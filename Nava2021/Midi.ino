@@ -4,7 +4,9 @@
 //-------------------------------------------------
 
 /////////////////////Function//////////////////////
-
+void MidiRead()
+{
+}
 //initialize midi real time variable
 void  InitMidiRealTime()
 {
@@ -18,8 +20,8 @@ void InitMidiNoteOff()
 {
   if(midiNoteOnActive){
     midiNoteOnActive = FALSE;
-    if (noteIndexCpt) MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
-    else MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
+    if (noteIndexCpt) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
+    else MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
   }
 }
 
@@ -43,20 +45,21 @@ void MidiSendNoteOn (byte channel, byte value, byte velocity)
 //Handle clock
 void HandleClock()
 {
-  DIN_CLK_HIGH;
+  DIN_CLK_HIGH;                                                                  
   CountPPQN();//execute 4x because internal sequencer run as 96 ppqn
   CountPPQN();
-  delayMicroseconds(2000);
+  //delayMicroseconds(2000);                 // [zabox] [1.028] 
   CountPPQN();
   CountPPQN();
-  DIN_CLK_LOW;
+  DIN_CLK_LOW;                                                                    
+
 }
+
 
 //handle start
 void HandleStart()
 {
   midiStart = HIGH;
-  Serial.println("Handle Midi Start()");
 }
 
 //handle stop
@@ -71,7 +74,17 @@ void HandleContinue()
   midiContinue = HIGH;
 }
 
-//Disconned midi real time callback
+
+//Connect midi real time callback                         // [zabox] [1.028]
+void ConnectMidiHandleRealTime()
+{
+  MIDI.setHandleClock(HandleClock); 
+  MIDI.setHandleStart(HandleStart);
+  MIDI.setHandleStop(HandleStop);
+  MIDI.setHandleContinue(HandleContinue);
+}
+
+//Disconnect midi real time callback
 void DisconnectMidiHandleRealTime()
 {
   MIDI.disconnectCallbackFromType(Clock);
@@ -80,11 +93,77 @@ void DisconnectMidiHandleRealTime()
   MIDI.disconnectCallbackFromType(Continue);
 }
 
+
+//Connect midi real time callback                         // [zabox] [1.028]
+void ConnectMidiHandleNote()
+{
+  MIDI.setHandleNoteOn(HandleNoteOn);
+  MIDI.setHandleNoteOff(HandleNoteOff);
+}
+
+//Disconnect midi real time callback                      // [zabox] [1.028]
+void DisconnectMidiHandleNote()
+{
+  MIDI.disconnectCallbackFromType(NoteOn);
+  MIDI.disconnectCallbackFromType(NoteOff);
+}
+
+
+
+
+
+
 //Handle noteON
 void HandleNoteOn(byte channel, byte pitch, byte velocity)
 {
-  if ( velocity != 0 )
-  { 
+  //Midi note On with 0 velocity as Midi note Off
+  if (velocity == 0){
+    if (channel == seq.RXchannel){
+      switch (pitch){
+      case 35:
+      case 36:
+        MidiTrigOff(BD);
+        break;
+      case 38:
+      case 40:
+        MidiTrigOff(SD);
+        break;
+      case 41:
+        MidiTrigOff(LT);
+        break;
+      case 45:
+      case 47:
+      case 48:
+        MidiTrigOff(MT);
+        break;
+      case 50:
+        MidiTrigOff(HT);
+        break;
+      case 34:
+        MidiTrigOff(RM);
+        break;
+      case 39:
+        MidiTrigOff(HC);
+        break;
+      case 42:
+        MidiTrigOff(CH);
+        break;
+      case 46:
+        MidiTrigOff(OH);
+        break;
+      case 49:
+        MidiTrigOff(CRASH);
+        break;
+      case 51:
+        MidiTrigOff(RIDE);
+        break;
+      case 60:
+        TRIG_HIGH;
+        break;
+      }
+    }
+  }
+  else{
     if (channel == seq.RXchannel){
       switch (pitch){
       case 35:
@@ -106,7 +185,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 50:
         MidiTrigOn(HT, velocity);
         break;
-      case 37:
+      case 34:
         MidiTrigOn(RM, velocity);
         break;
       case 39:
@@ -124,52 +203,14 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 49:
         MidiTrigOn(CRASH, velocity);
         break;
-      case 56:
-        TRIG_LOW;
-        break;
       case 60:
-      case 61:
-      case 62:
-      case 63:
-      case 64:
-      case 65:
-      case 66:
-      case 67:
-        // Bank Select
-        Serial.print("Bank Select: ");
-        Serial.println(char((pitch-60) + 65));
-        curBank = pitch-60;
-        nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-        break;
-      case 72:
-      case 73:
-      case 74:
-      case 75:
-      case 76:
-      case 77:
-      case 78:
-      case 79:
-      case 80:
-      case 81:
-      case 82:
-      case 83:
-      case 84:
-      case 85:
-      case 86:
-      case 87:
-        // Pattern Select
-        Serial.print("Pattern Select: ");
-        Serial.println((pitch-72) + 1);
-        group.priority = FALSE;
-        nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
-        group.pos = pattern[ptrnBuffer].groupPos;
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        if ((~muteInst) & 1) {                                       // [1.028] mute
+          TRIG_LOW;
+          trigCounterStart = TRUE;                                   // [zabox] [1.027] solves short trig 1 pulse
+        }
         break;
       }
     }
-  } else {
-    HandleNoteOff(channel,pitch,velocity);
   }
 }
 
@@ -197,7 +238,7 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
     case 50:
       MidiTrigOff(HT);
       break;
-    case 37:
+    case 34:
       MidiTrigOff(RM);
       break;
     case 39:
@@ -216,29 +257,36 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
       MidiTrigOff(CRASH);
       break;
     case 60:
-      TRIG_HIGH;
+      if (gateInst & 1) TRIG_HIGH;                             // [zabox] [1.028] gate
       break;
     }
-  }
+  }   
 }
 
 
 //MidiTrigOn insturment
 void MidiTrigOn(byte inst, byte velocity)
 {
-  if (instWasMidiTrigged[inst] == FALSE){
-    if (inst == OH) SetMuxTrigMidi(CH, velocity);//OH and CH share same velocity
-    else SetMuxTrigMidi(inst, velocity);
-    if (inst == CH || inst == OH){
-      SetDoutTrig(1 << HH);
-      delayMicroseconds(2000);
-      if (inst == OH) SetDoutTrig(0);
-      else SetDoutTrig(1 << HH_SLCT);
+  
+  if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
+ 
+    SetMuxTrigMidi(inst, velocity);                                                            
+    
+    if (inst == OH) {
+      SetDoutTrig((1 << HH) | (lastDoutTrig & (~(1 << HH_SLCT))));
+      triggerTime[HH] = TCNT2;      
+    } 
+    else if (inst == CH) {
+      SetDoutTrig((1 << HH) | (lastDoutTrig | (1 << HH_SLCT)));
+      triggerTime[HH] = TCNT2;                                                
     }
     else {
-      SetDoutTrig(1 << inst);
-      delayMicroseconds(2000);
-      SetDoutTrig(0);
+      SetDoutTrig((1 << inst) | (lastDoutTrig));                         
+      triggerTime[inst] = TCNT2;                                                    
+    }
+    
+    if (showTrigLeds) {
+      stepLeds = ((1 << ledMap[inst]) | lastStepLeds);
     }
     instWasMidiTrigged[inst] = TRUE;
   }
@@ -248,11 +296,24 @@ void MidiTrigOn(byte inst, byte velocity)
 void MidiTrigOff(byte inst)
 {
   instWasMidiTrigged[inst] = FALSE;
+  
+  
+  if ((gateInst >> inst) & 1U) SetMuxTrigMidi(inst, 0);                                               // [1.028]
+  
 }
 
 //Midi send all note off
 void SendAllNoteOff()
 {
-  MIDI.sendControlChange(ALL_NOTE_OFF , 0, seq.TXchannel);	
-  InitMidiNoteOff();
+   MIDI.sendControlChange(ALL_NOTE_OFF , 0, seq.TXchannel);	
 }
+
+
+
+
+
+
+
+
+
+

@@ -18,7 +18,7 @@ void KeyboardUpdate()
       InitMidiNoteOff();
       isStop = TRUE;
       isRunning = FALSE;
-      MIDI.sendRealTime(Stop);//;MidiSend(STOP_CMD);
+   //   MIDI.sendRealTime(Stop);//;MidiSend(STOP_CMD);
       stopBtn.counter = 1;//like a push on stop button
     }
     needLcdUpdate = TRUE;
@@ -53,7 +53,7 @@ void KeyboardUpdate()
     }
     if (fwdBtn.justRelease)MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndex]);
 
-    if(clearBtn){
+    if(clearBtn.justPressed){
       noteIndex = 0;
       needLcdUpdate = TRUE;
     }
@@ -82,3 +82,11 @@ void KeyboardUpdate()
     }
   }
 }
+
+
+
+
+
+
+
+

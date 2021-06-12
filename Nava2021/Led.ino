@@ -10,7 +10,7 @@ void SetLeds()
   //------------------------------Menu LEDS-------------------------------
   shiftLed = shiftBtn;
   instLed = instBtn;
-  clearLed = clearBtn;
+  clearLed = clearBtn.pressed;
   shufLed = shufBtn.pressed;
   scaleLed = scaleBtn.pressed;
   lastStepLed = lastStepBtn.pressed ;
@@ -55,6 +55,7 @@ void SetLeds()
   configLed = numLed | scaleLeds<<1 | trackLed<<5 | backLed<<6 | fwdLed<<7 | enterLed<<8 | ptrnLed<<9 | tapLed<<10 | dirLed<<11 |guideLed<<12 | bankLed<<13 | muteLed<<14 | tempoLed<<15;
 
   //------------------------------Step LEDS-------------------------------
+  
   //Update inst selected Leds
   switch (curInst){
   case BD:
@@ -129,10 +130,10 @@ void SetLeds()
           for (int a = 0; a <= group.length; a++){
             bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
           }
-          stepLeds = temp & ~(!blinkTempo << (curPattern % NBR_PATTERN))  ^ (blinkFast<< curStep);
+          stepLeds = temp & ~(!blinkTempo << (nextPattern % NBR_PATTERN))  ^ (blinkFast<< curStep);
         }
         else {
-          stepLeds = (blinkTempo <<(curPattern % NBR_PATTERN)) ^ (blinkFast<< curStep); 
+          stepLeds = (blinkTempo <<(nextPattern % NBR_PATTERN)) ^ (blinkFast<< curStep); 
         }
       }
       else if (!isRunning){
@@ -142,7 +143,7 @@ void SetLeds()
         for (int a = 0; a <= group.length; a++){
           bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
         }
-        stepLeds = temp & ~(!blinkTempo << (curPattern % NBR_PATTERN));
+        stepLeds = temp & ~(!blinkTempo << (nextPattern % NBR_PATTERN));
         /* }
          else {
          stepLeds = blinkTempo << (curPattern % NBR_PATTERN); 
@@ -161,18 +162,44 @@ void SetLeds()
       }
       else{
         if (curInst == OH) stepLeds = instSlctLed & LED_MASK_OH;
+        else if (curFlam) stepLeds = instSlctLed;                                                                  // [zabox] [1.027] flam
         else stepLeds = instSlctLed & LED_MASK;
         flagLedIntensity++;
       }
     }
+    else if (shufBtn.pressed) {                                                                                    // [zabox] [1.028] flam
+      if (flagLedIntensity >= 8) {
+        stepLeds = ~(1 << 7);
+        flagLedIntensity = 0;
+      }
+      else {
+        stepLeds = (1 << (pattern[ptrnBuffer].shuffle - 1)) | (1 << (pattern[ptrnBuffer].flam + 8));
+        flagLedIntensity++;
+      }
+      
+    }
     else if(isRunning && !instBtn){
       stepLedsHigh = stepLedsLow = 0;//initialize step Leds variable 
       for (int stp = 0; stp < NBR_STEP; stp++){
-        if (pattern[ptrnBuffer].velocity[curInst][stp] > instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsHigh, stp);
-        else if (pattern[ptrnBuffer].velocity[curInst][stp] <= instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsLow,stp);
-        else { 
-          bitClear(stepLedsHigh, stp);   
-          bitClear(stepLedsLow, stp); 
+        if (curFlam) {                                                                       // [zabox] [1.027] flam
+          if (pattern[ptrnBuffer].velocity[curInst][stp] & 128) {
+            if (((pattern[ptrnBuffer].velocity[curInst][stp]) & 127) > instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsHigh, stp);
+            else if (((pattern[ptrnBuffer].velocity[curInst][stp]) & 127) <= instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsLow,stp);
+            }
+          else { 
+            bitClear(stepLedsHigh, stp);   
+            bitClear(stepLedsLow, stp); 
+          }
+        }
+        else {
+          if (!(pattern[ptrnBuffer].velocity[curInst][stp] & 128)) {
+            if (pattern[ptrnBuffer].velocity[curInst][stp] > instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsHigh, stp);
+            else if (pattern[ptrnBuffer].velocity[curInst][stp] <= instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsLow,stp);
+          }
+          else { 
+            bitClear(stepLedsHigh, stp);   
+            bitClear(stepLedsLow, stp); 
+          }
         }
       }
       //this function is to fade low velocity leds
@@ -209,6 +236,38 @@ void SetLeds()
     break;
   }
   //Send OUTPUTS now !
-//  SetDoutLed(0x3333,0, 0);
   SetDoutLed(stepLeds, configLed , menuLed);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

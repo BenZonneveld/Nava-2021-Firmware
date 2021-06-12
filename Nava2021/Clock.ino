@@ -3,28 +3,38 @@
 //                  BPM
 //-------------------------------------------------
 
-byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
-                              0, // HH_SLCT
-                              50, // HT
-                              37, // RM
-                              39, // HC
-                              0,  // HH
-                              51, // RIDE
-                              49, // CRASH
-                              36, // BD
-                              38, // SD
-                              41, // LT
-                              45, // MT
-                              0,  // TOTAL_ACC
-                              0,  // EXT_INST
-                              42, // CH
-                              46}; // OH
-                              
 /////////////////////Function//////////////////////
 //Timer interrupt
-ISR(TIMER1_COMPA_vect) { 
-  CountPPQN(); 
+ISR(TIMER1_COMPA_vect) {
+  CountPPQN();
 }
+
+
+ISR(TIMER2_COMPA_vect) {     // [zabox] [v1.028] 2ms trig off isr. improves led flickering a lot and improves external instrument midi out lag
+
+  TRIG_TIMER_STOP;           // [zabox] one shot
+  TRIG_TIMER_ZERO;           // [zabox] reset
+  SetDoutTrig(tempDoutTrig);
+}  
+  
+
+
+ISR(TIMER3_COMPA_vect) {       // [zabox] flam
+
+  FLAM_TIMER_STOP;
+  FLAM_TIMER_ZERO;
+
+  SetMuxFlam();
+ 
+  SetDoutTrig(stepValueFlam & (~muteInst) | tempDoutTrig);//Send TempDoutTrig too to prevet tick noise on HH circuit
+  
+  TRIG_TIMER_START;
+  stepValueFlam = 0;
+  
+} 
+  
+  
+  
 
 //Tick proceed each pulse
 void CountPPQN()
@@ -32,11 +42,15 @@ void CountPPQN()
   blinkVeryFast =! blinkVeryFast;
   if (ppqn % (PPQN/2) == 0) blinkTempo = !blinkTempo;
   if (ppqn  % (pattern[ptrnBuffer].scale/2) == 0) blinkFast = LOW;
-  if (ppqn % 4 == 0) MIDI.sendRealTime(Clock);//MidiSend(CLOCK_CMD);//as NAVA seq is 96ppqn we need to send clock each 4 internal ppqn
+ // if (ppqn % 4 == 0) MIDI.sendRealTime(Clock);      //MidiSend(CLOCK_CMD);//as NAVA seq is 96ppqn we need to send clock each 4 internal ppqn
+  if (ppqn % 4 == 0) {                                
+    while (!(UCSR1A & (1 << UDRE1))) {};                                            // [zabox] directly adressing the uart fixes the midi clock lag
+    UDR1 = CLOCK_CMD; //Tick
+  }
 
-  if (seq.sync == MASTER){
+  if (seq.sync == MASTER){                                                          // [zabox] has to be 0/2 for the correct phase
     if (ppqn % 4 == 0){
-      DIN_CLK_HIGH;
+      DIN_CLK_HIGH;                                                               
       dinClkState = HIGH;
     }
     else if (ppqn % 4 == 2) {
@@ -44,13 +58,17 @@ void CountPPQN()
       dinClkState = LOW;
     }    
   }
+  
 
   if (isRunning)
   {
     if (ppqn % pattern[ptrnBuffer].scale == (pattern[ptrnBuffer].scale/2)) tapStepCount++;
 
     if (tapStepCount > pattern[ptrnBuffer].length) tapStepCount = 0;
-    
+
+    // Initialize the step value for trigger and gate value for cv gate track
+    stepValue = 0;
+
     if (ppqn % pattern[ptrnBuffer].scale == 0) stepChanged = TRUE;//Step changed ?
 
     if (((ppqn + shuffle[(pattern[ptrnBuffer].shuffle)-1][shufPolarity]) % pattern[ptrnBuffer].scale == 0) && stepChanged)
@@ -69,7 +87,7 @@ void CountPPQN()
         break;
       case PING_PONG:
         if (curStep == pattern[ptrnBuffer].length && changeDir == 1) changeDir = 0;
-        else if (curStep == 0 && changeDir == 0) changeDir = 1;
+        else if (curStep == 0 && changeDir == 0)  changeDir = 1;
         if (changeDir) curStep = stepCount;
         else curStep = pattern[ptrnBuffer].length - stepCount;
         break;
@@ -78,73 +96,73 @@ void CountPPQN()
         break;
       }
 
-      SetMux();
-      SetDoutTrig(((pattern[ptrnBuffer].step[curStep]) | (bitRead(metronome,curStep)<<RM)) & (~muteInst));//patternA[curStep]<<8 |  patternB[curStep]);
-
-      // Send MIDI notes for the playing instruments
-      for(int inst=0 ; inst < NBR_INST ; inst++ )
+      //Set step value to be trigged
+      for (byte z = 0; z < NBR_INST; z++)
       {
-        if ( bitRead(pattern[ptrnBuffer].inst[inst], curStep) & bitRead(~muteInst,inst) )
-        {
-          if (inst >= 14 && bitRead(muteInst,5)) continue;
-          if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0 )
-          {
-            unsigned int MIDIVelocity = (MIDI_LOW_VELOCITY * (pattern[ptrnBuffer].velocity[inst][curStep] == instVelLow[inst])) + 
-                                        (MIDI_HIGH_VELOCITY * (pattern[ptrnBuffer].velocity[inst][curStep] == instVelHigh[inst]));
-                                        
-            if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
-          
-            if (MIDIVelocity == 0 ) continue;
-            MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
-          }
+        stepValue |= (bitRead(pattern[ptrnBuffer].inst[z], curStep)) << z;
+      }
+      //Set stepvalue depending metronome
+      stepValue |= (bitRead(metronome,curStep) << RM);
+      
+      setFlam();                                                                                    // [zabox] [1.027] if changed, update flam interval
+      
+      if (stepValue){
+        SetMux();
+        int temp_muteInst = muteInst;                                                               // [zabox] OH/CH mute select
+        if (bitRead(stepValue, CH) && bitRead(muteInst, CH)) {                                      //
+          temp_muteInst |= (1 << HH);                                                               //  
+        }   
+        else if (bitRead(stepValue, OH) && bitRead(muteInst, OH)) {                                 //  
+          temp_muteInst |= (1 << HH);                                                               //
         }
+        
+        if (bitRead(pattern[ptrnBuffer].inst[CH], curStep) && !bitRead(muteInst, CH)) tempDoutTrig = B10;//CH trig                        // [zabox] + check if OH/CH mute
+        else if (bitRead(pattern[ptrnBuffer].inst[OH], curStep) && !bitRead(muteInst, OH)) tempDoutTrig = 0;// OH trig                    // [zabox] + check if OH/CH mute
+        
+        SetDoutTrig((stepValue) & (~temp_muteInst) | (tempDoutTrig));//Send TempDoutTrig too to prevet tick noise on HH circuit
+        
+        TRIG_TIMER_START;        // [zabox] [1.028] start trigger off timer
+        
+        if (stepValueFlam) {
+          FLAM_TIMER_START;
+        } 
+        
+      }
+      if (bitRead(pattern[ptrnBuffer].inst[TRIG_OUT], curStep)){
+        TRIG_LOW;//Trigout
+        trigCounterStart = TRUE;
       }
 
-      if (bitRead(pattern[ptrnBuffer].inst[TRIG_OUT], curStep)) TRIG_LOW;//Trigout
-
-      InitMidiNoteOff();
       //Trig external instrument-------------------------------------
       if (bitRead(pattern[ptrnBuffer].inst[EXT_INST], curStep))
       {
-        MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], MAX_VEL);
+        InitMidiNoteOff();
+        MidiSendNoteOn(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
         midiNoteOnActive = TRUE;
         noteIndexCpt++;//incremente external inst note index
       }
       if (noteIndexCpt > pattern[ptrnBuffer].extLength){
         noteIndexCpt = 0;
       }
-
-      /* As this delay is in the interrupt routine it doesn't need to be replaced by a non blocking version */
-      delayMicroseconds(10000);
-      for(int inst=0 ; inst < NBR_INST ; inst++ )
-      {
-        if ( bitRead(pattern[ptrnBuffer].inst[inst], curStep)  & bitRead(~muteInst,inst) )
-        {
-          if (inst >= 14 && bitRead(muteInst,5)) continue;
-          if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0)
-          {
-            MidiSendNoteOff(seq.TXchannel,instMidiNote[inst]-12);
-          }
-        }
-      }
-      if (bitRead(pattern[ptrnBuffer].inst[CH], curStep)) tempDoutTrig = B10;//CH trig
-      if (bitRead(pattern[ptrnBuffer].inst[OH], curStep)) tempDoutTrig = 0;// OH trig
+      
+/*      
+      delayMicroseconds(2000);
+      if (bitRead(pattern[ptrnBuffer].inst[CH], curStep) && !bitRead(muteInst, CH)) tempDoutTrig = B10;//CH trig                        // [zabox] + check if OH/CH mute               // [zabox v1.028] now handled inside timer2 isr
+      else if (bitRead(pattern[ptrnBuffer].inst[OH], curStep) && !bitRead(muteInst, OH)) tempDoutTrig = 0;// OH trig                    // [zabox] + check if OH/CH mute
       SetDoutTrig(tempDoutTrig);
-      TRIG_HIGH;
+*/      
+      
+      //TRIG_HIGH;
       //ResetDoutTrig();
       stepCount++;
 
     }
     if (stepCount > pattern[ptrnBuffer].length){// && (ppqn % 24 == pattern[ptrnBuffer].scale - 1))
       endMeasure = TRUE;
-      trackPosNeedIncremante = TRUE;
+      trackPosNeedIncremante = TRUE;                                                
       stepCount = 0;
       //In pattern play mode this peace of code execute in the PPQNCount function
-      if(nextPatternReady && curSeqMode == PTRN_PLAY 
-          && (( endMeasure && seq.patternSync ) 
-          || !seq.patternSync  
-          || !isRunning )
-      ){
+      if(nextPatternReady && curSeqMode == PTRN_PLAY){
         nextPatternReady = FALSE;
         keybOct = DEFAULT_OCT;
         noteIndex = 0;
@@ -155,12 +173,15 @@ void CountPPQN()
         InstToStepWord();
       }
     }
-    if (ppqn % pattern[ptrnBuffer].scale == 4 && stepCount == 0){ 
-      endMeasure = FALSE;
-    }
+//    if (ppqn % pattern[ptrnBuffer].scale == 4 && stepCount == 0){ 
+//      endMeasure = FALSE;
+//    }
+  
   }
-
-  if (ppqn++ >= PPQN ) ppqn = 1;
+  
+  ppqn++;                                                                 // [1.028] more consistent to run the counter from 0-95
+  if (ppqn >= PPQN) ppqn = 0;
+  
 }
 
 //
@@ -181,3 +202,33 @@ void Metronome(boolean state)
     pattern[ptrnBuffer].velocity[RM][12] = HIGH_VEL;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

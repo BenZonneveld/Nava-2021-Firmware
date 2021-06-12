@@ -15,47 +15,56 @@ void InitSeq()
   randomSeed(analogRead(0));
   seq.dir = FORWARD;
   seq.bpm = seq.defaultBpm;
-
-  switch (seq.sync){
-  case MASTER:
-    DisconnectMidiHandleRealTime();
-    TimerStart();//cf timer
-    break;
-  case SLAVE:
-    TimerStop();
-    MIDI.setHandleClock(HandleClock);
-    MIDI.setHandleStart(HandleStart);
-    MIDI.setHandleStop(HandleStop);
-    MIDI.setHandleContinue(HandleContinue);
-    break;
-    seq.syncChanged = FALSE;
-  }
-  switch(seq.runMode)
-  {
-    case 0:
-      curSeqMode = TRACK_PLAY;
-      break;
-    case 1:
-      curSeqMode = TRACK_WRITE;
-      break;
-    case 2:
-      curSeqMode = PTRN_PLAY;
-      break;
-    case 3:
-      curSeqMode = PTRN_STEP;
-      break;
-  }
+  SetSeqSync();                               // [zabox] [1.028] moved
+  seq.syncChanged = FALSE;
 }
 
-//Combine OH and CH pattern to trig HH
+//Combine OH and CH pattern to trig HH and set total accent for ride and crash
 void SetHHPattern()
 {
+  //static boolean rideTotalAcc;          [zabox] [1.028] unused
+  //static boolean crashTotalAcc;
+  //static boolean ohTotalAcc;
+
   pattern[ptrnBuffer].inst[HH] = pattern[ptrnBuffer].inst[CH] | pattern[ptrnBuffer].inst[OH];
-  for (int a = 0; a < NBR_STEP; a++){
-    if (bitRead(pattern[ptrnBuffer].inst[CH],a) && curInst == CH) bitClear(pattern[ptrnBuffer].inst[OH],a);
-    if (bitRead(pattern[ptrnBuffer].inst[OH],a) && curInst == OH){
-      bitClear(pattern[ptrnBuffer].inst[CH],a);
-      pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH];
+  if (curSeqMode != PTRN_TAP){
+    for (int a = 0; a < NBR_STEP; a++){
+      if (bitRead(pattern[ptrnBuffer].inst[CH],a) && curInst == CH) bitClear(pattern[ptrnBuffer].inst[OH],a);
+      if (bitRead(pattern[ptrnBuffer].inst[OH],a) && curInst == OH){
+        bitClear(pattern[ptrnBuffer].inst[CH],a);
+        pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH];
+      }
+
+
+      //Set total accent velocity for Ride and Crash
+      //Ride
+      
+ /*     if (bitRead(pattern[ptrnBuffer].inst[RIDE],a)){
+        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC],a))rideTotalAcc = TRUE;                                                           // [zabox] [1.028] looks like old code that is redundant?
+        else rideTotalAcc = FALSE;                                                                                                        //                 with the code, total acc is applied twice
+      }
+      if (rideTotalAcc) pattern[ptrnBuffer].velocity[RIDE][a] = instVelHigh[RIDE] + pattern[ptrnBuffer].totalAcc * 4;
+      else pattern[ptrnBuffer].velocity[RIDE][a] = instVelHigh[RIDE];
+
+      //Crash
+      if (bitRead(pattern[ptrnBuffer].inst[CRASH],a)){
+        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC],a))crashTotalAcc = TRUE;
+        else crashTotalAcc = FALSE;
+      }
+      if (crashTotalAcc) pattern[ptrnBuffer].velocity[CRASH][a] = instVelHigh[CRASH] + pattern[ptrnBuffer].totalAcc * 4;
+      else pattern[ptrnBuffer].velocity[CRASH][a] = instVelHigh[CRASH];
+      
+ */
+
+      /*  //OH accent
+       if (bitRead(pattern[ptrnBuffer].inst[OH],a)){
+       if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC],a))ohTotalAcc = TRUE;
+       else ohTotalAcc = FALSE;
+       }
+       if (ohTotalAcc) pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH] + pattern[ptrnBuffer].totalAcc * 4;
+       else pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH];*/
+       
+       
     }
   }
 }
@@ -115,16 +124,14 @@ void InitPattern()
     group.firstPattern = curPattern - pattern[ptrnBuffer].groupPos;
   }
   //Init Ride, Crash velocity to HIGH_VEL
-/*  for (int stp = 0; stp < NBR_STEP; stp++){
-    pattern[ptrnBuffer].velocity[HH][stp] = instVelHigh[HH];//CH and OH
-    pattern[ptrnBuffer].velocity[CH][stp] = instVelHigh[HH];//CH and OH
-    pattern[ptrnBuffer].velocity[OH][stp] = instVelHigh[HH];//CH and OH
+  for (int stp = 0; stp < NBR_STEP; stp++){
+    if (pattern[ptrnBuffer].velocity[CH][stp] == 0)  pattern[ptrnBuffer].velocity[CH][stp] = instVelHigh[HH];//HH
     pattern[ptrnBuffer].velocity[CRASH][stp] = instVelHigh[CRASH];//CRASH
     pattern[ptrnBuffer].velocity[RIDE][stp] = instVelHigh[RIDE];//RIDE
     pattern[ptrnBuffer].velocity[TOTAL_ACC][stp] = HIGH_VEL;//TOTAL_ACC
     pattern[ptrnBuffer].velocity[TRIG_OUT][stp] = HIGH_VEL;//TRIG_OUT
     pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
-  }*/
+  }
   switch (pattern[ptrnBuffer].scale){
   case  SCALE_16:
     scaleBtn.counter = 0;
@@ -216,3 +223,14 @@ void ShiftRightPattern()
   }
 
 }
+
+
+
+
+
+
+
+
+
+
+
