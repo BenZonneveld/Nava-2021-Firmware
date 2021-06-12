@@ -23,7 +23,7 @@ extern "C" {
   #include <stdlib.h>
   #include <string.h>
   #include <inttypes.h>
-  #include "twiN.h"
+  #include "utility/twiN.h"
 }
 
 #include "WireN.h"
