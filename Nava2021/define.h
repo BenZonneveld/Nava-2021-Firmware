@@ -502,6 +502,29 @@ boolean instWasMidiTrigged[NBR_INST] ={
   FALSE};
 byte midiVelocity[NBR_INST]={
   100};
+byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
+                              0, // HH_SLCT
+                              50, // HT
+                              37, // RM
+                              39, // HC
+                              0,  // HH
+                              51, // RIDE
+                              49, // CRASH
+                              36, // BD
+                              38, // SD
+                              41, // LT
+                              45, // MT
+                              0,  // TOTAL_ACC
+                              0,  // EXT_INST
+                              42, // CH
+                              46}; // OH
+                              
+#define MIDI_ACCENT_VELOCITY 127
+#define MIDI_HIGH_VELOCITY (MIDI_ACCENT_VELOCITY-16) 
+#define MIDI_LOW_VELOCITY (MIDI_HIGH_VELOCITY-16)
+unsigned int lastInstrumentMidiOut = 0;
+byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
+
 
 //Din synchro----------------------------------------
 boolean dinStartState = LOW;
