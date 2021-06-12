@@ -309,7 +309,44 @@ void SendAllNoteOff()
 }
 
 
+void SendInstrumentMidiOut(unsigned int value)
+{
+  // Send MIDI notes for the playing instruments
+  for(int inst=0 ; inst < NBR_INST ; inst++ )
+  {
+    if ( bitRead(value, inst))
+    {
+      if (inst >= 14 && bitRead(muteInst,5)) continue;
+      if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0 )
+      {
+        unsigned int MIDIVelocity = (MIDI_LOW_VELOCITY * (pattern[ptrnBuffer].velocity[inst][curStep] == instVelLow[inst])) + 
+                                    (MIDI_HIGH_VELOCITY * (pattern[ptrnBuffer].velocity[inst][curStep] == instVelHigh[inst]));
+                                    
+        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
+      
+        if (MIDIVelocity == 0 ) MIDIVelocity = MIDI_LOW_VELOCITY - 16;
+        MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
+      }
+    }
+    lastInstrumentMidiOut = value;
+  } 
+}
 
+void SendInstrumentMidiOff()
+{
+    for(int inst=0 ; inst < NBR_INST ; inst++ )
+  {
+    if ( bitRead(lastInstrumentMidiOut, inst))
+    {
+      if (inst >= 14 && bitRead(muteInst,5)) continue;
+      if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0)
+      {
+        MidiSendNoteOff(seq.TXchannel,instMidiNote[inst]-12);
+      }
+    }
+  }
+
+}
 
 
 
