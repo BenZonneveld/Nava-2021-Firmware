@@ -7,25 +7,11 @@
 
 void EncGet()
 {
-  //////////////////////////////////SHUFFLE////////////////////////////////////
-  if (shufBtn.pressed && curSeqMode == PTRN_STEP){
-    pattern[ptrnBuffer].shuffle = EncGet(pattern[ptrnBuffer].shuffle, 1);
-    if(pattern[ptrnBuffer].shuffle <= 1) pattern[ptrnBuffer].shuffle = 1;
-    if(pattern[ptrnBuffer].shuffle >= MAX_SHUF_TYPE) pattern[ptrnBuffer].shuffle = MAX_SHUF_TYPE;
-    static byte prevShuf;
-    if (pattern[ptrnBuffer].shuffle != prevShuf){
-      prevShuf = pattern[ptrnBuffer].shuffle;
-      needLcdUpdate = TRUE;
-      patternWasEdited = TRUE;
-    }
-  }
+
+  
   //////////////////////////////////TOTAL ACCENT////////////////////////////////////
   if (curInst == TOTAL_ACC && curSeqMode == PTRN_STEP){
     pattern[ptrnBuffer].totalAcc = EncGet(pattern[ptrnBuffer].totalAcc, 1);
-#ifdef DEBUG
-    Serial.print("Total Accent: ");
-    Serial.println(pattern[ptrnBuffer].totalAcc);
-#endif
     pattern[ptrnBuffer].totalAcc = constrain(pattern[ptrnBuffer].totalAcc, 0, 13);
     static byte prevTotalAcc;
     if (pattern[ptrnBuffer].totalAcc != prevTotalAcc){
@@ -125,109 +111,98 @@ void EncGet()
     }
   }
   ///////////////////////////////////CONFIG MODE////////////////////////////////////
-  else if (seq.configMode){
-    switch(seq.configPage) 
-    {
+  else if (seq.configMode){                                                               //  [zabox] rewrite for two complete pages & no wrong encoder updates
+    
+    if (seq.configPage == 1) {    
+      
+  //---------------------Page 1----------------------------------------------------
+    
+    switch (curIndex){
+      //track position
+      case 0:
+      
+        seq.sync = EncGet(seq.sync, 1);                       //sync select
+        seq.sync = constrain(seq.sync, 0, 2);
+        static byte prevSeqSync;
+        if (seq.sync != prevSeqSync){
+          prevSeqSync = seq.sync;
+          seq.syncChanged = TRUE;
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
+        break;
       case 1:
-              switch (curIndex){
-              case 0://sync select
-                seq.sync = EncGet(seq.sync, 1);
-                seq.sync = constrain(seq.sync, 0, 1);
-                static boolean prevSeqSync;
-                if (seq.sync != prevSeqSync){
-                  prevSeqSync = seq.sync;
-                  seq.syncChanged = TRUE;
-                  seq.setupNeedSaved = TRUE;
-                  needLcdUpdate = TRUE;
-                }
-                break;
-              case 1://default bpm
-                seq.defaultBpm = EncGet(seq.defaultBpm, 1);
-                seq.defaultBpm = constrain(seq.defaultBpm, MIN_BPM, MAX_BPM);
-                static unsigned int prevDefaultBpm;
-                if (seq.defaultBpm != prevDefaultBpm){
-                  prevDefaultBpm = seq.defaultBpm;
-                  seq.setupNeedSaved = TRUE;
-                  needLcdUpdate = TRUE;
-                }
-                break;
-              case 2://Main Midi tx channel
-                seq.TXchannel = EncGet(seq.TXchannel, 1);
-                seq.TXchannel = constrain(seq.TXchannel, 1, 16);
-                static unsigned int prevTX;
-                if (seq.TXchannel != prevTX){
-                  prevTX = seq.TXchannel;
-                  seq.setupNeedSaved = TRUE;
-                  needLcdUpdate = TRUE;
-                }
-                break;
-              case 3://Midi RX channel
-                seq.RXchannel = EncGet(seq.RXchannel, 1);
-                seq.RXchannel = constrain(seq.RXchannel, 1, 16);
-                static unsigned int prevRX;
-                if (seq.RXchannel != prevRX){
-                  prevRX = seq.RXchannel;
-                  MIDI.setInputChannel(seq.RXchannel);
-                  seq.setupNeedSaved = TRUE;
-                  needLcdUpdate = TRUE;
-                }
-                break;
-              }
-              break;
+  
+        seq.defaultBpm = EncGet(seq.defaultBpm, 1);
+        seq.defaultBpm = constrain(seq.defaultBpm, MIN_BPM, MAX_BPM);
+        static unsigned int prevDefaultBpm;
+        if (seq.defaultBpm != prevDefaultBpm){
+          prevDefaultBpm = seq.defaultBpm;
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
+        break;
       case 2:
-              switch (curIndex)
-              {
-              case 0://sync select
-                {
-                  seq.patternSync = EncGet(seq.patternSync, 1);
-                  seq.patternSync = constrain(seq.patternSync, 0, 1);
-                  static boolean prevSeqpatternSync;
-                  if (seq.patternSync != prevSeqpatternSync){
-                    prevSeqpatternSync = seq.patternSync;
-                    seq.setupNeedSaved = TRUE;
-                    needLcdUpdate = TRUE;
-                  }
-                  break;
-                }
-  //              case 1://default bpm
-//              {
-//                seq.defaultBpm = EncGet(seq.defaultBpm, 1);
-//                seq.defaultBpm = constrain(seq.defaultBpm, MIN_BPM, MAX_BPM);
-//                static unsigned int prevDefaultBpm;
-//                if (seq.defaultBpm != prevDefaultBpm){
-//                  prevDefaultBpm = seq.defaultBpm;
-//                  seq.setupNeedSaved = TRUE;
-//                  needLcdUpdate = TRUE;
-//                }
-//                break;
-//              }
-              case 2://EXT Midi tx channel
-              {
-                  seq.EXTchannel = EncGet(seq.EXTchannel, 1);
-                  seq.EXTchannel = constrain(seq.EXTchannel, 1, 16);
-                  static unsigned int prevEXT;
-                  if (seq.EXTchannel != prevEXT){
-                    prevEXT = seq.EXTchannel;
-                    seq.setupNeedSaved = TRUE;
-                    needLcdUpdate = TRUE;
-                  }
-                  break;
-              }
-              case 3://Startup Mode
-              {
-                  seq.runMode = EncGet(seq.runMode, 1);
-                  seq.runMode = constrain(seq.runMode, 0,3);
-                  static byte prevrunMode;
-                  if ( seq.runMode != prevrunMode) {
-                    prevrunMode = seq.runMode;
-                    seq.setupNeedSaved = TRUE;
-                    needLcdUpdate = TRUE;
-                  }
-                  break;
-              }
-          }
+  
+        seq.TXchannel = EncGet(seq.TXchannel, 1);
+        seq.TXchannel = constrain(seq.TXchannel, 1, 16);
+        static unsigned int prevTX;
+        if (seq.TXchannel != prevTX){
+          prevTX = seq.TXchannel;
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
+        break;
+      case 3:
+        seq.RXchannel = EncGet(seq.RXchannel, 1);
+        seq.RXchannel = constrain(seq.RXchannel, 1, 16);
+        static unsigned int prevRX;
+        if (seq.RXchannel != prevRX){
+          prevRX = seq.RXchannel;
+          MIDI.setInputChannel(seq.RXchannel);
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
+        break;
+      }
     }
-
+    else if (seq.configPage == 2) {
+            
+  //---------------------Page 2----------------------------------------------------
+    
+    switch (curIndex){
+      //track position
+      case 0:
+        seq.ptrnChangeSync = EncGet(seq.ptrnChangeSync, 1);               //pattern change sync select
+        seq.ptrnChangeSync = constrain(seq.ptrnChangeSync, 0, 1);
+        static boolean prevPtrnSyncChange;
+        if (seq.ptrnChangeSync != prevPtrnSyncChange){
+          prevPtrnSyncChange = seq.ptrnChangeSync;
+          // seq.syncChanged = TRUE;
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
+        break;
+      case 1:
+        seq.muteModeHH = EncGet(seq.muteModeHH, 1);                              // [zabox]
+        seq.muteModeHH = constrain(seq.muteModeHH, 0, 1);
+        static boolean prev_muteModeHH;
+        if (seq.muteModeHH != prev_muteModeHH){
+          prev_muteModeHH = seq.muteModeHH;
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
+        break;
+      case 2:
+  
+        break;
+      case 3:
+        
+        break;
+      }
+    }
+    
+    
   }
   else{
     seq.bpm = EncGet(seq.bpm,1);
@@ -236,7 +211,6 @@ void EncGet()
     static unsigned int curBpm;
     if( seq.bpm != curBpm)
     {
-      needLcdUpdate = TRUE;
       curBpm = seq.bpm;
       TimerSetFrequency();
       if (curSeqMode != PTRN_STEP || tempoBtn.pressed) needLcdUpdate = TRUE;
@@ -250,7 +224,6 @@ int EncGet(int value, int dif)
 {
   encoder_A = PINB & B1;// Read encoder pins
   encoder_B = PINB & B10;
-
   if((!encoder_A) && (encoder_A_prev)){
     // A has gone from high to low 
     if(encoder_B) {
@@ -277,3 +250,24 @@ int EncGet(int value, int dif)
   encoder_A_prev = encoder_A;     // Store value of A for next time 
   return value;
 }  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
