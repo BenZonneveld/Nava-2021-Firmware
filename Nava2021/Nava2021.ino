@@ -4,16 +4,16 @@
 //-------------------------------------------------
 
 /////////////////////Include/////////////////////
-#include <SPI.h>
+#include "src/SPI/SPI.h"
 #include <LiquidCrystal.h>     // [zabox] [1.028] (still working)
 //#include <NewLiquidCrystal.h>    // [zabox] [1.028] faster lcd library (https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home)
                                  //                  somehow requires the wire.h library to be present, so i modded mine with the 130 byte buffer length. old lib sill works without modification
                                  //                  lcd update down from 19ms to 5ms (1,3ms to 0,3ms in shuffle/flam update). reduces flickering
 //#include <Wire.h>                // [zabox] [1.028] (wire.h/twi.h 130 byte buffer length)
-#include <WireN.h>             // [zabox] [1.028]
+#include "src/WireN/WireN.h"             // [zabox] [1.028]
 #include "define.h"
 #include "string.h"
-#include <MIDI.h>
+#include "src/MIDI/MIDI.h"
 
 #include <MemoryFree.h>
 
