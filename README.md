@@ -1,2 +1,7 @@
-# Nava-v1.0-code
-An attempt to fix some of the remaining NAVA Firmware bugs and add some features I wanted for my own use.
+# Nava2021
+Neuromancers new features
+
+*MIDI Out of drumsounds playing in  pattern
+
+*Bank and Pattern select using MIDI notes.
+ Changes the MIDI not used for TRIG-1

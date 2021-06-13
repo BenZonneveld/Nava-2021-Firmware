@@ -141,7 +141,7 @@ void CountPPQN()
       if (bitRead(pattern[ptrnBuffer].inst[EXT_INST], curStep))
       {
         InitMidiNoteOff();
-        MidiSendNoteOn(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
+        MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
         midiNoteOnActive = TRUE;
         noteIndexCpt++;//incremente external inst note index
       }
@@ -206,33 +206,3 @@ void Metronome(boolean state)
     pattern[ptrnBuffer].velocity[RM][12] = HIGH_VEL;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
