@@ -194,7 +194,14 @@ void EncGet()
         }
         break;
       case 2:
-  
+        seq.EXTchannel = EncGet(seq.EXTchannel, 1);
+        seq.EXTchannel = constrain(seq.EXTchannel, 1, 16);
+        static unsigned int prevEXT;
+        if (seq.EXTchannel != prevEXT){
+          prevEXT = seq.EXTchannel;
+          seq.setupNeedSaved = TRUE;
+          needLcdUpdate = TRUE;
+        }
         break;
       case 3:
         
@@ -250,24 +257,3 @@ int EncGet(int value, int dif)
   encoder_A_prev = encoder_A;     // Store value of A for next time 
   return value;
 }  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

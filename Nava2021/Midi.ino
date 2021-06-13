@@ -20,8 +20,8 @@ void InitMidiNoteOff()
 {
   if(midiNoteOnActive){
     midiNoteOnActive = FALSE;
-    if (noteIndexCpt) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
-    else MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
+    if (noteIndexCpt) MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
+    else MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
   }
 }
 
@@ -117,53 +117,7 @@ void DisconnectMidiHandleNote()
 void HandleNoteOn(byte channel, byte pitch, byte velocity)
 {
   //Midi note On with 0 velocity as Midi note Off
-  if (velocity == 0){
-    if (channel == seq.RXchannel){
-      switch (pitch){
-      case 35:
-      case 36:
-        MidiTrigOff(BD);
-        break;
-      case 38:
-      case 40:
-        MidiTrigOff(SD);
-        break;
-      case 41:
-        MidiTrigOff(LT);
-        break;
-      case 45:
-      case 47:
-      case 48:
-        MidiTrigOff(MT);
-        break;
-      case 50:
-        MidiTrigOff(HT);
-        break;
-      case 34:
-        MidiTrigOff(RM);
-        break;
-      case 39:
-        MidiTrigOff(HC);
-        break;
-      case 42:
-        MidiTrigOff(CH);
-        break;
-      case 46:
-        MidiTrigOff(OH);
-        break;
-      case 49:
-        MidiTrigOff(CRASH);
-        break;
-      case 51:
-        MidiTrigOff(RIDE);
-        break;
-      case 60:
-        TRIG_HIGH;
-        break;
-      }
-    }
-  }
-  else{
+  if (velocity != 0){
     if (channel == seq.RXchannel){
       switch (pitch){
       case 35:
@@ -186,6 +140,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         MidiTrigOn(HT, velocity);
         break;
       case 34:
+      case 37:
         MidiTrigOn(RM, velocity);
         break;
       case 39:
@@ -197,20 +152,56 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 46:
         MidiTrigOn(OH, velocity);
         break;
-      case 51:
-        MidiTrigOn(RIDE, velocity);
-        break;
       case 49:
         MidiTrigOn(CRASH, velocity);
         break;
-      case 60:
-        if ((~muteInst) & 1) {                                       // [1.028] mute
-          TRIG_LOW;
-          trigCounterStart = TRUE;                                   // [zabox] [1.027] solves short trig 1 pulse
-        }
+      case 51:
+        MidiTrigOn(RIDE, velocity);
         break;
+      case 56:
+        TRIG_HIGH;
+        break;
+      case 60:
+      case 61:
+      case 62:
+      case 63:
+      case 64:
+      case 65:
+      case 66:
+      case 67:
+        // Bank Select
+        curBank = pitch - 60;
+        nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
+        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        break;
+      case 72:
+      case 73:
+      case 74:
+      case 75:
+      case 76:
+      case 77:
+      case 78:
+      case 79:
+      case 80:
+      case 81:
+      case 82:
+      case 83:
+      case 84:
+      case 85:
+      case 86:
+      case 87:
+        // Pattern Select
+        group.priority = FALSE;
+        nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
+        group.pos = pattern[ptrnBuffer].groupPos;
+        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        break;
+
       }
     }
+  }
+  else{
+    HandleNoteOff(channel, pitch, velocity);
   }
 }
 
@@ -239,6 +230,7 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
       MidiTrigOff(HT);
       break;
     case 34:
+    case 37:
       MidiTrigOff(RM);
       break;
     case 39:

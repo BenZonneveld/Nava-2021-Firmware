@@ -46,7 +46,7 @@ void LcdUpdate()
         lcd.print(seq.RXchannel);
         break;
       case 2:// second page
-        lcd.print("pCh mte nc. nc. ");                             // [zabox]
+        lcd.print("pCh mte eXT nc. ");                             // [zabox]
         lcd.setCursor(cursorPos[curIndex],0);
         lcd.print(letterUpConfPage2[curIndex]);
         lcd.setCursor(0,1);
@@ -60,7 +60,7 @@ void LcdUpdate()
         strcpy_P(mute, (char*)pgm_read_word(&(nameMute[seq.muteModeHH])));
         lcd.print(mute);
         lcd.setCursor(8,1);
-        lcd.print("xxx");
+        lcd.print(seq.EXTchannel);
         lcd.setCursor(12,1);
         lcd.print("xxx");
         break;
@@ -336,17 +336,3 @@ void  LcdPrintTM2Adjust()
   lcd.setCursor(0,1);
   lcd.print("TP1 is +5V...");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

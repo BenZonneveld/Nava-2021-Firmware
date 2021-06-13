@@ -128,6 +128,8 @@ void loop()
   LcdUpdate();
   
 
+//  Serial.print("ADC: ");
+//  Serial.println(analogRead(TRIG2_PIN));
   
 #if DEBUG_
     if (stepValue) {

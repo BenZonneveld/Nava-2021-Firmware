@@ -7,6 +7,7 @@
 #define define_h
 
 //DEBUG
+#define NEUROMANCER 1
 #define DEBUG 1
 
   #if DEBUG
@@ -46,6 +47,14 @@
 #define BTN_BANK     B1
 #define BTN_MUTE     B10
 #define BTN_TEMPO    B100
+
+#ifdef NEUROMANCER 
+// needed because I swap some pins
+#define BTN_BANK     B100
+#define BTN_MUTE     B1
+#define BTN_TEMPO    B10
+#endif
+
 #define BTN_ENTER    B1000
 #define BTN_ENCODER  B100
 #define ENC_SW_GET   PINB & BTN_ENCODER
@@ -318,6 +327,7 @@ struct SeqConfig {
   boolean syncChanged;
   byte TXchannel;//MIDI transmit channel
   byte RXchannel;
+  byte EXTchannel; //EXT Instrument TX Channel   [Neuromancer]
   unsigned int bpm;
   unsigned int defaultBpm;// stored in the eeprom
   byte dir;
@@ -491,7 +501,7 @@ const char *letterUpExtInst[MAX_CUR_POS]={
 const char *letterUpConfPage1[MAX_CUR_POS]={
   "S", "B", "M", "M"};
 const char *letterUpConfPage2[MAX_CUR_POS]={                          // [zabox] N to M for mute mode
-  "P", "M", "N", "N"};
+  "P", "M", "E", "N"};
 
 //MIDI-----------------------------------------------
 volatile boolean midiNoteOnActive = FALSE;
