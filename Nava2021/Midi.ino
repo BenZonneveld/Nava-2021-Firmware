@@ -319,12 +319,12 @@ void SendInstrumentMidiOut(unsigned int value)
       if (inst >= 14 && bitRead(muteInst,5)) continue;
       if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0 )
       {
-        unsigned int MIDIVelocity = (MIDI_LOW_VELOCITY * (pattern[ptrnBuffer].velocity[inst][curStep] == instVelLow[inst])) + 
-                                    (MIDI_HIGH_VELOCITY * (pattern[ptrnBuffer].velocity[inst][curStep] == instVelHigh[inst]));
+        unsigned int MIDIVelocity = InstrumentMidiOutVelocity[inst];
+        if ( inst >= 14 ) MIDIVelocity = InstrumentMidiOutVelocity[CH];
+        MIDIVelocity = map(MIDIVelocity, instVelLow[inst], instVelHigh[inst], MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);
                                     
         if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
-      
-        if (MIDIVelocity == 0 ) MIDIVelocity = MIDI_LOW_VELOCITY - 16;
+
         MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
       }
     }
@@ -347,10 +347,3 @@ void SendInstrumentMidiOff()
   }
 
 }
-
-
-
-
-
-
-

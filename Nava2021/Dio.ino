@@ -153,20 +153,3 @@ void SetTrigPeriod(byte ms)
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

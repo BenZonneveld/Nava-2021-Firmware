@@ -17,8 +17,6 @@
 
 #include <MemoryFree.h>
 
-
-
 LiquidCrystal lcd(18, 19, 20, 21, 22, 23);
 
 ////////////////////////Setup//////////////////////
@@ -131,10 +129,7 @@ void loop()
   
 
   
-
-   
-  
-#if DEBUG
+#if DEBUG_
     if (stepValue) {
       if (stepValue != stepValue_old) {
        // Serial.println(stepValue, BIN);
@@ -154,31 +149,3 @@ void loop()
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
