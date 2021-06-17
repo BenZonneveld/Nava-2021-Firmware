@@ -70,5 +70,3 @@ void setFlam() {
     OCR3A = flam[pattern[ptrnBuffer].flam];                              // Set output compare register to 2m
   }
 }
-  
-  
