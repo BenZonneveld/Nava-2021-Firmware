@@ -238,36 +238,3 @@ void SetLeds()
   //Send OUTPUTS now !
   SetDoutLed(stepLeds, configLed , menuLed);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

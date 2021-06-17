@@ -223,14 +223,3 @@ void ShiftRightPattern()
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
