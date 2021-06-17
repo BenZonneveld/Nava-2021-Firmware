@@ -11,6 +11,8 @@
                                  //                  lcd update down from 19ms to 5ms (1,3ms to 0,3ms in shuffle/flam update). reduces flickering
 //#include <Wire.h>                // [zabox] [1.028] (wire.h/twi.h 130 byte buffer length)
 #include "src/WireN/WireN.h"             // [zabox] [1.028]
+
+#include "features.h"
 #include "define.h"
 #include "string.h"
 #include "src/MIDI/MIDI.h"
