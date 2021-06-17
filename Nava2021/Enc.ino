@@ -194,6 +194,7 @@ void EncGet()
         }
         break;
       case 2:
+#if MIDI_EXT_CHANNEL      
         seq.EXTchannel = EncGet(seq.EXTchannel, 1);
         seq.EXTchannel = constrain(seq.EXTchannel, 1, 16);
         static unsigned int prevEXT;
@@ -203,6 +204,7 @@ void EncGet()
           needLcdUpdate = TRUE;
         }
         break;
+#endif        
       case 3:
         
         break;

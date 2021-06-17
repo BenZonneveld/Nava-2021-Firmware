@@ -20,8 +20,13 @@ void InitMidiNoteOff()
 {
   if(midiNoteOnActive){
     midiNoteOnActive = FALSE;
+#if MIDI_EXT_CHANNEL    
     if (noteIndexCpt) MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
     else MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
+#else
+    if (noteIndexCpt) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
+    else MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
+#endif    
   }
 }
 
@@ -161,6 +166,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 56:
         TRIG_HIGH;
         break;
+#if MIDI_BANK_PATTERN_CHANGE        
       case 60:
       case 61:
       case 62:
@@ -196,7 +202,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         group.pos = pattern[ptrnBuffer].groupPos;
         if(curPattern != nextPattern) selectedPatternChanged = TRUE;
         break;
-
+#endif // MIDI_BANK_PATTERN_CHANGE
       }
     }
   }
@@ -300,7 +306,7 @@ void SendAllNoteOff()
    MIDI.sendControlChange(ALL_NOTE_OFF , 0, seq.TXchannel);	
 }
 
-
+#if MIDI_DRUMNOTES_OUT
 void SendInstrumentMidiOut(unsigned int value)
 {
   // Send MIDI notes for the playing instruments
@@ -339,3 +345,4 @@ void SendInstrumentMidiOff()
   }
 
 }
+#endif // MIDI_DRUMNOTES_OUT

@@ -327,7 +327,11 @@ struct SeqConfig {
   boolean syncChanged;
   byte TXchannel;//MIDI transmit channel
   byte RXchannel;
+  
+#if MIDI_EXT_CHANNEL
   byte EXTchannel; //EXT Instrument TX Channel   [Neuromancer]
+#endif  
+
   unsigned int bpm;
   unsigned int defaultBpm;// stored in the eeprom
   byte dir;
@@ -500,8 +504,13 @@ const char *letterUpExtInst[MAX_CUR_POS]={
   "I", "N", "L", "O"};
 const char *letterUpConfPage1[MAX_CUR_POS]={
   "S", "B", "M", "M"};
+#if MIDI_EXT_CHANNEL  
 const char *letterUpConfPage2[MAX_CUR_POS]={                          // [zabox] N to M for mute mode
   "P", "M", "E", "N"};
+#else
+const char *letterUpConfPage2[MAX_CUR_POS]={                          // [zabox] N to M for mute mode
+  "P", "M", "N", "N"};
+#endif
 
 //MIDI-----------------------------------------------
 volatile boolean midiNoteOnActive = FALSE;
@@ -512,6 +521,8 @@ boolean instWasMidiTrigged[NBR_INST] ={
   FALSE};
 byte midiVelocity[NBR_INST]={
   100};
+
+#if MIDI_DRUMNOTES_OUT
 byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
                               0, // HH_SLCT
                               50, // HT
@@ -534,7 +545,7 @@ byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
 #define MIDI_LOW_VELOCITY (MIDI_HIGH_VELOCITY-16)
 unsigned int lastInstrumentMidiOut = 0;
 byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
-
+#endif // MIDI_DRUMNOTES_OUT
 
 //Din synchro----------------------------------------
 boolean dinStartState = LOW;
