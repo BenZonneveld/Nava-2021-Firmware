@@ -64,7 +64,11 @@ void KeyboardUpdate()
         if (stepBtn[a].curState != stepBtn[a].prevState){
           if ((stepBtn[a].pressed == LOW) && (stepBtn[a].curState == HIGH)){
             pattern[ptrnBuffer].extNote[noteIndex] = a + (12* keybOct);
+#if MIDI_EXT_CHANNEL
+            MidiSendNoteOn(seq.EXTchannel, a + 12*keybOct, HIGH_VEL);
+#else                        
             MidiSendNoteOn(seq.TXchannel, a + 12*keybOct, HIGH_VEL);
+#endif            
             noteIndex++;
             patternWasEdited = TRUE;
             if(noteIndex > MAX_EXT_INST_NOTE) noteIndex = MAX_EXT_INST_NOTE;
@@ -73,7 +77,11 @@ void KeyboardUpdate()
             needLcdUpdate = TRUE;
           }  
           if ((stepBtn[a].pressed == HIGH) && (stepBtn[a].curState == LOW)){
-            MidiSendNoteOff(seq.TXchannel, a + 12*keybOct);    
+#if MIDI_EXT_CHANNEL
+            MidiSendNoteOff(seq.EXTchannel, a + 12*keybOct);
+#else            
+            MidiSendNoteOff(seq.TXchannel, a + 12*keybOct);
+#endif                
           }
           stepBtn[a].pressed = stepBtn[a].curState;
         }
@@ -82,11 +90,3 @@ void KeyboardUpdate()
     }
   }
 }
-
-
-
-
-
-
-
-

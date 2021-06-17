@@ -20,14 +20,17 @@ void SetMux()
       //As CH and OH share same Mux out this code is needed
      // if (bitRead(stepValue, OH && muxInst[a + 5] == CH )){                                                                 // [zabox] bracket error, caused the ext_trig bug. took me hours to spot :/
       if (bitRead(temp_stepValue, OH) && (muxInst[a + 5] == CH )){                                                            // [zabox] correct bracketing
+#if MIDI_DRUMNOTES_OUT        
         InstrumentMidiOutVelocity[muxInst[a + 5]] = pattern[ptrnBuffer].velocity[OH][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0); // [Neuromancer]: MIDI Out Velocity levels
-
+#endif
         SetDacA(pattern[ptrnBuffer].velocity[OH][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));
         PORTA = (PORTA & 0b00011111) | muxAddr[2];//Mask to clear last 3 bits of the PORTA
         SelectSecondMux();//Set the value to the multiplexer out
       }
       else  {
+#if MIDI_DRUMNOTES_OUT
         InstrumentMidiOutVelocity[muxInst[a + 5]] = pattern[ptrnBuffer].velocity[muxInst[a + 5]][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);  // [Neuromancer]: MIDI Out
+#endif
         SetDacA(pattern[ptrnBuffer].velocity[muxInst[a + 5]][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));//Set DAC Value
         //Set Multiplexer address
         PORTA = (PORTA & 0b00011111) | muxAddr[a];//Mask to clear last 3 bits of the PORTA
@@ -47,7 +50,9 @@ void SetMux()
         stepValueFlam |= (1 << muxInst[a]);
         vel &= 127;
       }
+#if MIDI_DRUMNOTES_OUT      
       InstrumentMidiOutVelocity[muxInst[a]] = vel + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);  // [Neuromancer]: MIDI Out
+#endif
       SetDacA(vel + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));//Set DAC Value 
       //Set Multiplexer address
       PORTA = (PORTA & 0b00011111) | muxAddr[a];//Mask to clear last 3 bits of the PORTA
@@ -69,7 +74,9 @@ void SetMuxFlam() {
       if (bitRead(vel, 7)) {
         vel &= 127;
       }
+#if MIDI_DRUMNOTES_OUT      
       InstrumentMidiOutVelocity[muxInst[a]] = vel+ ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);                                   // [Neuromancer]: MIDI Out
+#endif      
       SetDacA(vel + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));//Set DAC Value 
       //Set Multiplexer address
       PORTA = (PORTA & 0b00011111) | muxAddr[a];//Mask to clear last 3 bits of the PORTA

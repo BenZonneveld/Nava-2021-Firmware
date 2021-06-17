@@ -60,7 +60,11 @@ void LcdUpdate()
         strcpy_P(mute, (char*)pgm_read_word(&(nameMute[seq.muteModeHH])));
         lcd.print(mute);
         lcd.setCursor(8,1);
+#if MIDI_EXT_CHANNEL        
         lcd.print(seq.EXTchannel);
+#else
+        lcd.print("xxx");
+#endif        
         lcd.setCursor(12,1);
         lcd.print("xxx");
         break;
