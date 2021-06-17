@@ -15,7 +15,6 @@ ISR(TIMER2_COMPA_vect) {     // [zabox] [v1.028] 2ms trig off isr. improves led 
   TRIG_TIMER_STOP;           // [zabox] one shot
   TRIG_TIMER_ZERO;           // [zabox] reset
   SetDoutTrig(tempDoutTrig);
-  SendInstrumentMidiOff();
 }  
   
 
@@ -28,10 +27,10 @@ ISR(TIMER3_COMPA_vect) {       // [zabox] flam
   SetMuxFlam();
  
   SetDoutTrig(stepValueFlam & (~muteInst) | tempDoutTrig);//Send TempDoutTrig too to prevet tick noise on HH circuit
-  SendInstrumentMidiOut(stepValueFlam & (~muteInst) | tempDoutTrig);
+  
   TRIG_TIMER_START;
   stepValueFlam = 0;
-//  ResetDoutTrig();  
+  
 } 
   
   
@@ -122,8 +121,6 @@ void CountPPQN()
         
         SetDoutTrig((stepValue) & (~temp_muteInst) | (tempDoutTrig));//Send TempDoutTrig too to prevet tick noise on HH circuit
         
-        SendInstrumentMidiOut((stepValue) & (~temp_muteInst) | (tempDoutTrig));
-        
         TRIG_TIMER_START;        // [zabox] [1.028] start trigger off timer
         
         if (stepValueFlam) {
@@ -156,7 +153,7 @@ void CountPPQN()
 */      
       
       //TRIG_HIGH;
- //     ResetDoutTrig();
+      //ResetDoutTrig();
       stepCount++;
 
     }
@@ -205,3 +202,33 @@ void Metronome(boolean state)
     pattern[ptrnBuffer].velocity[RM][12] = HIGH_VEL;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
