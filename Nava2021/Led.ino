@@ -203,7 +203,7 @@ void SetLeds()
         }
       }
       //this function is to fade low velocity leds
-      if(flagLedIntensity >= 8){
+      if(flagLedIntensity >= 3){
         stepLeds = stepLedsHigh | stepLedsLow ^ blinkFast << curStep;//B1111111111111111;
         flagLedIntensity = 0;
       }

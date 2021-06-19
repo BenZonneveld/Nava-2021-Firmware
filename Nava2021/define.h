@@ -7,8 +7,7 @@
 #define define_h
 
 //DEBUG
-#define NEUROMANCER 1
-#define DEBUG 1
+#define DEBUG 0
 
   #if DEBUG
    unsigned int stepValue_old = 0;
@@ -48,7 +47,7 @@
 #define BTN_MUTE     B10
 #define BTN_TEMPO    B100
 
-#ifdef NEUROMANCER 
+#ifdef VERSION_DATE 
 // needed because I swap some pins
 #define BTN_BANK     B100
 #define BTN_MUTE     B1
@@ -475,8 +474,8 @@ byte keybOct = DEFAULT_OCT;
 byte noteIndex = 0;//external inst note index
 
 //SPI------------------------------------------------
-SPISettings SPIset(4000000, MSBFIRST, SPI_MODE0);
-SPISettings SPIset_f(4000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
+SPISettings SPIset(8000000, MSBFIRST, SPI_MODE0);
+SPISettings SPIset_f(8000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
 
 
 //Encoder--------------------------------------------

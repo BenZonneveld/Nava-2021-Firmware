@@ -38,6 +38,12 @@ jobs:
 
     # This is the list of steps this job will run.
     steps:
+      - name: Get Date
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYYMMDD
+
       # First of all, we clone the repo using the `checkout` action.
       - name: Checkout
         uses: actions/checkout@v2
@@ -60,4 +66,16 @@ jobs:
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
       - name: Compile Sketch
-        run: arduino-cli compile -e --fqbn ${{ matrix.fqbn }} ./Nava2021
+        run: arduino-cli compile -e --build-property compiler.cpp.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --build-property build.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --fqbn ${{ matrix.fqbn }} ./Nava2021
+
+      - name: Convert to sysex
+        run: python2 tools/hex2sysex/hex2sysex.py -o Nava2021/build/MightyCore.avr.1284/firmware.syx  Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex -s
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: Nava2021Neuro-${{ steps.current-time.outputs.formattedTime  }}
+          artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx, Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin
+          allowUpdates: true
+          bodyFile: Release.md
+          token: ${{ secrets.GITHUB_TOKEN }}

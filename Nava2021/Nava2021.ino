@@ -3,6 +3,9 @@
 //                  main program
 //-------------------------------------------------
 
+#define XSTR(s) STR(s)
+#define STR(s) #s
+
 /////////////////////Include/////////////////////
 #include "src/SPI/SPI.h"
 #include <LiquidCrystal.h>     // [zabox] [1.028] (still working)
@@ -99,7 +102,12 @@ void setup()
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("NAVA v1.028beta ");
+#ifndef VERSION_DATE  
+  lcd.print("    NAVA2021    ");
+#else
+  lcd.print(" NAVA v" XSTR(VERSION_DATE) " ");
+#endif
+  
   lcd.setCursor(0,1);
   lcd.print("by e-licktronic ");
   delay(1000);
