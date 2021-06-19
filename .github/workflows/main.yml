@@ -66,7 +66,7 @@ jobs:
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
       - name: Compile Sketch
-        run: arduino-cli compile -e -v --build-property build.extra_flags=-DVERSION_DATE="${{ steps.current-time.outputs.formattedTime }}" --fqbn ${{ matrix.fqbn }} ./Nava2021
+        run: arduino-cli compile -e -v --build-property build.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --fqbn ${{ matrix.fqbn }} ./Nava2021
 
       - name: Convert to sysex
         run: python2 tools/hex2sysex/hex2sysex.py -o Nava2021/build/MightyCore.avr.1284/firmware.syx  Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex -s
