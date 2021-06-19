@@ -67,12 +67,12 @@ jobs:
 
       - name: Upload resulting binary file
         uses: actions/upload-artifact@v2
-	with:
-	  name: hex-file
-	  path: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex
+        with:
+          name: hex-file
+          path: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex
 
       - name: Upload resulting sysex file
         uses: actions/upload-artifact@v2
-	with:
-	  name: firmware sysex
+        with:
+          name: firmware sysex
           path: Nava2021/build/MightyCore.avr.1284/firmware.syx
