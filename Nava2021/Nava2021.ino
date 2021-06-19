@@ -3,6 +3,9 @@
 //                  main program
 //-------------------------------------------------
 
+#define XSTR(s) STR(s)
+#define STR(s) #s
+
 /////////////////////Include/////////////////////
 #include "src/SPI/SPI.h"
 #include <LiquidCrystal.h>     // [zabox] [1.028] (still working)
@@ -103,9 +106,7 @@ void setup()
 #ifndef VERSION_DATE  
   lcd.print("    NAVA2021    ");
 #else
-  lcd.print("  NAVA");
-  lcd.print(VERSION_DATE);
-  lcd.print("  ");
+  lcd.print("  NAVA" XSTR(VERSION_DATE) "  ");
 #endif
   
   lcd.setCursor(0,1);
