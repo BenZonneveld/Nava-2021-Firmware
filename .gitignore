@@ -1,31 +1,29 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Precompiled python modules
+*.pyc
 
-# Precompiled Headers
-*.gch
-*.pch
+# Eagle backups
+*.s#?
+*.b#?
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Gerber files
+*.CUT
+*.GBL
+*.GBO
+*.GBS
+*.GML
+*.GTL
+*.GTO
+*.GTP
+*.GTS
+*.TXT
+*.dri
+*.gpi
+*.pro
 
-# Fortran module files
-*.mod
+# LaTeX compiled file
+*.pdf
+*.log
+*.aux
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-Nava2021Neuromancer/*
-Nava_v1_028beta/*
+# OS X crap
+.DS_Stor?
