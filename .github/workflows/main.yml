@@ -78,8 +78,13 @@ jobs:
           path: Nava2021/build/MightyCore.avr.1284/firmware.syx
 
       - name: Release
+        id: date
+        uses: ajilraju/actions-date@v0.1
+        with:
+          args: date +%m%d%Y
+
         uses: ncipollo/release-action@v1
         with:
-          tag: beta
+          tag: Nava2021beta-${{ steps.date }}
           artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx
           token: ${{ secrets.GITHUB_TOKEN }}
