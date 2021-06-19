@@ -77,12 +77,13 @@ jobs:
           name: firmware sysex
           path: Nava2021/build/MightyCore.avr.1284/firmware.syx
 
-      - name: Release
+      - name: Date
         id: date
         uses: ajilraju/actions-date@v0.1
         with:
           args: date +%m%d%Y
 
+      - name: Release
         uses: ncipollo/release-action@v1
         with:
           tag: Nava2021beta-${{ steps.date }}
