@@ -17,7 +17,7 @@
 #include "string.h"
 #include "src/MIDI/MIDI.h"
 
-#include <MemoryFree.h>
+#include "src/MemoryFree/MemoryFree.h"
 
 LiquidCrystal lcd(18, 19, 20, 21, 22, 23);
 
