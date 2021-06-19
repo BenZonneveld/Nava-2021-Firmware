@@ -77,4 +77,5 @@ jobs:
           tag: Nava2021Neuro-${{ steps.current-time.outputs.formattedTime  }}
           artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx, Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin
           allowUpdates: true
+          bodyFile: Release.md
           token: ${{ secrets.GITHUB_TOKEN }}
