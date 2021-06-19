@@ -47,7 +47,7 @@
 #define BTN_MUTE     B10
 #define BTN_TEMPO    B100
 
-#ifndef VERSION_DATE 
+#ifdef VERSION_DATE 
 // needed because I swap some pins
 #define BTN_BANK     B100
 #define BTN_MUTE     B1
