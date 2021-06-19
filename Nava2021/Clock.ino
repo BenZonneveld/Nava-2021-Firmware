@@ -148,7 +148,7 @@ void CountPPQN()
       if (bitRead(pattern[ptrnBuffer].inst[EXT_INST], curStep))
       {
         InitMidiNoteOff();
-#if MIDI_EXT_CHANNEL
+#if MIDI_EXT_CHANNEL > 0
         MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
 #else
         MidiSendNoteOn(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);

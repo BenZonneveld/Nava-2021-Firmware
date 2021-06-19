@@ -165,6 +165,7 @@ void SeqParameter()
     }
     if (curSeqMode != MUTE) muteBtn.counter = 0;
     if (!seq.configMode) seq.configPage = 0;
+
     if (tempoBtn.justRelease) needLcdUpdate = TRUE;
   }
 
@@ -283,14 +284,17 @@ void SeqParameter()
     }
     if (instBtn && enterBtn.justPressed){
       curInst = TOTAL_ACC;
+      curFlam = 0;
       needLcdUpdate = TRUE;
     }
     if (instBtn && stopBtn.justPressed){
       curInst = TRIG_OUT;
+      curFlam = 0;
       needLcdUpdate = TRUE;
     }
     if (shiftBtn && guideBtn.justPressed){
       curInst = EXT_INST;
+      curFlam = 0;
       needLcdUpdate = TRUE;
     }
 
@@ -964,9 +968,3 @@ void SeqParameter()
     } 
   }
 }
-
-
-
-
-
-
