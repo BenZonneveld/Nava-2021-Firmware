@@ -102,9 +102,7 @@ void setup()
 #ifndef VERSION_DATE  
   lcd.print("    NAVA2021    ");
 #else
-  lcd.print("  NAVA");
-  lcd.print(VERSION_DATE);
-  lcd.print("  ");
+  lcd.print("  NAVA" VERSION_DATE "  ");
 #endif
   
   lcd.setCursor(0,1);
