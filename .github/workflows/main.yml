@@ -10,8 +10,8 @@ on: [push, pull_request, workflow_dispatch]
 # started depends on how many configurations the matrix
 # will produce.
 jobs:
-  DoLintChecking
-  # This is the platform GitHub will use to run our workflow, we
+  DoLintChecking:
+    # This is the platform GitHub will use to run our workflow, we
     # pick Windows for no particular reason.
     runs-on: windows-latest
 
