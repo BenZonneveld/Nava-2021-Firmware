@@ -7,7 +7,7 @@
 #define define_h
 
 //DEBUG
-#define NEUROMANCER 1
+#define NEUROMANCER 0
 #define DEBUG 0
 
   #if DEBUG
