@@ -7,3 +7,8 @@ Features in this release:
 * Shift+step in Mute mode solos the instrument (shift+encoder mutes all) [sandormatyi]
 
 At startup the display now shows the build date for this release
+
+Bugfixes:
+- Issue #12: Flam bug with external instrument and others
+- Issue #13: Switching from keyboardMode to config page doesn't work
+ 
