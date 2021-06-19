@@ -66,32 +66,15 @@ jobs:
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
       - name: Compile Sketch
-        run: arduino-cli compile -e --build-property=build.extra_flags=-DVERSION_DATE="${{ steps.current-time.outputs.formattedTime }}" --fqbn ${{ matrix.fqbn }} ./Nava2021
+        run: arduino-cli compile -e --build-property compiler.cpp.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --build-property build.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --fqbn ${{ matrix.fqbn }} ./Nava2021
 
       - name: Convert to sysex
         run: python2 tools/hex2sysex/hex2sysex.py -o Nava2021/build/MightyCore.avr.1284/firmware.syx  Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex -s
-
-      - name: Upload resulting hex file
-        uses: actions/upload-artifact@v2
-        with:
-          name: hex-file
-          path: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex
-
-      - name: Upload resulting bin file
-        uses: actions/upload-artifact@v2
-        with:
-          name: bin-file
-          path: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin
-
-      - name: Upload resulting sysex file
-        uses: actions/upload-artifact@v2
-        with:
-          name: firmware sysex
-          path: Nava2021/build/MightyCore.avr.1284/firmware.syx
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
           tag: Nava2021Neuro-${{ steps.current-time.outputs.formattedTime  }}
-          artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx
+          artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx, Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin
+          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}

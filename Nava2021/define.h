@@ -7,7 +7,6 @@
 #define define_h
 
 //DEBUG
-#define NEUROMANCER 1
 #define DEBUG 0
 
   #if DEBUG
@@ -48,7 +47,7 @@
 #define BTN_MUTE     B10
 #define BTN_TEMPO    B100
 
-#ifdef NEUROMANCER 
+#ifdef VERSION_DATE 
 // needed because I swap some pins
 #define BTN_BANK     B100
 #define BTN_MUTE     B1
