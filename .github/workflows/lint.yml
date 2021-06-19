@@ -1,4 +1,4 @@
-name: Lint Checking
+name: Neuromancer Lint Checking
 
 on: workflow_dispatch
 
