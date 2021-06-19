@@ -7,7 +7,7 @@
 #define define_h
 
 //DEBUG
-#define DEBUG 0
+#define DEBUG 1
 
   #if DEBUG
    unsigned int stepValue_old = 0;
@@ -446,8 +446,8 @@ byte instVelLow[NBR_INST]={
 typedef struct Track Track;
 struct Track 
 {
-  unsigned int length;//lenght before loop 0 to 999
   byte patternNbr[MAX_PTRN_TRACK];//Should be 999 
+  unsigned int length;//lenght before loop 0 to 999
 };
 Track track[2];
 

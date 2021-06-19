@@ -114,10 +114,6 @@ void DisconnectMidiHandleNote()
 }
 
 
-
-
-
-
 //Handle noteON
 void HandleNoteOn(byte channel, byte pitch, byte velocity)
 {
@@ -134,13 +130,14 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         MidiTrigOn(SD, velocity);
         break;
       case 41:
+      case 43:
         MidiTrigOn(LT, velocity);
         break;
       case 45:
       case 47:
-      case 48:
         MidiTrigOn(MT, velocity);
         break;
+      case 48:
       case 50:
         MidiTrigOn(HT, velocity);
         break;
@@ -152,6 +149,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         MidiTrigOn(HC, velocity);
         break;
       case 42:
+      case 44:
         MidiTrigOn(CH, velocity);
         break;
       case 46:

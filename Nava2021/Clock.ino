@@ -41,8 +41,6 @@ ISR(TIMER3_COMPA_vect) {       // [zabox] flam
 } 
   
   
-  
-
 //Tick proceed each pulse
 void CountPPQN()
 {
@@ -159,14 +157,7 @@ void CountPPQN()
       if (noteIndexCpt > pattern[ptrnBuffer].extLength){
         noteIndexCpt = 0;
       }
-      
-/*      
-      delayMicroseconds(2000);
-      if (bitRead(pattern[ptrnBuffer].inst[CH], curStep) && !bitRead(muteInst, CH)) tempDoutTrig = B10;//CH trig                        // [zabox] + check if OH/CH mute               // [zabox v1.028] now handled inside timer2 isr
-      else if (bitRead(pattern[ptrnBuffer].inst[OH], curStep) && !bitRead(muteInst, OH)) tempDoutTrig = 0;// OH trig                    // [zabox] + check if OH/CH mute
-      SetDoutTrig(tempDoutTrig);
-*/      
-      
+            
       //TRIG_HIGH;
       //ResetDoutTrig();
       stepCount++;
@@ -187,11 +178,7 @@ void CountPPQN()
         SetHHPattern();
         InstToStepWord();
       }
-    }
-//    if (ppqn % pattern[ptrnBuffer].scale == 4 && stepCount == 0){ 
-//      endMeasure = FALSE;
-//    }
-  
+    }  
   }
   
   ppqn++;                                                                 // [1.028] more consistent to run the counter from 0-95

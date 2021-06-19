@@ -35,11 +35,6 @@ void SeqParameter()
     blinkTempo = 0;                                                               // [zabox] looks more consistent
     //trackPosNeedIncremante = TRUE;
     //init Groupe pattern  position
-    /*group.pos = 0;
-     nextPattern = group.firstPattern + group.pos;
-     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-     trackPosNeedIncremante = FALSE;
-     needLcdUpdate = TRUE;*/
 
     MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
       DIN_START_HIGH;
@@ -106,7 +101,8 @@ void SeqParameter()
 
     //sequencer configuration page
     if (tempoBtn.justPressed && !isRunning){
-      seq.configMode  = TRUE;
+      seq.configMode = TRUE;
+      keyboardMode = FALSE;
       seq.configPage++;
       curIndex = 0;
       if (seq.configPage > MAX_CONF_PAGE){
@@ -243,10 +239,6 @@ void SeqParameter()
         curFlam = 0;
         break;
       }
-      //if (readButtonState == OH_BTN){
-      //  curInst = OH;
-      //  doublePush = 1;
-      //}
       switch (readButtonState) {
         case BD_F_BTN:
           curFlam = 1;
@@ -272,11 +264,7 @@ void SeqParameter()
           curInst = OH;
           doublePush = 1;
         break;
-      }
-        
-        
-        
-        
+      }    
     }
     if (curInstChanged && stepsBtn.justRelease){
       needLcdUpdate = TRUE;
@@ -379,13 +367,7 @@ void SeqParameter()
         }
       }
     }
-      
     
-    
-    
-    
-    
-
     //-------------------scale button------------------------------
     if (scaleBtn.justPressed && !keyboardMode){
       needLcdUpdate = TRUE;
@@ -718,15 +700,7 @@ void SeqParameter()
     }
 
     //--------------------------------pattern next update---------------------------
-    /* if (trackPosNeedIncremante && group.length ){// && stepCount > 0)
-     if (group.pos > group.length) group.pos = 0;
-     nextPattern = group.firstPattern + group.pos;
-     group.pos++;
-     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-     trackPosNeedIncremante = FALSE;
-     needLcdUpdate = TRUE;
-     }
-     else*/    if (trackPosNeedIncremante && group.length == 0){
+    if (trackPosNeedIncremante && group.length == 0){
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       trackPosNeedIncremante = FALSE;
     }
@@ -759,7 +733,7 @@ void SeqParameter()
         if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       }
     }
-    //decremente track position
+    //decrease track position
     if (backBtn.justPressed){
       trk.pos--;
       if (trk.pos < 0 || trk.pos > MAX_PTRN_TRACK) trk.pos = 0;
@@ -767,7 +741,7 @@ void SeqParameter()
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       needLcdUpdate = TRUE;
     }
-    //incremente track position
+    //increment track position
     if (fwdBtn.justPressed){
       trk.pos++;
       if (trk.pos > MAX_PTRN_TRACK) trk.pos = MAX_PTRN_TRACK;
@@ -888,7 +862,7 @@ void SeqParameter()
     trackJustSaved = TRUE;
     timeSinceSaved = millis();
   }
-  //this function is to not incremente trk.pos when released enterBtn after Saved track
+  //this function is to not increment trk.pos when released enterBtn after Saved track
   if (millis() - timeSinceSaved > HOLD_TIME){                                               
     trackJustSaved = FALSE;
   }
@@ -956,7 +930,7 @@ void SeqParameter()
     }
   } 
 
-  //We still incremente pattern group in those mode
+  //We still increment pattern group in those mode
   if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP ){
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
       group.pos++;
