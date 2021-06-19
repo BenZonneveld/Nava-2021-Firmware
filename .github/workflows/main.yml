@@ -88,4 +88,5 @@ jobs:
         with:
           tag: Nava2021beta-${{ steps.current-time.outputs.formattedTime  }}
           artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx
+          allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
