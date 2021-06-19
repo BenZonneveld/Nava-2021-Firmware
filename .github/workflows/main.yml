@@ -11,7 +11,7 @@ on: [push, pull_request, workflow_dispatch]
 # will produce.
 jobs:
   DoLintChecking
-    - name: arduino-lint-action
+    - name: Lint
     # You may pin to the exact commit or the version.
     # uses: arduino/arduino-lint-action@34273a972ebf4575065aaede94a51632888d7452
     uses: arduino/arduino-lint-action@v1.0.0
