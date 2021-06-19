@@ -78,14 +78,14 @@ jobs:
           path: Nava2021/build/MightyCore.avr.1284/firmware.syx
 
       - name: Date
-        id: date
-        uses: ajilraju/actions-date@v0.1
+        uses: 1466587594/get-current-time@v2
+        id: current-time
         with:
-          args: date +%m%d%Y
+          format: YYYYMMDD
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          tag: Nava2021beta-${{ steps.date }}
+          tag: Nava2021beta-${{ steps.current-time.outputs.formattedTime  }}
           artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx
           token: ${{ secrets.GITHUB_TOKEN }}
