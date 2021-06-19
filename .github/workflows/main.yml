@@ -71,11 +71,17 @@ jobs:
       - name: Convert to sysex
         run: python2 tools/hex2sysex/hex2sysex.py -o Nava2021/build/MightyCore.avr.1284/firmware.syx  Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex -s
 
-      - name: Upload resulting binary file
+      - name: Upload resulting hex file
         uses: actions/upload-artifact@v2
         with:
           name: hex-file
           path: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex
+
+      - name: Upload resulting bin file
+        uses: actions/upload-artifact@v2
+        with:
+          name: bin-file
+          path: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin
 
       - name: Upload resulting sysex file
         uses: actions/upload-artifact@v2
