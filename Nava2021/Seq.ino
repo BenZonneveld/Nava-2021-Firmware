@@ -415,66 +415,8 @@ void SeqParameter()
     if (curSeqMode == PTRN_STEP){
       if (stepsBtn.justRelease) doublePush = FALSE; 
       if(!lastStepBtn.pressed && !instBtn && !keyboardMode && !shufBtn.pressed){                                      // [zabox] test
-        if (isRunning)
-        {
-          pattern[ptrnBuffer].inst[curInst] = InstValueGet(pattern[ptrnBuffer].inst[curInst]);//cf InstValueGet()
-        }
-        else if (!isRunning)
-        {//Return pattern number
-          if (stepsBtn.pressed){
-            if (bankBtn.pressed){
-              if(FirstBitOn() >= MAX_BANK) curBank = MAX_BANK;
-              else curBank = FirstBitOn();
-              nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-              if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-              group.length = 0;
-            }
-            else{//pattern group edit------------------------------------------------------
-              if (SecondBitOn())
-              {
-                trackPosNeedIncremante = FALSE;                                                               // [zabox] fixes group bug
-                group.length = SecondBitOn() - FirstBitOn();
-                nextPattern = group.firstPattern = FirstBitOn() + curBank * NBR_PATTERN;
-                doublePush = TRUE;
-                group.priority = TRUE;
-                //Store groupe in eeprom
-                if(enterBtn.justPressed){
-                  group.priority = FALSE;
-                  byte tempLength;
-                  byte tempPos;
-                  //Test if one the  selected pattern is already in a Group
-                  for (int a = 0; a <= group.length; a++){
-                    tempLength = LoadPatternGroup(group.firstPattern + a, LENGTH);
-                    if (tempLength){
-                      tempPos = LoadPatternGroup(group.firstPattern + a, POSITION);
-                      ClearPatternGroup(group.firstPattern + a - tempPos, tempLength);
-                    }
-                  }
-                  SavePatternGroup(group.firstPattern, group.length);
-                }
-              }
-              else if (!doublePush){
-                group.priority = FALSE;
-                nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
-                if(enterBtn.justPressed){
-                  ClearPatternGroup(nextPattern - pattern[ptrnBuffer].groupPos, pattern[ptrnBuffer].groupLength);
-                  group.length = 0;
-                }
-                group.pos = pattern[ptrnBuffer].groupPos;
-              }
-              if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-            }
-          }
-        }
+        pattern[ptrnBuffer].inst[curInst] = InstValueGet(pattern[ptrnBuffer].inst[curInst]);//cf InstValueGet()
       }
-      /*if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
-       group.pos++;
-       if (group.pos > group.length) group.pos = 0;
-       nextPattern = group.firstPattern + group.pos;
-       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-       trackPosNeedIncremante = FALSE;
-       needLcdUpdate = TRUE;
-       }*/
     }
     //////////////////////////////TAP EDIT///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     else if (curSeqMode == PTRN_TAP)
@@ -996,9 +938,17 @@ void SeqParameter()
   if (curSeqMode == MUTE){
     MuteButtonGet();
     if (encBtn.pressed){
-      muteInst = 0;
-      muteLeds = 0;                                                                   // [1.028] new MuteButtonGet function
-      //InitMuteBtnCounter();                                                         //   
+      // Mute all instruments when shift is pressed
+      if (shiftBtn) {
+        // Avoid filling muteInst with all 1's
+        for (byte a = 0; a < NBR_STEP_BTN; a++)
+          muteInst |= (1 << muteOut[a]);
+        muteLeds = ~0;
+      } else {
+        muteInst = 0;
+        muteLeds = 0;                                                                   // [1.028] new MuteButtonGet function
+        //InitMuteBtnCounter();                                                         //   
+      }
     }
   } 
 
@@ -1014,3 +964,9 @@ void SeqParameter()
     } 
   }
 }
+
+
+
+
+
+

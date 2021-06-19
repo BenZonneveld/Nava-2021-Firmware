@@ -217,6 +217,9 @@ unsigned int InstValueGet(unsigned int value)
 }
 
 
+
+
+
 //Mute steps buttons -----------------------------------------------------------               [1.028] new version. faster, doens't need a button counter
 void MuteButtonGet()
 {
@@ -224,28 +227,54 @@ void MuteButtonGet()
   muteButtons = (dinSr[1] << 8) | dinSr[0];
 
   if (muteButtons != lastMuteButtons) {                                                     // [1.028] runs only when a button is pressed (important for expander mode)
-    
-    for (byte a = 0; a < NBR_STEP_BTN; a++) {
-      
-      if (((muteButtons >> a) & 1U) && !((lastMuteButtons >> a) & 1U)) {
-              
-        muteInst ^= (1 << muteOut[a]);
-        muteLeds ^= muteLedsOrder[a];
+    // If shift is held down, solo the selected instrument
+    if (shiftBtn) {
+      for (byte a = 0; a < NBR_STEP_BTN; a++) {
         
-        if (seq.muteModeHH) {                                        
-          if (a == 12) {
-            muteInst ^= (1 << muteOut[13]);
-            muteLeds ^= muteLedsOrder[13];
+        if (((muteButtons >> a) & 1U) && !((lastMuteButtons >> a) & 1U)) {
+          muteInst &= ~(1 << muteOut[a]);
+          for (byte b = 0; b < NBR_STEP_BTN; b++) {
+            if (muteOut[a] != muteOut[b]) {
+              muteInst |= (1 << muteOut[b]);
+            }
           }
-          else if (a == 13) {
-            muteInst ^= (1 << muteOut[12]);
-            muteLeds ^= muteLedsOrder[12];
-          }
+          muteLeds = ~muteLedsOrder[a];
+          
+          if (seq.muteModeHH) {                                        
+            if (a == 12) {
+              muteInst &= ~(1 << muteOut[13]);
+              muteLeds &= ~muteLedsOrder[13];
+            }
+            else if (a == 13) {
+              muteInst &= ~(1 << muteOut[12]);
+              muteLeds &= ~muteLedsOrder[12];
+            }
+          }      
         }      
-      }      
+      }
+    } else {
+      for (byte a = 0; a < NBR_STEP_BTN; a++) {
+        
+        if (((muteButtons >> a) & 1U) && !((lastMuteButtons >> a) & 1U)) {
+          muteInst ^= (1 << muteOut[a]);
+          muteLeds ^= muteLedsOrder[a];
+          
+          if (seq.muteModeHH) {                                        
+            if (a == 12) {
+              muteInst ^= (1 << muteOut[13]);
+              muteLeds ^= muteLedsOrder[13];
+            }
+            else if (a == 13) {
+              muteInst ^= (1 << muteOut[12]);
+              muteLeds ^= muteLedsOrder[12];
+            }
+          }      
+        }      
+      }
     }
   }
 }
+
 
 
 //Mute steps buttons -----------------------------------------------------------               [1.028] gate
@@ -268,6 +297,9 @@ void GateButtonGet()
     }
   }
 }
+
+
+
 
 //return value of first pressed step button
 byte FirstBitOn()
@@ -303,6 +335,28 @@ byte SecondBitOn()
 
 //return value of first just pressed step button 
 //MODE => JUSTPRESSED or JUSTRELEASE
+/*byte StepBtn(byte mode)
+ {
+ unsigned int reading = (dinSr[1] <<8) | dinSr[0];
+ for (byte a = 0; a < NBR_STEP_BTN; a++){//a = step button number
+ stepBtn[a].justPressed = 0;
+ stepBtn[a].justRelease = 0;
+ stepBtn[a].curState = bitRead(reading,a);
+ if (stepBtn[a].curState != stepBtn[a].prevState){
+ if (stepBtn[a].pressed == LOW && stepBtn[a].curState == HIGH){
+ stepBtn[a].justPressed = 1;
+ if (mode == JUSTPRESSED) return a;
+ }
+ if (stepBtn[a].pressed == HIGH && stepBtn[a].curState == LOW){
+ stepBtn[a].justRelease = 1;
+ if (mode == JUSTRELEASE) return a;
+ }
+ stepBtn[a].pressed = stepBtn[a].curState;
+ }
+ stepBtn[a].prevState = stepBtn[a].curState;
+ }
+ }*/
+
 //Init buttons counter----------------------------------------------------
 void InitButtonCounter()
 {
@@ -315,3 +369,174 @@ void InitButtonCounter()
   encBtn.counter = 0;
   muteBtn.counter = 0;
 }
+
+//Init  mute buttons counter----------------------------------------------------      [1.028] new MuteButtonGet function doesn't need this.
+/*
+void InitMuteBtnCounter()
+{
+  for (byte a=0; a<NBR_STEP_BTN; a++){
+    muteStepBtn[a].counter = 0;
+  }
+}
+
+*/
+
+
+
+//Mute steps buttons -----------------------------------------------------------      [1.028] old version
+/*
+void MuteButtonGet()
+{
+  unsigned int data = (dinSr[1] <<8) | dinSr[0];
+  //static unsigned int value;
+  for (byte a=0; a<NBR_STEP_BTN; a++){
+    muteStepBtn[a].justPressed = 0;
+    muteStepBtn[a].curState = bitRead(data,a);
+    if (muteStepBtn[a].curState != muteStepBtn[a].prevState){
+      if ((muteStepBtn[a].pressed == LOW) && (muteStepBtn[a].curState == HIGH)){
+        muteStepBtn[a].justPressed = 1;
+        switch(a){
+        case 0:
+        case 1:
+          muteStepBtn[0].counter++;//incremente step button counter
+          muteStepBtn[1].counter++;//incremente step button counter
+          break;
+        case 2:
+        case 3:
+          muteStepBtn[2].counter++;//incremente step button counter
+          muteStepBtn[3].counter++;//incremente step button counter
+          break;
+        case 4:
+        case 5:
+          muteStepBtn[4].counter++;//incremente step button counter
+          muteStepBtn[5].counter++;//incremente step button counter
+          break;
+        case 6:
+        case 7:
+          muteStepBtn[6].counter++;//incremente step button counter
+          muteStepBtn[7].counter++;//incremente step button counter
+          break;
+        case 8:
+        case 9:
+          muteStepBtn[8].counter++;//incremente step button counter
+          muteStepBtn[9].counter++;//incremente step button counter
+          break;
+        case 10:
+          muteStepBtn[10].counter++;//incremente step button counter
+          break;
+        case 11:
+          muteStepBtn[11].counter++;//incremente step button counter
+          break;
+        case 12:
+          muteStepBtn[12].counter++;//incremente step button counter                     // [zabox] OH/CH mute
+          break;
+        case 13:
+          muteStepBtn[13].counter++;//incremente step button counter
+          break;
+        case 14:
+          muteStepBtn[14].counter++;//incremente step button counter
+          break;
+        case 15:
+          muteStepBtn[15].counter++;//incremente step button counter
+          break;
+        }
+        switch (muteStepBtn[a].counter){
+        case 1:
+          bitSet (muteInst,muteOut[a]);
+          muteLeds |= muteLedsOrder[a];
+          
+          if (seq.muteModeHH) {                                                         // [zabox] HH mute mode
+            if (a == 12) {
+              bitSet (muteInst,muteOut[13]);
+              muteLeds |= muteLedsOrder[13];
+              muteStepBtn[13].counter++;
+            }
+            else if (a == 13) {
+              bitSet (muteInst,muteOut[12]);
+              muteLeds |= muteLedsOrder[12];
+              muteStepBtn[12].counter++;
+            }
+          }
+          break;
+        case 2:
+          switch(a){
+          case 0:
+          case 1:
+            muteStepBtn[0].counter = muteStepBtn[1].counter = 0;
+            break;
+          case 2:
+          case 3:
+            muteStepBtn[2].counter = muteStepBtn[3].counter = 0;
+            break;
+          case 4:
+          case 5:
+            muteStepBtn[4].counter = muteStepBtn[5].counter = 0;
+            break;
+          case 6:
+          case 7:
+            muteStepBtn[6].counter = muteStepBtn[7].counter = 0;
+            break;
+          case 8:
+          case 9:
+            muteStepBtn[8].counter = muteStepBtn[9].counter = 0;
+            break;
+          case 10:
+            muteStepBtn[10].counter = 0;
+            break;
+          case 11:
+            muteStepBtn[11].counter = 0;
+            break;
+          case 12:
+            muteStepBtn[12].counter = 0;                                       // [zabox] OH/HC mute
+            break;
+          case 13:
+            muteStepBtn[13].counter = 0;
+            break;
+          case 14:
+            muteStepBtn[14].counter = 0;
+            break;
+          case 15:
+            muteStepBtn[15].counter = 0;
+            break;
+          }
+          muteStepBtn[a].counter = 0;
+          bitClear (muteInst,muteOut[a]);
+          muteLeds ^= muteLedsOrder[a];
+          
+          if (seq.muteModeHH) {                                                // [zabox] mute mode
+            if (a == 12) {
+              bitClear (muteInst,muteOut[13]);
+              muteLeds ^= muteLedsOrder[13];
+              muteStepBtn[13].counter = 0;
+            }
+            else if (a == 13) {
+              bitClear (muteInst,muteOut[12]);
+              muteLeds ^= muteLedsOrder[12];
+              muteStepBtn[12].counter = 0;
+            }
+          }
+          break;
+          
+        }
+      }      
+    }
+    muteStepBtn[a].prevState = muteStepBtn[a].curState;
+  }
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
