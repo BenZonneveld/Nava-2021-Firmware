@@ -38,6 +38,12 @@ jobs:
 
     # This is the list of steps this job will run.
     steps:
+      - name: Get Date
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYYMMDD
+
       # First of all, we clone the repo using the `checkout` action.
       - name: Checkout
         uses: actions/checkout@v2
@@ -76,12 +82,6 @@ jobs:
         with:
           name: firmware sysex
           path: Nava2021/build/MightyCore.avr.1284/firmware.syx
-
-      - name: Date
-        uses: 1466587594/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYYMMDD
 
       - name: Release
         uses: ncipollo/release-action@v1
