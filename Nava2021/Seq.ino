@@ -106,7 +106,8 @@ void SeqParameter()
 
     //sequencer configuration page
     if (tempoBtn.justPressed && !isRunning){
-      seq.configMode  = TRUE;
+      seq.configMode = TRUE;
+      keyboardMode = FALSE;
       seq.configPage++;
       curIndex = 0;
       if (seq.configPage > MAX_CONF_PAGE){
