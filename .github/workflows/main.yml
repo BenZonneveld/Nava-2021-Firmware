@@ -11,6 +11,12 @@ on: [push, pull_request, workflow_dispatch]
 # will produce.
 jobs:
   DoLintChecking
+  # This is the platform GitHub will use to run our workflow, we
+    # pick Windows for no particular reason.
+    runs-on: windows-latest
+
+    # This is the list of steps this job will run.
+    steps:
     - name: Lint
     # You may pin to the exact commit or the version.
     # uses: arduino/arduino-lint-action@34273a972ebf4575065aaede94a51632888d7452
