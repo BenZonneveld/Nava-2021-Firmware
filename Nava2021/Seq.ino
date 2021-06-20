@@ -6,10 +6,6 @@
 /////////////////////Function//////////////////////
 void SeqParameter()
 {  
-#if DEBUG
-  DebugPatternChange("Start of SeqParameter");
-#endif
-
   readButtonState = StepButtonGet(MOMENTARY);
   //can not access config when isRunning
   if (isRunning && seq.configMode){
@@ -778,10 +774,6 @@ void SeqParameter()
   //////////////////////////MODE TRACK WRITE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   if (curSeqMode == TRACK_WRITE){
-#if DEBUG
-  DebugPatternChange("Start of Track Write");
-#endif
-
     //-------------------------------select pattern-----------------------------------
     if (readButtonState){
 
@@ -824,6 +816,18 @@ void SeqParameter()
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       needLcdUpdate = TRUE;
     }
+    //
+    // Set end of track
+    //
+    if ( lastStepBtn.justPressed )
+    {
+      track[trkBuffer].patternNbr[trk.pos] = END_OF_TRACK;
+      track[trkBuffer].length = trk.pos+1;
+      trackNeedSaved = TRUE;
+      needLcdUpdate = TRUE;
+      curPattern = END_OF_TRACK;
+      nextPattern = END_OF_TRACK;
+    }
     if(shiftBtn){
       //go to last measure
       if (numBtn.pressed){
@@ -839,6 +843,7 @@ void SeqParameter()
         for (int a = trk.pos + 1; a < track[trkBuffer].length; a++){         
           track[trkBuffer].patternNbr[a] = track[trkBuffer].patternNbr[a + 1]; 
         }
+        track[trkBuffer].patternNbr[track[trkBuffer].length - 1] = 0;                                                                 // [Neuromancer] Delete pattern info at tail
         trk.pos +=1;//to stay in the same position
         track[trkBuffer].length = track[trkBuffer].length - 1;//decremente length by 1 du to deleted pattern
         nextPattern = track[trkBuffer].patternNbr[trk.pos];
@@ -868,12 +873,24 @@ void SeqParameter()
           trk.pos -=1;//to stay in the same position
         }
       }
+      if (clearBtn.justPressed){
+        trk.pos = 0;
+        for (int a = 0; a < MAX_PTRN_TRACK; a++)
+        {
+          track[trkBuffer].patternNbr[a]=0;
+        }
+        track[trkBuffer].length = 0;
+        nextPattern = track[trkBuffer].patternNbr[trk.pos];
+        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        trackNeedSaved = TRUE;
+        needLcdUpdate = TRUE;
+      }
     }//end shift
 
     //write selected pattern in the current track position
     if (enterBtn.justRelease && !trackJustSaved){
       track[trkBuffer].patternNbr[trk.pos] = curPattern;
-      trk.pos++;
+      if ( curPattern != END_OF_TRACK ) trk.pos++;               // [Neuromancer] Do not advance beyond END_OF_TRACK marker
       if (trk.pos > MAX_PTRN_TRACK) trk.pos = MAX_PTRN_TRACK;
       nextPattern = track[trkBuffer].patternNbr[trk.pos];
       if ( nextPattern == 0 && curPattern != 0 ) {
@@ -946,7 +963,10 @@ void SeqParameter()
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
     patternNeedSaved = FALSE;
-    LoadPattern(nextPattern);
+    if ( nextPattern != END_OF_TRACK )
+    {
+      LoadPattern(nextPattern);
+    }
     curPattern = nextPattern;
     nextPatternReady = TRUE;
   }
@@ -960,9 +980,12 @@ void SeqParameter()
     InitMidiNoteOff();
     ptrnBuffer = !ptrnBuffer;
     //Serial.println("switched!!");
-    InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
-    SetHHPattern();
-    InstToStepWord();
+    if ( curPattern != END_OF_TRACK )
+    {
+      InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
+      SetHHPattern();
+      InstToStepWord();
+    }
   }
 
   if (patternWasEdited)

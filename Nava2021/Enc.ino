@@ -34,6 +34,7 @@ void EncGet()
         trk.pos = constrain(trk.pos, 0, track[trkBuffer].length);
         static unsigned int prevTrkPos;
         if (trk.pos != prevTrkPos){
+          if ( trk.pos > prevTrkPos && track[trkBuffer].patternNbr[prevTrkPos] == END_OF_TRACK ) trk.pos = prevTrkPos;   // Do not go beyond end of track marker
           prevTrkPos = trk.pos;
           nextPattern = track[trkBuffer].patternNbr[trk.pos];
           
@@ -55,9 +56,6 @@ void EncGet()
           if(curPattern != nextPattern) selectedPatternChanged = TRUE;
           needLcdUpdate = TRUE;
         }
-#if DEBUG
-  DebugPatternChange("In EncGet");
-#endif          
         break;
       case 2://track length
         if(instBtn) {
@@ -248,9 +246,6 @@ void EncGet()
     {
       curBpm = seq.bpm;
       TimerSetFrequency();
-#ifdef DEBUG
-  Serial.print("curSeqMode: "); Serial.println(curSeqMode);
-#endif
       if (curSeqMode != PTRN_STEP || tempoBtn.pressed) needLcdUpdate = TRUE;
     }
   }
