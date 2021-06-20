@@ -146,7 +146,7 @@
 #define TRIG2_PIN 27
 #define DIN_START_PIN 24
 #define DIN_CLK_PIN 25
-#define TRIG_LENGHT 10 //10ms
+#define TRIG_LENGTH 10 //10ms
 
 //Dincsync out
 #define DIN_START_HIGH PORTA |= 1

@@ -119,7 +119,7 @@ void setup()
 void loop()
 {
   Expander();                                                             // [1.028] expander
-  SetTrigPeriod(TRIG_LENGHT);
+  SetTrigPeriod(TRIG_LENGTH);
   InitMidiRealTime();
   MIDI.read();
   //SetMux();//!!!! if SetMUX() loop there is noise on HT out and a less noise on HH noise too !!!!
