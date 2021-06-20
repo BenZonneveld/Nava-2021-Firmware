@@ -242,6 +242,9 @@ void EncGet()
     {
       curBpm = seq.bpm;
       TimerSetFrequency();
+#ifdef DEBUG
+  Serial.print("curSeqMode: "); Serial.println(curSeqMode);
+#endif
       if (curSeqMode != PTRN_STEP || tempoBtn.pressed) needLcdUpdate = TRUE;
     }
   }

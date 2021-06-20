@@ -733,7 +733,7 @@ void SeqParameter()
         if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       }
     }
-    //decremente track position
+    //decrease track position
     if (backBtn.justPressed){
       trk.pos--;
       if (trk.pos < 0 || trk.pos > MAX_PTRN_TRACK) trk.pos = 0;
@@ -741,7 +741,7 @@ void SeqParameter()
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       needLcdUpdate = TRUE;
     }
-    //incremente track position
+    //increment track position
     if (fwdBtn.justPressed){
       trk.pos++;
       if (trk.pos > MAX_PTRN_TRACK) trk.pos = MAX_PTRN_TRACK;
@@ -862,7 +862,7 @@ void SeqParameter()
     trackJustSaved = TRUE;
     timeSinceSaved = millis();
   }
-  //this function is to not incremente trk.pos when released enterBtn after Saved track
+  //this function is to not increment trk.pos when released enterBtn after Saved track
   if (millis() - timeSinceSaved > HOLD_TIME){                                               
     trackJustSaved = FALSE;
   }
@@ -930,7 +930,7 @@ void SeqParameter()
     }
   } 
 
-  //We still incremente pattern group in those mode
+  //We still increment pattern group in those mode
   if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP ){
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
       group.pos++;
