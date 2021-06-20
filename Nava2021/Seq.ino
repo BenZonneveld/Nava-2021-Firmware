@@ -965,6 +965,7 @@ void SeqParameter()
   if (curSeqMode == MUTE){
     MuteButtonGet();
     if (encBtn.pressed){
+#ifdef SHIFT_MUTE_ALL
       // Mute all instruments when shift is pressed
       if (shiftBtn) {
         // Avoid filling muteInst with all 1's
@@ -976,6 +977,11 @@ void SeqParameter()
         muteLeds = 0;                                                                   // [1.028] new MuteButtonGet function
         //InitMuteBtnCounter();                                                         //   
       }
+#else
+      muteInst = 0;
+      muteLeds = 0;                                                                   // [1.028] new MuteButtonGet function
+      //InitMuteBtnCounter();
+#endif      
     }
   } 
 
