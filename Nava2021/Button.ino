@@ -128,7 +128,7 @@ unsigned int InstValueGet(unsigned int value)
         stepBtn[a].justPressed = 1;
 
         //two button state
-        if(curInst == OH || curInst == RIDE || curInst == CRASH || curInst == TOTAL_ACC || curInst == TRIG_OUT || curInst == EXT_INST){
+        if(curInst == OH || curInst == RIDE || curInst == CRASH || curInst == TOTAL_ACC || curInst == TRIG_OUT /*|| curInst == EXT_INST*/){
           if (bitRead(value,a)) stepBtn[a].counter = 2;
           else stepBtn[a].counter = 1;
           switch (stepBtn[a].counter){
@@ -223,7 +223,7 @@ void MuteButtonGet()
   muteButtons = (dinSr[1] << 8) | dinSr[0];
 
   if (muteButtons != lastMuteButtons) {                                                     // [1.028] runs only when a button is pressed (important for expander mode)
-#ifdef SHIFT_MUTE_ALL
+#if SHIFT_MUTE_ALL
     // If shift is held down, solo the selected instrument
     if (shiftBtn) {
       for (byte a = 0; a < NBR_STEP_BTN; a++) {
@@ -268,7 +268,7 @@ void MuteButtonGet()
           }      
         }      
       }
-#ifdef SHIFT_MUTE_ALL      
+#if SHIFT_MUTE_ALL      
     }
 #endif    
   }

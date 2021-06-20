@@ -14,6 +14,7 @@ void InitSeq()
   seq.configMode = FALSE;
   randomSeed(analogRead(0));
   seq.dir = FORWARD;
+  curSeqMode = seq.BootMode;
   seq.bpm = seq.defaultBpm;
   SetSeqSync();                               // [zabox] [1.028] moved
   seq.syncChanged = FALSE;
@@ -95,7 +96,7 @@ void InitPattern()
     pattern[ptrnBuffer].velocity[RIDE][stp] = instVelHigh[RIDE];//RIDE
     pattern[ptrnBuffer].velocity[TOTAL_ACC][stp] = HIGH_VEL;//TOTAL_ACC
     pattern[ptrnBuffer].velocity[TRIG_OUT][stp] = HIGH_VEL;//TRIG_OUT
-    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
+//    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
   }
   switch (pattern[ptrnBuffer].scale){
   case  SCALE_16:

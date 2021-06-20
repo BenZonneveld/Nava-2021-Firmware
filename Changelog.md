@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/HEAD)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210620...HEAD)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210621...HEAD)
 
 **Closed issues:**
 
@@ -10,13 +10,23 @@
 - Bug: Switching to pattern play always gives step edit the first press! [\#22](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/22)
 - Bug: Track play pattern name not updated [\#21](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/21)
 - Track Write: do not reset current pattern [\#20](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/20)
+- Feature request: Mode at startup should be selectable. [\#16](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/16)
+- EXT Instrument should have 2 velocity levels. [\#15](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/15)
+- Tempo display isn't always updated. [\#14](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/14)
+
+## [Nava2021Neuro-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210621) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210621...Nava2021Neuro-20210621)
+
+## [Nava2021beta-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021beta-20210621) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210619...Nava2021beta-20210621)
+
+**Closed issues:**
+
 - Switching from keyboardMode to config page doesn't work [\#13](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/13)
 - Flam bug with external instrument and others [\#12](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/12)
 - Merge the source tree from sandormatyi [\#9](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/9)
-
-## [Nava2021Neuro-20210620](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210620) (2021-06-19)
-
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210619...Nava2021Neuro-20210620)
 
 ## [Nava2021beta-20210619](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021beta-20210619) (2021-06-19)
 

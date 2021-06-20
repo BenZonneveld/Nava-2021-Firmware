@@ -908,7 +908,7 @@ void SeqParameter()
   }//END IF MODE TRACK WRITE
 
     //////////////////////////MODE TRACK PLAY/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (curSeqMode == TRACK_PLAY)
+  if (curSeqMode == TRACK_PLAY || ( curSeqMode == MUTE && prevSeqMode == TRACK_PLAY) )
   {
     if (trackPosNeedIncremante){//(endMeasure)
       trk.pos++;
@@ -972,8 +972,6 @@ void SeqParameter()
   }
 
   if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function
-    //if ((isRunning && endMeasure) || !isRunning ){//|| (curSeqMode != PTRN_PLAY))
-    // Serial.println("endMeasure!!");
     nextPatternReady = FALSE;
     keybOct = DEFAULT_OCT;
     noteIndex = 0;
@@ -1011,7 +1009,7 @@ void SeqParameter()
   if (curSeqMode == MUTE){
     MuteButtonGet();
     if (encBtn.pressed){
-#ifdef SHIFT_MUTE_ALL
+#if SHIFT_MUTE_ALL
       // Mute all instruments when shift is pressed
       if (shiftBtn) {
         // Avoid filling muteInst with all 1's

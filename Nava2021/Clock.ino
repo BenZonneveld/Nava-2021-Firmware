@@ -146,12 +146,19 @@ void CountPPQN()
       if (bitRead(pattern[ptrnBuffer].inst[EXT_INST], curStep))
       {
         InitMidiNoteOff();
-#if MIDI_EXT_CHANNEL > 0
-        MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
+#if MIDI_EXT_CHANNEL
+        if ( pattern[ptrnBuffer].velocity[EXT_INST][curStep] > 0 )
+        {
+          unsigned int MIDIVelocity = pattern[ptrnBuffer].velocity[EXT_INST][curStep];
+          MIDIVelocity = map(MIDIVelocity, instVelLow[EXT_INST], instVelHigh[EXT_INST], MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);                                    
+          if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
+          MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], MIDIVelocity);           
+          midiNoteOnActive = TRUE;
+        }
 #else
         MidiSendNoteOn(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
-#endif
         midiNoteOnActive = TRUE;
+#endif
         noteIndexCpt++;//incremente external inst note index
       }
       if (noteIndexCpt > pattern[ptrnBuffer].extLength){
@@ -168,7 +175,7 @@ void CountPPQN()
       trackPosNeedIncremante = TRUE;                                                
       stepCount = 0;
       //In pattern play mode this piece of code executes here
-      if(nextPatternReady && curSeqMode == PTRN_PLAY){
+      if(nextPatternReady && curSeqMode == PTRN_PLAY ){
         nextPatternReady = FALSE;
         keybOct = DEFAULT_OCT;
         noteIndex = 0;
