@@ -3,7 +3,7 @@ name: Build Neuromancer Code
 
 # Here we tell GitHub to run the workflow when a commit
 # is pushed or a Pull Request is opened.
-on: [push, pull_request, workflow_dispatch]
+on: workflow_dispatch
 
 # This is the list of jobs that will be run concurrently.
 # Since we use a build matrix, the actual number of jobs

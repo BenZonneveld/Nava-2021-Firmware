@@ -256,12 +256,14 @@ void LcdPrintTempo()
 {
   lcd.write(byte(5));
   lcd.print("-");
-  if (seq.sync == MASTER)lcd.print(seq.bpm);
-  else {
+  if (seq.sync == MASTER){
+    lcd.print(seq.bpm);
+  } else {
     lcd.print((char)219);
     lcd.print((char)219);
     lcd.print((char)219);
   }
+  lcd.print("  ");
 }
 
 //print special line--------------------------------------------------
