@@ -6,6 +6,10 @@
 /////////////////////Function//////////////////////
 void SeqParameter()
 {  
+#if DEBUG
+  DebugPatternChange("Start of SeqParameter");
+#endif
+
   readButtonState = StepButtonGet(MOMENTARY);
   //can not access config when isRunning
   if (isRunning && seq.configMode){
@@ -78,14 +82,20 @@ void SeqParameter()
       curSeqMode = TRACK_WRITE;
       keyboardMode = FALSE;
       seq.configMode  = FALSE;
+      nextPattern = track[trkBuffer].patternNbr[trk.pos];           // Get the correct pattern
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     }
     if (ptrnBtn.justPressed) {
+      if ( curPattern >= MAX_PTRN ) nextPattern = 0;               // If on an invalid pattern number, goto pattern 0
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE; // 
       needLcdUpdate = TRUE;
       curSeqMode = PTRN_STEP;
       seq.configMode  = FALSE;
       trackNeedSaved = FALSE;
     }
     if (tapBtn.justPressed){
+      if ( curPattern >= MAX_PTRN ) nextPattern = 0;               // If on an invalid pattern number, goto pattern 0
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE; // 
       curSeqMode = PTRN_TAP;
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
@@ -116,9 +126,6 @@ void SeqParameter()
   //-------------------Shift button released------------------------------
   else {
     if (trkBtn.justPressed){
-#ifdef DEBUG
-      Serial.println("Just entered TRACK PLAY");
-#endif
       curSeqMode = TRACK_PLAY;
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
@@ -130,6 +137,8 @@ void SeqParameter()
     //if (fwdBtn.justPressed) ;//foward track postion
     if (numBtn.pressed) ;//select Track number
     if (ptrnBtn.justPressed){
+      if ( curPattern >= MAX_PTRN ) nextPattern = 0;               // If on an invalid pattern number, goto pattern 0
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE; // 
       if (curSeqMode == PTRN_PLAY) curSeqMode = PTRN_STEP;
       else curSeqMode = PTRN_PLAY;
       needLcdUpdate = TRUE;
@@ -769,6 +778,10 @@ void SeqParameter()
   //////////////////////////MODE TRACK WRITE/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   if (curSeqMode == TRACK_WRITE){
+#if DEBUG
+  DebugPatternChange("Start of Track Write");
+#endif
+
     //-------------------------------select pattern-----------------------------------
     if (readButtonState){
 
@@ -863,8 +876,15 @@ void SeqParameter()
       trk.pos++;
       if (trk.pos > MAX_PTRN_TRACK) trk.pos = MAX_PTRN_TRACK;
       nextPattern = track[trkBuffer].patternNbr[trk.pos];
+      if ( nextPattern == 0 && curPattern != 0 ) {
+        nextPattern = curPattern;
+        selectedPatternChanged = TRUE;
+      }
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-      track[trkBuffer].length = trk.pos;
+      if ( track[trkBuffer].length < trk.pos ) // Only change the length when larger
+      {
+        track[trkBuffer].length = trk.pos;
+      }
       trackNeedSaved = TRUE;
       needLcdUpdate = TRUE;
     }
@@ -923,7 +943,6 @@ void SeqParameter()
 
   if (selectedPatternChanged)
   {
-    //Serial.println("changed!!");
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
     patternNeedSaved = FALSE;
@@ -932,8 +951,7 @@ void SeqParameter()
     nextPatternReady = TRUE;
   }
 
-  if(nextPatternReady){///In pattern play mode this peace of code execute in the PPQ Count function
-    //Serial.println("Ready!!");
+  if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function
     //if ((isRunning && endMeasure) || !isRunning ){//|| (curSeqMode != PTRN_PLAY))
     // Serial.println("endMeasure!!");
     nextPatternReady = FALSE;
