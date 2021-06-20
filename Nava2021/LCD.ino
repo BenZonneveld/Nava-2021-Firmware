@@ -183,9 +183,9 @@ void LcdUpdate()
         lcd.setCursor(0,1);
         lcd.print(trk.pos + 1);                                                 // [zabox] 
         lcd.setCursor(4,1);
-        if (curPattern >= MAX_PTRN )
+        if (curPattern == END_OF_TRACK )
         {
-          lcd.print("xxx");
+          lcd.print("END");
         } else {
           lcd.print((char)((curPattern / 16) + 65));
           lcd.print((curPattern - (((curPattern / 16)*NBR_PATTERN)) + 1));        // [zabox] step button alignement
@@ -206,14 +206,14 @@ void LcdUpdate()
         lcd.print(trk.pos + 1);                                                 // [zabox]
         lcd.setCursor(8,1);
         lcd.print("ptrn:");
-        if (curPattern >= MAX_PTRN )
+        if (curPattern == END_OF_TRACK )
         {
-          lcd.print("xxx");
+          lcd.print("END");
         } else {
           lcd.print((char)((curPattern / 16) + 65));
           lcd.print((curPattern - (((curPattern / 16)*NBR_PATTERN)) + 1));        // [zabox] step button alignement
         }
-         previousMode = TRACK_PLAY;
+        previousMode = TRACK_PLAY;
         break;
       }
     }

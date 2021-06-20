@@ -31,10 +31,14 @@ void EncGet()
           trk.pos = EncGet(trk.pos, 1);
         }
         trk.pos = constrain(trk.pos, 0, 999);
+        trk.pos = constrain(trk.pos, 0, track[trkBuffer].length);
         static unsigned int prevTrkPos;
         if (trk.pos != prevTrkPos){
+          if ( trk.pos > prevTrkPos && track[trkBuffer].patternNbr[prevTrkPos] == END_OF_TRACK ) trk.pos = prevTrkPos;   // Do not go beyond end of track marker
           prevTrkPos = trk.pos;
           nextPattern = track[trkBuffer].patternNbr[trk.pos];
+          
+          if (trk.pos > track[trkBuffer].length-1 && nextPattern < MAX_PTRN ) nextPattern = curPattern; // Neuromancer: keep same pattern if writing at the end of the track.          
           if(curPattern != nextPattern) selectedPatternChanged = TRUE;
           needLcdUpdate = TRUE;
           break;
@@ -242,9 +246,6 @@ void EncGet()
     {
       curBpm = seq.bpm;
       TimerSetFrequency();
-#ifdef DEBUG
-  Serial.print("curSeqMode: "); Serial.println(curSeqMode);
-#endif
       if (curSeqMode != PTRN_STEP || tempoBtn.pressed) needLcdUpdate = TRUE;
     }
   }

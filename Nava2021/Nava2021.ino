@@ -118,7 +118,6 @@ void setup()
 ////////////////////////Loop///////////////////////
 void loop()
 {
-  
   Expander();                                                             // [1.028] expander
   SetTrigPeriod(TRIG_LENGHT);
   InitMidiRealTime();
@@ -133,6 +132,7 @@ void loop()
   } ledUpdateCounter++;
   
   SeqConfiguration();
+  
   SeqParameter();
   KeyboardUpdate();
   LcdUpdate();

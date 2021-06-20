@@ -7,7 +7,7 @@
 #define define_h
 
 //DEBUG
-#define DEBUG 0
+#define DEBUG 1
 
   #if DEBUG
    unsigned int stepValue_old = 0;
@@ -131,6 +131,7 @@
 #define MIN_TOTAL_ACC 0
 #define SYNC 1
 #define FREE 0
+#define END_OF_TRACK 128
 
 //Ext inst
 #define MAX_OCT 8
@@ -474,8 +475,8 @@ byte keybOct = DEFAULT_OCT;
 byte noteIndex = 0;//external inst note index
 
 //SPI------------------------------------------------
-SPISettings SPIset(8000000, MSBFIRST, SPI_MODE0);
-SPISettings SPIset_f(8000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
+SPISettings SPIset(4000000, MSBFIRST, SPI_MODE0);
+SPISettings SPIset_f(4000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
 
 
 //Encoder--------------------------------------------
