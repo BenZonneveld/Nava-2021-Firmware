@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- Feature: No option to clear a track. [\#23](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/23)
 - Bug: Switching to pattern play always gives step edit the first press! [\#22](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/22)
 - Bug: Track play pattern name not updated [\#21](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/21)
+- Track Write: do not reset current pattern [\#20](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/20)
 - Switching from keyboardMode to config page doesn't work [\#13](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/13)
 - Flam bug with external instrument and others [\#12](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/12)
 - Merge the source tree from sandormatyi [\#9](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/9)
