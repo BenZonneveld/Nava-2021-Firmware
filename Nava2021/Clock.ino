@@ -167,7 +167,7 @@ void CountPPQN()
       endMeasure = TRUE;
       trackPosNeedIncremante = TRUE;                                                
       stepCount = 0;
-      //In pattern play mode this peace of code execute in the PPQNCount function
+      //In pattern play mode this piece of code executes here
       if(nextPatternReady && curSeqMode == PTRN_PLAY){
         nextPatternReady = FALSE;
         keybOct = DEFAULT_OCT;

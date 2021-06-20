@@ -31,10 +31,13 @@ void EncGet()
           trk.pos = EncGet(trk.pos, 1);
         }
         trk.pos = constrain(trk.pos, 0, 999);
+        trk.pos = constrain(trk.pos, 0, track[trkBuffer].length);
         static unsigned int prevTrkPos;
         if (trk.pos != prevTrkPos){
           prevTrkPos = trk.pos;
           nextPattern = track[trkBuffer].patternNbr[trk.pos];
+          
+          if (trk.pos > track[trkBuffer].length-1 && nextPattern < MAX_PTRN ) nextPattern = curPattern; // Neuromancer: keep same pattern if writing at the end of the track.          
           if(curPattern != nextPattern) selectedPatternChanged = TRUE;
           needLcdUpdate = TRUE;
           break;
@@ -52,6 +55,9 @@ void EncGet()
           if(curPattern != nextPattern) selectedPatternChanged = TRUE;
           needLcdUpdate = TRUE;
         }
+#if DEBUG
+  DebugPatternChange("In EncGet");
+#endif          
         break;
       case 2://track length
         if(instBtn) {
