@@ -116,10 +116,15 @@ void SeqParameter()
   //-------------------Shift button released------------------------------
   else {
     if (trkBtn.justPressed){
+#ifdef DEBUG
+      Serial.println("Just entered TRACK PLAY");
+#endif
       curSeqMode = TRACK_PLAY;
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
       seq.configMode  = FALSE;
+      nextPattern = track[trkBuffer].patternNbr[trk.pos];
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     }
     // if (backBtn.justPressed) ;//back  track postion
     //if (fwdBtn.justPressed) ;//foward track postion
