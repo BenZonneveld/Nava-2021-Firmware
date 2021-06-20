@@ -7,7 +7,7 @@
 #define define_h
 
 //DEBUG
-#define DEBUG 1
+#define DEBUG 0
 
   #if DEBUG
    unsigned int stepValue_old = 0;
