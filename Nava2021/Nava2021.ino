@@ -153,11 +153,7 @@ void loop()
     if (ppqn != ppqn_old) {
       //Serial.println(ppqn);
       ppqn_old = ppqn;
-    }
-    
-    
+    }    
 #endif
-
-
 
 }

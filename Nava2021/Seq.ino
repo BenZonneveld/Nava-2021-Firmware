@@ -35,11 +35,6 @@ void SeqParameter()
     blinkTempo = 0;                                                               // [zabox] looks more consistent
     //trackPosNeedIncremante = TRUE;
     //init Groupe pattern  position
-    /*group.pos = 0;
-     nextPattern = group.firstPattern + group.pos;
-     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-     trackPosNeedIncremante = FALSE;
-     needLcdUpdate = TRUE;*/
 
     MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
       DIN_START_HIGH;
@@ -244,10 +239,6 @@ void SeqParameter()
         curFlam = 0;
         break;
       }
-      //if (readButtonState == OH_BTN){
-      //  curInst = OH;
-      //  doublePush = 1;
-      //}
       switch (readButtonState) {
         case BD_F_BTN:
           curFlam = 1;
@@ -273,11 +264,7 @@ void SeqParameter()
           curInst = OH;
           doublePush = 1;
         break;
-      }
-        
-        
-        
-        
+      }    
     }
     if (curInstChanged && stepsBtn.justRelease){
       needLcdUpdate = TRUE;
@@ -380,13 +367,7 @@ void SeqParameter()
         }
       }
     }
-      
     
-    
-    
-    
-    
-
     //-------------------scale button------------------------------
     if (scaleBtn.justPressed && !keyboardMode){
       needLcdUpdate = TRUE;
@@ -719,15 +700,7 @@ void SeqParameter()
     }
 
     //--------------------------------pattern next update---------------------------
-    /* if (trackPosNeedIncremante && group.length ){// && stepCount > 0)
-     if (group.pos > group.length) group.pos = 0;
-     nextPattern = group.firstPattern + group.pos;
-     group.pos++;
-     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-     trackPosNeedIncremante = FALSE;
-     needLcdUpdate = TRUE;
-     }
-     else*/    if (trackPosNeedIncremante && group.length == 0){
+    if (trackPosNeedIncremante && group.length == 0){
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       trackPosNeedIncremante = FALSE;
     }
