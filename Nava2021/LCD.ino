@@ -157,26 +157,24 @@ ptrn_step:
         previousMode = PTRN_STEP;
         break;
       case MUTE:
-        if (previousMode == PTRN_STEP){
-          goto ptrn_step;
-//          lcd.setCursor(0,1);
-//          lcd.print("   ");
-//          lcd.setCursor(0,1);
-//          lcd.print(char(curBank+65));
-//          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
+        switch (previousMode)
+        {
+          case PTRN_STEP:
+            goto ptrn_step;
+            break;
+          case PTRN_TAP:
+            goto ptrn_step;
+            break;
+          case PTRN_PLAY:
+            goto ptrn_play;
+            break;
+          case TRACK_WRITE:
+            goto trck_write;
+            break;
+          case TRACK_PLAY:
+            goto trck_play;
+            break;
         }
-        else if (previousMode == PTRN_PLAY){
-          goto ptrn_play;
-//          lcd.setCursor(2,1);
-//          lcd.print("   ");
-//          lcd.setCursor(2,1);
-//          lcd.print(char(curBank+65));
-//          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
-//          lcd.setCursor(9,1);
-//          LcdPrintTempo(); 
-        }
-        else if (previousMode == TRACK_WRITE ) goto trck_write;
-        else if (previousMode == TRACK_PLAY ) goto trck_play;
         break;
       case TRACK_WRITE:
 trck_write:
