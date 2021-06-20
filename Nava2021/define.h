@@ -131,6 +131,7 @@
 #define MIN_TOTAL_ACC 0
 #define SYNC 1
 #define FREE 0
+#define END_OF_TRACK 128
 
 //Ext inst
 #define MAX_OCT 8

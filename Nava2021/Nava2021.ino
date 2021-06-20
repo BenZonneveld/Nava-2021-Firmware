@@ -125,9 +125,6 @@ void loop()
   //SetMux();//!!!! if SetMUX() loop there is noise on HT out and a less noise on HH noise too !!!!
   ButtonGet(); 
   EncGet();
-#if DEBUG
-  DebugPatternChange("Loop After EncGet");
-#endif  
   
   if (ledUpdateCounter > 2) {                                             // [zabox] [1.028] smooth leds (combine 3 loop cycles, reduces update rate from ~220hz with running secuencer to 80hz)
     SetLeds();
@@ -135,14 +132,8 @@ void loop()
   } ledUpdateCounter++;
   
   SeqConfiguration();
-#if DEBUG
-  DebugPatternChange("Loop After SeqConfiguration");
-#endif  
   
   SeqParameter();
-#if DEBUG
-  DebugPatternChange("Loop After SeqParameter");
-#endif  
   KeyboardUpdate();
   LcdUpdate();
   
@@ -166,17 +157,3 @@ void loop()
 #endif
 
 }
-
-#if DEBUG
-void DebugPatternChange(char * debugtitle)
-{
-  if(curPattern != nextPattern)
-  {
-    Serial.println(debugtitle);
-    Serial.print("trk.pos: ");Serial.println(trk.pos);
-    Serial.print("Current Pattern: "); Serial.println(curPattern);
-    Serial.print("Next Pattern: "); Serial.println(nextPattern);
-    Serial.println();
-  }
-}
-#endif
