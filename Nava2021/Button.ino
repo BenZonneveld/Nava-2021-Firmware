@@ -249,8 +249,7 @@ void MuteButtonGet()
         }      
       }
     } else {
-      for (byte a = 0; a < NBR_STEP_BTN; a++) {
-        
+      for (byte a = 0; a < NBR_STEP_BTN; a++) {        
         if (((muteButtons >> a) & 1U) && !((lastMuteButtons >> a) & 1U)) {
           muteInst ^= (1 << muteOut[a]);
           muteLeds ^= muteLedsOrder[a];
@@ -292,7 +291,6 @@ void GateButtonGet()
     }
   }
 }
-
 
 //return value of first pressed step button
 byte FirstBitOn()
