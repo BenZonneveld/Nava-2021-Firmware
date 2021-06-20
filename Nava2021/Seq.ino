@@ -125,8 +125,8 @@ void SeqParameter()
     //if (fwdBtn.justPressed) ;//foward track postion
     if (numBtn.pressed) ;//select Track number
     if (ptrnBtn.justPressed){
-      if (curSeqMode == PTRN_STEP) curSeqMode = PTRN_PLAY;
-      else curSeqMode = PTRN_STEP;
+      if (curSeqMode == PTRN_PLAY) curSeqMode = PTRN_STEP;
+      else curSeqMode = PTRN_PLAY;
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
       seq.configMode  = FALSE;

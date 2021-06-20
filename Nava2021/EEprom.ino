@@ -365,7 +365,7 @@ void InitEEprom()
         {
           Wire.write((byte)(0));
         } else {
-          Wire.write((byte)(128));
+          Wire.write((byte)(128)); // Fill track with pattern
         }
         trackpos++;
         if ( trackpos >= TRACK_SIZE ) trackpos = 0;
