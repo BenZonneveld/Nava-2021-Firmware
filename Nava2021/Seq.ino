@@ -23,28 +23,27 @@ void SeqParameter()
   }
   //-------------------play button---------------------------
   if (playBtn.justPressed || midiStart){
-    isRunning = TRUE;
-    isStop = FALSE;
-    ppqn = 0;
-    stepCount = 0;
-    tapStepCount = 0;
-    changeDir = 1;//restart Forward
-    stopBtn.counter = 0;
-    shufPolarity = 0;//Init shuffle polarity
-    noteIndexCpt = 0;//init ext instrument note index counter
-    blinkTempo = 0;                                                               // [zabox] looks more consistent
-    //trackPosNeedIncremante = TRUE;
-    //init Groupe pattern  position
-
-    MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
-      DIN_START_HIGH;
-      dinStartState = HIGH;
-//    DIN_CLK_HIGH;                                                               // [1.028] redundant
-//    dinClkState = HIGH;
+    if ( curPattern < MAX_PTRN ) // Refuse the run on invalid patterns.
+    {
+      isRunning = TRUE;
+      isStop = FALSE;
+      ppqn = 0;
+      stepCount = 0;
+      tapStepCount = 0;
+      changeDir = 1;//restart Forward
+      stopBtn.counter = 0;
+      shufPolarity = 0;//Init shuffle polarity
+      noteIndexCpt = 0;//init ext instrument note index counter
+      blinkTempo = 0;                                                               // [zabox] looks more consistent
+    
+      MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
+        DIN_START_HIGH;
+        dinStartState = HIGH;
+    }
   }
 
   //-------------------stop button------------------------------
-  if ((stopBtn.justPressed && !instBtn) || midiStop || midiContinue){
+  if ((stopBtn.justPressed && !instBtn) || midiStop || midiContinue || curPattern >= MAX_PTRN ){
     //Init Midi note off
     SendAllNoteOff();//InitMidiNoteOff();
     if (midiStop) stopBtn.counter = 0;
@@ -59,13 +58,15 @@ void SeqParameter()
       dinStartState = LOW;
       break;
     case 2:
-      isStop = FALSE;
-      isRunning = TRUE;
-      stopBtn.counter = 0;
-      ppqn = 0;
-      MIDI.sendRealTime(Continue);//MidiSend(CONTINU_CMD);
-      DIN_START_HIGH;
-      dinStartState = HIGH;
+      if ( curPattern < MAX_PTRN ){
+        isStop = FALSE;
+        isRunning = TRUE;
+        stopBtn.counter = 0;
+        ppqn = 0;
+        MIDI.sendRealTime(Continue);//MidiSend(CONTINU_CMD);
+        DIN_START_HIGH;
+        dinStartState = HIGH;
+      }
       break;
     }
   }
@@ -818,6 +819,9 @@ void SeqParameter()
     //////////////////////////MODE TRACK PLAY/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (curSeqMode == TRACK_PLAY)
   {
+    Serial.print("curSeqMode: "); Serial.println(curSeqMode);
+    Serial.print("prevSeqMode: "); Serial.println(prevSeqMode);
+    
     if (trackPosNeedIncremante){//(endMeasure)
       trk.pos++;
       if (trk.pos >= track[trkBuffer].length) trk.pos = 0;
@@ -825,7 +829,6 @@ void SeqParameter()
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       trackPosNeedIncremante = FALSE;
       needLcdUpdate = TRUE;
-
     }
     //go to first measure
     if (clearBtn.justPressed){

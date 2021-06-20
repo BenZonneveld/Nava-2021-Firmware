@@ -363,7 +363,6 @@ void InitEEprom()
       for (byte i = 0; i < MAX_PAGE_SIZE; i++){//loop as many instrument for a page
         if ( trackpos >= (TRACK_SIZE - 2)) // The track length is stored in the last 2 bytes of the patternNbr array
         {
-          Serial.println(trackpos);
           Wire.write((byte)(0));
         } else {
           Wire.write((byte)(128));
