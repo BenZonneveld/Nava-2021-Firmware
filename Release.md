@@ -5,8 +5,9 @@ MIDI:
 * MIDI select for bank and pattern. Notes 61-68 select the bank, 72-87 select the pattern
 * Separate channel for the external instrument, selectable in config page 2
 
-Interface:
+Muting:
 * Shift+step in Mute mode solos the instrument (shift+encoder mutes all) [sandormatyi]
+* When using mute in Track play mode the track keeps running and advancing.
 
 Track Write: [Neuromancer]
 * Shift+Clear in Track write mode now clears the current track. 

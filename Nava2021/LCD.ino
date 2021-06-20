@@ -81,6 +81,7 @@ void LcdUpdate()
     else{
       switch (curSeqMode){
       case PTRN_PLAY:
+ptrn_play:      
         lcd.setCursor(0,0);
         lcd.print("  Pattern Play  ");
         lcd.setCursor(0,1);
@@ -94,6 +95,7 @@ void LcdUpdate()
         break;
       case PTRN_STEP:
       case PTRN_TAP:
+ptrn_step:      
         if (curInst == TOTAL_ACC){
           LcdPrintTotalAcc();
         }
@@ -156,24 +158,28 @@ void LcdUpdate()
         break;
       case MUTE:
         if (previousMode == PTRN_STEP){
-          lcd.setCursor(0,1);
-          lcd.print("   ");
-          lcd.setCursor(0,1);
-          lcd.print(char(curBank+65));
-          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
+          goto ptrn_step;
+//          lcd.setCursor(0,1);
+//          lcd.print("   ");
+//          lcd.setCursor(0,1);
+//          lcd.print(char(curBank+65));
+//          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
         }
         else if (previousMode == PTRN_PLAY){
-          lcd.setCursor(2,1);
-          lcd.print("   ");
-          lcd.setCursor(2,1);
-          lcd.print(char(curBank+65));
-          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
-          lcd.setCursor(9,1);
-          LcdPrintTempo(); 
+          goto ptrn_play;
+//          lcd.setCursor(2,1);
+//          lcd.print("   ");
+//          lcd.setCursor(2,1);
+//          lcd.print(char(curBank+65));
+//          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
+//          lcd.setCursor(9,1);
+//          LcdPrintTempo(); 
         }
-
+        else if (previousMode == TRACK_WRITE ) goto trck_write;
+        else if (previousMode == TRACK_PLAY ) goto trck_play;
         break;
       case TRACK_WRITE:
+trck_write:
         lcd.setCursor(0,0);
         lcd.print("pos ptr len num ");
         lcd.setCursor(cursorPos[curIndex],0);
@@ -197,6 +203,7 @@ void LcdUpdate()
         previousMode = TRACK_WRITE;
         break;
       case TRACK_PLAY:
+trck_play:      
         lcd.setCursor(0,0);
         lcd.print("   Track Play   ");
         lcd.setCursor(0,1);
