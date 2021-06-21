@@ -1,0 +1,82 @@
+# This is the name of the workflow, visible on GitHub UI.
+name: Build Sysex Code
+
+# Here we tell GitHub to run the workflow when a commit
+# is pushed or a Pull Request is opened.
+on: workflow_dispatch
+
+# This is the list of jobs that will be run concurrently.
+# Since we use a build matrix, the actual number of jobs
+# started depends on how many configurations the matrix
+# will produce.
+jobs:
+  # This is the name of the job - can be whatever.
+  BuildNavaFirmware:
+
+    # Here we tell GitHub that the jobs must be determined
+    # dynamically depending on a matrix configuration.
+    strategy:
+      matrix:
+        # The matrix will produce one job for each configuration
+        # parameter of type `arduino-platform`, in this case a
+        # total of 2.
+        arduino-platform: ["MightyCore:avr"]
+        # This is usually optional but we need to statically define the
+        # FQBN of the boards we want to test for each platform. In the
+        # future the CLI might automatically detect and download the core
+        # needed to compile against a certain FQBN, at that point the
+        # following `include` section will be useless.
+        include:
+          # This works like this: when the platform is "arduino:samd", the
+          # variable `fqbn` is set to "arduino:samd:nano_33_iot".
+          - arduino-platform: "Mightycore:avr"
+            fqbn: "MightyCore:avr:1284"
+
+    # This is the platform GitHub will use to run our workflow, we
+    # pick Windows for no particular reason.
+    runs-on: windows-latest
+
+    # This is the list of steps this job will run.
+    steps:
+      - name: Get Date
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYYMMDD
+
+      # First of all, we clone the repo using the `checkout` action.
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # We use the `arduino/setup-arduino-cli` action to install and
+      # configure the Arduino CLI on the system.
+      - name: Setup Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+
+      # We then install the platform, which one will be determined
+      # dynamically by the build matrix.
+      - name: Install platform
+        run: |
+          arduino-cli core update-index --additional-urls="https://mcudude.github.io/MightyCore/package_MCUdude_MightyCore_index.json"
+          arduino-cli core install --additional-urls="https://mcudude.github.io/MightyCore/package_MCUdude_MightyCore_index.json" ${{ matrix.arduino-platform }}
+
+      - name: Install libraries
+        run: arduino-cli lib install LiquidCrystal
+             arduino-cli lib install Arduino_CRC32
+          
+      # Finally, we compile the sketch, using the FQBN that was set
+      # in the build matrix.
+      - name: Compile Sketch
+        run: arduino-cli compile -e --build-property compiler.cpp.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --build-property build.extra_flags=-DVERSION_DATE='${{ steps.current-time.outputs.formattedTime }}' --fqbn ${{ matrix.fqbn }} ./Nava2021
+
+      - name: Convert to sysex
+        run: python2 tools/hex2sysex/hex2sysex.py -o Nava2021/build/MightyCore.avr.1284/firmware.syx  Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex -s
+
+#      - name: Release
+#        uses: ncipollo/release-action@v1
+#        with:
+#          tag: Nava2021Neuro-${{ steps.current-time.outputs.formattedTime  }}
+#          artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx, Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin
+#          allowUpdates: true
+#          bodyFile: Release.md
+#          token: ${{ secrets.GITHUB_TOKEN }}
