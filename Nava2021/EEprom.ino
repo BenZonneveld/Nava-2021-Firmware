@@ -211,7 +211,10 @@ void SaveSeqSetup()
   Wire.write((byte)(seq.muteModeHH));                                  // [zabox]
 #if MIDI_EXT_CHANNEL
   Wire.write((byte)(seq.EXTchannel));  // [Neuromancer]
-#endif  
+#endif
+#if CONFIG_BOOTMODE
+  Wire.write((byte)(seq.BootMode)); // [Neuromancer]
+#endif    
   Wire.endTransmission();//end page transmission
   delay(DELAY_WR);//delay between each write page
 }
@@ -238,7 +241,11 @@ void LoadSeqSetup()
 #if MIDI_EXT_CHANNEL  
   seq.EXTchannel = (Wire.read() & 0xFF);
   seq.EXTchannel = constrain(seq.EXTchannel, 1 ,16);
-#endif  
+#endif
+#if CONFIG_BOOTMODE
+  unsigned int bootmode = (Wire.read() & 0xFF);
+  seq.BootMode = (SeqMode)constrain(bootmode, 0 ,4);
+#endif   
 }
 
 //Save pattern group
@@ -354,12 +361,21 @@ void InitEEprom()
   Serial.println(adress);*/
   
   //Track Init
+//  Serial.println("Track Init");
+//  unsigned int trackpos = 0;
   for (unsigned long trackNbr = 0; trackNbr < MAX_TRACK; trackNbr++){
     for(unsigned long nbrPage = 0; nbrPage < (TRACK_SIZE/MAX_PAGE_SIZE); nbrPage++){// to init 1024 byte track size we need 16 pages of 64 bytes
       adress = (unsigned long)(PTRN_OFFSET + (trackNbr * TRACK_SIZE) + (MAX_PAGE_SIZE * nbrPage) + TRACK_OFFSET);
       WireBeginTX(adress);
       for (byte i = 0; i < MAX_PAGE_SIZE; i++){//loop as many instrument for a page
-        Wire.write((byte)(0)); 
+ //       if ( trackpos >= (TRACK_SIZE - 2)) // The track length is stored in the last 2 bytes of the patternNbr array
+//       {
+          Wire.write((byte)(0));
+//        } else {
+//          Wire.write((byte)(128)); // Fill track with pattern
+//        }
+//        trackpos++;
+//        if ( trackpos >= TRACK_SIZE ) trackpos = 0;
       }
       Wire.endTransmission();//end of 64 bytes transfer
       delay(DELAY_WR);//delay between each write page
@@ -379,47 +395,19 @@ void InitEEprom()
   Wire.write((byte)(DEFAULT_BPM));//seq.defaultBpm));
   Wire.write((byte)(1));//seq.TXchannel));
   Wire.write((byte)(1));//seq.RXchannel));
-
+  Wire.write((byte)(1));//seq.ptrnChangeSync));
+  Wire.write((byte)(1));//seq.muteModeHH));  
+#if MIDI_EXT_CHANNEL
+  Wire.write((byte)(2));//seq.EXTchannel);
+#endif
+#if CONFIG_BOOTMODE
+  Wire.write((byte)(SeqMode::PTRN_STEP)); // Bootmode
+#endif   
   Wire.endTransmission();//end page transmission
   delay(DELAY_WR);//delay between each write page
   /*Serial.print("setup offset add=");
   Serial.println((unsigned long)(TRACK_OFFSET + (TRACK_SIZE * MAX_TRACK)));*/
 }
-
-//init track in the eeprom //GOT SOME ISSUES: PATTERN 0 TO 18 ARE NOT INTIALIZE CORRECTLY ?!!//
-/*void InitEEpromTrack()
-{
-  unsigned long adress;
-  for (unsigned long trackNbr = 1; trackNbr < MAX_TRACK; trackNbr++){
-    for(unsigned long nbrPage = 0; nbrPage < (TRACK_SIZE/MAX_PAGE_SIZE); nbrPage++){// to init 1024 byte track size we need 16 pages of 64 bytes
-      adress = (unsigned long)(PTRN_OFFSET + (trackNbr * TRACK_SIZE) + (MAX_PAGE_SIZE * nbrPage) + TRACK_OFFSET);
-      WireBeginTX(adress);
-      for (byte i = 0; i < MAX_PAGE_SIZE; i++){//loop as many instrument for a page
-        Wire.write((byte)(0)); 
-      }
-      Wire.endTransmission();//end of 64 bytes transfer
-      delay(DELAY_WR);//delay between each write page
-    }
-    static unsigned int tempInitLeds;
-    tempInitLeds |= bitSet(tempInitLeds, trackNbr);
-    SetDoutLed(tempInitLeds, 0, 0);
-   //delay(10);
-  }
-}
-
-//Init sequencer setup
-void InitSeqSetup()
-{
-  unsigned long adress = (unsigned long)(OFFSET_SETUP);
-  WireBeginTX(adress);
-  Wire.write((byte)(MASTER));//seq.sync)); 
-  Wire.write((byte)(DEFAULT_BPM));//seq.defaultBpm));
-  Wire.write((byte)(1));//seq.TXchannel));
-  Wire.write((byte)(1));//seq.RXchannel));
-
-  Wire.endTransmission();//end page transmission
-  delay(DELAY_WR);//delay between each write page
-}*/
 
 //wire begin
 void WireBeginTX(unsigned long address)

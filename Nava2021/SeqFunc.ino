@@ -14,6 +14,7 @@ void InitSeq()
   seq.configMode = FALSE;
   randomSeed(analogRead(0));
   seq.dir = FORWARD;
+  curSeqMode = seq.BootMode;
   seq.bpm = seq.defaultBpm;
   SetSeqSync();                               // [zabox] [1.028] moved
   seq.syncChanged = FALSE;
@@ -22,10 +23,6 @@ void InitSeq()
 //Combine OH and CH pattern to trig HH and set total accent for ride and crash
 void SetHHPattern()
 {
-  //static boolean rideTotalAcc;          [zabox] [1.028] unused
-  //static boolean crashTotalAcc;
-  //static boolean ohTotalAcc;
-
   pattern[ptrnBuffer].inst[HH] = pattern[ptrnBuffer].inst[CH] | pattern[ptrnBuffer].inst[OH];
   if (curSeqMode != PTRN_TAP){
     for (int a = 0; a < NBR_STEP; a++){
@@ -33,38 +30,7 @@ void SetHHPattern()
       if (bitRead(pattern[ptrnBuffer].inst[OH],a) && curInst == OH){
         bitClear(pattern[ptrnBuffer].inst[CH],a);
         pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH];
-      }
-
-
-      //Set total accent velocity for Ride and Crash
-      //Ride
-      
- /*     if (bitRead(pattern[ptrnBuffer].inst[RIDE],a)){
-        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC],a))rideTotalAcc = TRUE;                                                           // [zabox] [1.028] looks like old code that is redundant?
-        else rideTotalAcc = FALSE;                                                                                                        //                 with the code, total acc is applied twice
-      }
-      if (rideTotalAcc) pattern[ptrnBuffer].velocity[RIDE][a] = instVelHigh[RIDE] + pattern[ptrnBuffer].totalAcc * 4;
-      else pattern[ptrnBuffer].velocity[RIDE][a] = instVelHigh[RIDE];
-
-      //Crash
-      if (bitRead(pattern[ptrnBuffer].inst[CRASH],a)){
-        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC],a))crashTotalAcc = TRUE;
-        else crashTotalAcc = FALSE;
-      }
-      if (crashTotalAcc) pattern[ptrnBuffer].velocity[CRASH][a] = instVelHigh[CRASH] + pattern[ptrnBuffer].totalAcc * 4;
-      else pattern[ptrnBuffer].velocity[CRASH][a] = instVelHigh[CRASH];
-      
- */
-
-      /*  //OH accent
-       if (bitRead(pattern[ptrnBuffer].inst[OH],a)){
-       if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC],a))ohTotalAcc = TRUE;
-       else ohTotalAcc = FALSE;
-       }
-       if (ohTotalAcc) pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH] + pattern[ptrnBuffer].totalAcc * 4;
-       else pattern[ptrnBuffer].velocity[CH][a] = instVelHigh[HH];*/
-       
-       
+      }      
     }
   }
 }
@@ -130,7 +96,7 @@ void InitPattern()
     pattern[ptrnBuffer].velocity[RIDE][stp] = instVelHigh[RIDE];//RIDE
     pattern[ptrnBuffer].velocity[TOTAL_ACC][stp] = HIGH_VEL;//TOTAL_ACC
     pattern[ptrnBuffer].velocity[TRIG_OUT][stp] = HIGH_VEL;//TRIG_OUT
-    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
+//    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
   }
   switch (pattern[ptrnBuffer].scale){
   case  SCALE_16:

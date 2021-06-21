@@ -20,7 +20,7 @@ void InitMidiNoteOff()
 {
   if(midiNoteOnActive){
     midiNoteOnActive = FALSE;
-#if MIDI_EXT_CHANNEL    
+#if MIDI_EXT_CHANNEL   
     if (noteIndexCpt) MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
     else MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
 #else
@@ -114,10 +114,6 @@ void DisconnectMidiHandleNote()
 }
 
 
-
-
-
-
 //Handle noteON
 void HandleNoteOn(byte channel, byte pitch, byte velocity)
 {
@@ -134,13 +130,14 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         MidiTrigOn(SD, velocity);
         break;
       case 41:
+      case 43:
         MidiTrigOn(LT, velocity);
         break;
       case 45:
       case 47:
-      case 48:
         MidiTrigOn(MT, velocity);
         break;
+      case 48:
       case 50:
         MidiTrigOn(HT, velocity);
         break;
@@ -152,6 +149,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         MidiTrigOn(HC, velocity);
         break;
       case 42:
+      case 44:
         MidiTrigOn(CH, velocity);
         break;
       case 46:
@@ -163,11 +161,10 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 51:
         MidiTrigOn(RIDE, velocity);
         break;
-      case 56:
+      case 60:
         TRIG_HIGH;
         break;
 #if MIDI_BANK_PATTERN_CHANGE        
-      case 60:
       case 61:
       case 62:
       case 63:
@@ -175,8 +172,9 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 65:
       case 66:
       case 67:
+      case 68:
         // Bank Select
-        curBank = pitch - 60;
+        curBank = pitch - 61;
         nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
         if(curPattern != nextPattern) selectedPatternChanged = TRUE;
         break;

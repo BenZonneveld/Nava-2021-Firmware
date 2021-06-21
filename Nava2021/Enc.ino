@@ -6,9 +6,7 @@
 ////////////////////////Function//////////////////////
 
 void EncGet()
-{
-
-  
+{  
   //////////////////////////////////TOTAL ACCENT////////////////////////////////////
   if (curInst == TOTAL_ACC && curSeqMode == PTRN_STEP){
     pattern[ptrnBuffer].totalAcc = EncGet(pattern[ptrnBuffer].totalAcc, 1);
@@ -22,22 +20,35 @@ void EncGet()
   }
   ///////////////////////////////////TRACK WRITE////////////////////////////////////
   else if (curSeqMode == TRACK_WRITE && !tempoBtn.pressed && !seq.configMode){
-    switch (curIndex){
-      //track position
-    case 0://track position
-      if(instBtn) trk.pos = EncGet(trk.pos, 10);
-      else trk.pos = EncGet(trk.pos, 1);
-      trk.pos = constrain(trk.pos, 0, 999);
-      static unsigned int prevTrkPos;
-      if (trk.pos != prevTrkPos){
-        prevTrkPos = trk.pos;
-        nextPattern = track[trkBuffer].patternNbr[trk.pos];
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-        needLcdUpdate = TRUE;
-        break;
+    switch (curIndex)
+    {
+        //track position
+      case 0://track position
+        if(instBtn) {
+          trk.pos = EncGet(trk.pos, 10);
+        }
+        else {
+          trk.pos = EncGet(trk.pos, 1);
+        }
+        trk.pos = constrain(trk.pos, 0, 999);
+        trk.pos = constrain(trk.pos, 0, track[trkBuffer].length);
+        static unsigned int prevTrkPos;
+        if (trk.pos != prevTrkPos){
+          if ( trk.pos > prevTrkPos && track[trkBuffer].patternNbr[prevTrkPos] == END_OF_TRACK ) trk.pos = prevTrkPos;   // Do not go beyond end of track marker
+          prevTrkPos = trk.pos;
+          nextPattern = track[trkBuffer].patternNbr[trk.pos];
+          
+          if (trk.pos > track[trkBuffer].length-1 && nextPattern < MAX_PTRN ) nextPattern = curPattern; // Neuromancer: keep same pattern if writing at the end of the track.          
+          if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+          needLcdUpdate = TRUE;
+          break;
       case 1:// track pattern
-        if(instBtn) nextPattern = EncGet(nextPattern, 16);
-        else nextPattern = EncGet(nextPattern, 1);
+        if(instBtn) {
+          nextPattern = EncGet(nextPattern, 16);
+        }
+        else {
+          nextPattern = EncGet(nextPattern, 1);
+        }
         nextPattern = constrain(nextPattern, 0, MAX_PTRN - 1);
         static unsigned int prevNextPattern;
         if (nextPattern != prevNextPattern){
@@ -47,8 +58,12 @@ void EncGet()
         }
         break;
       case 2://track length
-        if(instBtn) track[trkBuffer].length = EncGet(track[trkBuffer].length, 10);
-        else track[trkBuffer].length = EncGet(track[trkBuffer].length, 1);
+        if(instBtn) {
+          track[trkBuffer].length = EncGet(track[trkBuffer].length, 10);
+        }
+        else {
+          track[trkBuffer].length = EncGet(track[trkBuffer].length, 1);
+        }
         track[trkBuffer].length = constrain(track[trkBuffer].length, 0, 999);
         static unsigned int prevTrkLength;
         if (track[trkBuffer].length != prevTrkLength){
@@ -68,18 +83,26 @@ void EncGet()
   else if (keyboardMode){
     switch (curIndex){
       //track position
-    case 0://external instrument note index
-      if(instBtn) noteIndex = EncGet(noteIndex, 10);
-      else noteIndex = EncGet(noteIndex, 1);
-      noteIndex = constrain(noteIndex, 0, 99);
-      static unsigned int prevNoteIndex;
-      if (noteIndex != prevNoteIndex){
-        prevNoteIndex = noteIndex;
-        needLcdUpdate = TRUE;
-        break;
+      case 0://external instrument note index
+        if(instBtn) {
+          noteIndex = EncGet(noteIndex, 10);
+        }
+        else {
+          noteIndex = EncGet(noteIndex, 1);
+        }
+        noteIndex = constrain(noteIndex, 0, 99);
+        static unsigned int prevNoteIndex;
+        if (noteIndex != prevNoteIndex){
+          prevNoteIndex = noteIndex;
+          needLcdUpdate = TRUE;
+          break;
       case 1://external instrument note
-        if(instBtn) pattern[ptrnBuffer].extNote[noteIndex] = EncGet(pattern[ptrnBuffer].extNote[noteIndex], 12);
-        else pattern[ptrnBuffer].extNote[noteIndex] = EncGet(pattern[ptrnBuffer].extNote[noteIndex], 1);
+        if(instBtn) {
+          pattern[ptrnBuffer].extNote[noteIndex] = EncGet(pattern[ptrnBuffer].extNote[noteIndex], 12);
+        }
+        else {
+          pattern[ptrnBuffer].extNote[noteIndex] = EncGet(pattern[ptrnBuffer].extNote[noteIndex], 1);
+        }
         pattern[ptrnBuffer].extNote[noteIndex] = constrain(pattern[ptrnBuffer].extNote[noteIndex], 0, 127);
         static unsigned int prevExtNote;
         if (pattern[ptrnBuffer].extNote[noteIndex] != prevExtNote){
@@ -88,8 +111,12 @@ void EncGet()
         }
         break;
       case 2://external instrument notes stack length
-        if(instBtn) pattern[ptrnBuffer].extLength = EncGet(pattern[ptrnBuffer].extLength, 10);
-        else pattern[ptrnBuffer].extLength = EncGet(pattern[ptrnBuffer].extLength, 1);
+        if(instBtn) {
+          pattern[ptrnBuffer].extLength = EncGet(pattern[ptrnBuffer].extLength, 10);
+        }
+        else {
+          pattern[ptrnBuffer].extLength = EncGet(pattern[ptrnBuffer].extLength, 1);
+        }
         pattern[ptrnBuffer].extLength = constrain(pattern[ptrnBuffer].extLength, 0, 99);
         static unsigned int prevExtLength;
         if (pattern[ptrnBuffer].extLength != prevExtLength){
@@ -170,48 +197,56 @@ void EncGet()
             
   //---------------------Page 2----------------------------------------------------
     
-    switch (curIndex){
-      //track position
-      case 0:
-        seq.ptrnChangeSync = EncGet(seq.ptrnChangeSync, 1);               //pattern change sync select
-        seq.ptrnChangeSync = constrain(seq.ptrnChangeSync, 0, 1);
-        static boolean prevPtrnSyncChange;
-        if (seq.ptrnChangeSync != prevPtrnSyncChange){
-          prevPtrnSyncChange = seq.ptrnChangeSync;
-          // seq.syncChanged = TRUE;
-          seq.setupNeedSaved = TRUE;
-          needLcdUpdate = TRUE;
-        }
-        break;
-      case 1:
-        seq.muteModeHH = EncGet(seq.muteModeHH, 1);                              // [zabox]
-        seq.muteModeHH = constrain(seq.muteModeHH, 0, 1);
-        static boolean prev_muteModeHH;
-        if (seq.muteModeHH != prev_muteModeHH){
-          prev_muteModeHH = seq.muteModeHH;
-          seq.setupNeedSaved = TRUE;
-          needLcdUpdate = TRUE;
-        }
-        break;
-      case 2:
+      switch (curIndex){
+        //track position
+        case 0:
+          seq.ptrnChangeSync = EncGet(seq.ptrnChangeSync, 1);               //pattern change sync select
+          seq.ptrnChangeSync = constrain(seq.ptrnChangeSync, 0, 1);
+          static boolean prevPtrnSyncChange;
+          if (seq.ptrnChangeSync != prevPtrnSyncChange){
+            prevPtrnSyncChange = seq.ptrnChangeSync;
+            // seq.syncChanged = TRUE;
+            seq.setupNeedSaved = TRUE;
+            needLcdUpdate = TRUE;
+          }
+          break;
+        case 1:
+          seq.muteModeHH = EncGet(seq.muteModeHH, 1);                              // [zabox]
+          seq.muteModeHH = constrain(seq.muteModeHH, 0, 1);
+          static boolean prev_muteModeHH;
+          if (seq.muteModeHH != prev_muteModeHH){
+            prev_muteModeHH = seq.muteModeHH;
+            seq.setupNeedSaved = TRUE;
+            needLcdUpdate = TRUE;
+          }
+          break;
+        case 2:
 #if MIDI_EXT_CHANNEL      
-        seq.EXTchannel = EncGet(seq.EXTchannel, 1);
-        seq.EXTchannel = constrain(seq.EXTchannel, 1, 16);
-        static unsigned int prevEXT;
-        if (seq.EXTchannel != prevEXT){
-          prevEXT = seq.EXTchannel;
-          seq.setupNeedSaved = TRUE;
-          needLcdUpdate = TRUE;
-        }
-        break;
+          seq.EXTchannel = EncGet(seq.EXTchannel, 1);
+          seq.EXTchannel = constrain(seq.EXTchannel, 1, 16);
+          static unsigned int prevEXT;
+          if (seq.EXTchannel != prevEXT){
+            prevEXT = seq.EXTchannel;
+            seq.setupNeedSaved = TRUE;
+            needLcdUpdate = TRUE;
+          }
+          break;
 #endif        
-      case 3:
-        
-        break;
-      }
-    }
-    
-    
+        case 3:
+#if CONFIG_BOOTMODE
+          seq.BootMode = (SeqMode)EncGet(seq.BootMode, 1);
+          seq.BootMode = (SeqMode)constrain((unsigned int)seq.BootMode, 0, 4);
+          static SeqMode prevBootMode;
+          if ( seq.BootMode != prevBootMode )
+          {
+            prevBootMode = seq.BootMode;
+            seq.setupNeedSaved = TRUE;
+            needLcdUpdate = TRUE;
+          }
+#endif                 
+          break;
+        }
+    }    
   }
   else{
     seq.bpm = EncGet(seq.bpm,1);

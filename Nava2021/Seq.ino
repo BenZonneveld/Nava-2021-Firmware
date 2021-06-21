@@ -23,33 +23,27 @@ void SeqParameter()
   }
   //-------------------play button---------------------------
   if (playBtn.justPressed || midiStart){
-    isRunning = TRUE;
-    isStop = FALSE;
-    ppqn = 0;
-    stepCount = 0;
-    tapStepCount = 0;
-    changeDir = 1;//restart Forward
-    stopBtn.counter = 0;
-    shufPolarity = 0;//Init shuffle polarity
-    noteIndexCpt = 0;//init ext instrument note index counter
-    blinkTempo = 0;                                                               // [zabox] looks more consistent
-    //trackPosNeedIncremante = TRUE;
-    //init Groupe pattern  position
-    /*group.pos = 0;
-     nextPattern = group.firstPattern + group.pos;
-     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-     trackPosNeedIncremante = FALSE;
-     needLcdUpdate = TRUE;*/
-
-    MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
-      DIN_START_HIGH;
-      dinStartState = HIGH;
-//    DIN_CLK_HIGH;                                                               // [1.028] redundant
-//    dinClkState = HIGH;
+    if ( curPattern < MAX_PTRN ) // Refuse the run on invalid patterns.
+    {
+      isRunning = TRUE;
+      isStop = FALSE;
+      ppqn = 0;
+      stepCount = 0;
+      tapStepCount = 0;
+      changeDir = 1;//restart Forward
+      stopBtn.counter = 0;
+      shufPolarity = 0;//Init shuffle polarity
+      noteIndexCpt = 0;//init ext instrument note index counter
+      blinkTempo = 0;                                                               // [zabox] looks more consistent
+    
+      MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
+        DIN_START_HIGH;
+        dinStartState = HIGH;
+    }
   }
 
   //-------------------stop button------------------------------
-  if ((stopBtn.justPressed && !instBtn) || midiStop || midiContinue){
+  if ((stopBtn.justPressed && !instBtn) || midiStop || midiContinue || curPattern >= MAX_PTRN ){
     //Init Midi note off
     SendAllNoteOff();//InitMidiNoteOff();
     if (midiStop) stopBtn.counter = 0;
@@ -64,13 +58,15 @@ void SeqParameter()
       dinStartState = LOW;
       break;
     case 2:
-      isStop = FALSE;
-      isRunning = TRUE;
-      stopBtn.counter = 0;
-      ppqn = 0;
-      MIDI.sendRealTime(Continue);//MidiSend(CONTINU_CMD);
-      DIN_START_HIGH;
-      dinStartState = HIGH;
+      if ( curPattern < MAX_PTRN ){
+        isStop = FALSE;
+        isRunning = TRUE;
+        stopBtn.counter = 0;
+        ppqn = 0;
+        MIDI.sendRealTime(Continue);//MidiSend(CONTINU_CMD);
+        DIN_START_HIGH;
+        dinStartState = HIGH;
+      }
       break;
     }
   }
@@ -82,14 +78,20 @@ void SeqParameter()
       curSeqMode = TRACK_WRITE;
       keyboardMode = FALSE;
       seq.configMode  = FALSE;
+      nextPattern = track[trkBuffer].patternNbr[trk.pos];           // Get the correct pattern
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     }
     if (ptrnBtn.justPressed) {
+      if ( curPattern >= MAX_PTRN ) nextPattern = 0;               // If on an invalid pattern number, goto pattern 0
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE; // 
       needLcdUpdate = TRUE;
       curSeqMode = PTRN_STEP;
       seq.configMode  = FALSE;
       trackNeedSaved = FALSE;
     }
     if (tapBtn.justPressed){
+      if ( curPattern >= MAX_PTRN ) nextPattern = 0;               // If on an invalid pattern number, goto pattern 0
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE; // 
       curSeqMode = PTRN_TAP;
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
@@ -106,7 +108,8 @@ void SeqParameter()
 
     //sequencer configuration page
     if (tempoBtn.justPressed && !isRunning){
-      seq.configMode  = TRUE;
+      seq.configMode = TRUE;
+      keyboardMode = FALSE;
       seq.configPage++;
       curIndex = 0;
       if (seq.configPage > MAX_CONF_PAGE){
@@ -123,13 +126,17 @@ void SeqParameter()
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
       seq.configMode  = FALSE;
+      nextPattern = track[trkBuffer].patternNbr[trk.pos];
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     }
     // if (backBtn.justPressed) ;//back  track postion
     //if (fwdBtn.justPressed) ;//foward track postion
     if (numBtn.pressed) ;//select Track number
     if (ptrnBtn.justPressed){
-      if (curSeqMode == PTRN_STEP) curSeqMode = PTRN_PLAY;
-      else curSeqMode = PTRN_STEP;
+      if ( curPattern >= MAX_PTRN ) nextPattern = 0;               // If on an invalid pattern number, goto pattern 0
+      if(curPattern != nextPattern) selectedPatternChanged = TRUE; // 
+      if (curSeqMode == PTRN_PLAY) curSeqMode = PTRN_STEP;
+      else curSeqMode = PTRN_PLAY;
       needLcdUpdate = TRUE;
       keyboardMode = FALSE;
       seq.configMode  = FALSE;
@@ -242,10 +249,6 @@ void SeqParameter()
         curFlam = 0;
         break;
       }
-      //if (readButtonState == OH_BTN){
-      //  curInst = OH;
-      //  doublePush = 1;
-      //}
       switch (readButtonState) {
         case BD_F_BTN:
           curFlam = 1;
@@ -272,10 +275,6 @@ void SeqParameter()
           doublePush = 1;
         break;
       }
-        
-        
-        
-        
     }
     if (curInstChanged && stepsBtn.justRelease){
       needLcdUpdate = TRUE;
@@ -283,14 +282,17 @@ void SeqParameter()
     }
     if (instBtn && enterBtn.justPressed){
       curInst = TOTAL_ACC;
+      curFlam = 0;
       needLcdUpdate = TRUE;
     }
     if (instBtn && stopBtn.justPressed){
       curInst = TRIG_OUT;
+      curFlam = 0;
       needLcdUpdate = TRUE;
     }
     if (shiftBtn && guideBtn.justPressed){
       curInst = EXT_INST;
+      curFlam = 0;
       needLcdUpdate = TRUE;
     }
 
@@ -375,13 +377,7 @@ void SeqParameter()
         }
       }
     }
-      
     
-    
-    
-    
-    
-
     //-------------------scale button------------------------------
     if (scaleBtn.justPressed && !keyboardMode){
       needLcdUpdate = TRUE;
@@ -415,7 +411,57 @@ void SeqParameter()
     if (curSeqMode == PTRN_STEP){
       if (stepsBtn.justRelease) doublePush = FALSE; 
       if(!lastStepBtn.pressed && !instBtn && !keyboardMode && !shufBtn.pressed){                                      // [zabox] test
-        pattern[ptrnBuffer].inst[curInst] = InstValueGet(pattern[ptrnBuffer].inst[curInst]);//cf InstValueGet()
+        if (isRunning)
+        {
+          pattern[ptrnBuffer].inst[curInst] = InstValueGet(pattern[ptrnBuffer].inst[curInst]);//cf InstValueGet()
+        }
+        else if (!isRunning)
+        {//Return pattern number
+          if (stepsBtn.pressed){
+            if (bankBtn.pressed){
+              if(FirstBitOn() >= MAX_BANK) curBank = MAX_BANK;
+              else curBank = FirstBitOn();
+              nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
+              if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+              group.length = 0;
+            }
+            else{//pattern group edit------------------------------------------------------
+              if (SecondBitOn())
+              {
+                trackPosNeedIncremante = FALSE;                                                               // [zabox] fixes group bug
+                group.length = SecondBitOn() - FirstBitOn();
+                nextPattern = group.firstPattern = FirstBitOn() + curBank * NBR_PATTERN;
+                doublePush = TRUE;
+                group.priority = TRUE;
+                //Store groupe in eeprom
+                if(enterBtn.justPressed){
+                  group.priority = FALSE;
+                  byte tempLength;
+                  byte tempPos;
+                  //Test if one the  selected pattern is already in a Group
+                  for (int a = 0; a <= group.length; a++){
+                    tempLength = LoadPatternGroup(group.firstPattern + a, LENGTH);
+                    if (tempLength){
+                      tempPos = LoadPatternGroup(group.firstPattern + a, POSITION);
+                      ClearPatternGroup(group.firstPattern + a - tempPos, tempLength);
+                    }
+                  }
+                  SavePatternGroup(group.firstPattern, group.length);
+                }
+              }
+              else if (!doublePush){
+                group.priority = FALSE;
+                nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
+                if(enterBtn.justPressed){
+                  ClearPatternGroup(nextPattern - pattern[ptrnBuffer].groupPos, pattern[ptrnBuffer].groupLength);
+                  group.length = 0;
+                }
+                group.pos = pattern[ptrnBuffer].groupPos;
+              }
+              if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+            }
+          }
+        }
       }
     }
     //////////////////////////////TAP EDIT///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -714,15 +760,7 @@ void SeqParameter()
     }
 
     //--------------------------------pattern next update---------------------------
-    /* if (trackPosNeedIncremante && group.length ){// && stepCount > 0)
-     if (group.pos > group.length) group.pos = 0;
-     nextPattern = group.firstPattern + group.pos;
-     group.pos++;
-     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-     trackPosNeedIncremante = FALSE;
-     needLcdUpdate = TRUE;
-     }
-     else*/    if (trackPosNeedIncremante && group.length == 0){
+    if (trackPosNeedIncremante && group.length == 0){
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       trackPosNeedIncremante = FALSE;
     }
@@ -755,7 +793,7 @@ void SeqParameter()
         if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       }
     }
-    //decremente track position
+    //decrease track position
     if (backBtn.justPressed){
       trk.pos--;
       if (trk.pos < 0 || trk.pos > MAX_PTRN_TRACK) trk.pos = 0;
@@ -763,7 +801,7 @@ void SeqParameter()
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       needLcdUpdate = TRUE;
     }
-    //incremente track position
+    //increment track position
     if (fwdBtn.justPressed){
       trk.pos++;
       if (trk.pos > MAX_PTRN_TRACK) trk.pos = MAX_PTRN_TRACK;
@@ -777,6 +815,18 @@ void SeqParameter()
       nextPattern = track[trkBuffer].patternNbr[trk.pos];
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       needLcdUpdate = TRUE;
+    }
+    //
+    // Set end of track
+    //
+    if ( lastStepBtn.justPressed )
+    {
+      track[trkBuffer].patternNbr[trk.pos] = END_OF_TRACK;
+      track[trkBuffer].length = trk.pos+1;
+      trackNeedSaved = TRUE;
+      needLcdUpdate = TRUE;
+      curPattern = END_OF_TRACK;
+      nextPattern = END_OF_TRACK;
     }
     if(shiftBtn){
       //go to last measure
@@ -793,6 +843,7 @@ void SeqParameter()
         for (int a = trk.pos + 1; a < track[trkBuffer].length; a++){         
           track[trkBuffer].patternNbr[a] = track[trkBuffer].patternNbr[a + 1]; 
         }
+        track[trkBuffer].patternNbr[track[trkBuffer].length - 1] = 0;                                                                 // [Neuromancer] Delete pattern info at tail
         trk.pos +=1;//to stay in the same position
         track[trkBuffer].length = track[trkBuffer].length - 1;//decremente length by 1 du to deleted pattern
         nextPattern = track[trkBuffer].patternNbr[trk.pos];
@@ -822,23 +873,42 @@ void SeqParameter()
           trk.pos -=1;//to stay in the same position
         }
       }
+      if (clearBtn.justPressed){
+        trk.pos = 0;
+        for (int a = 0; a < MAX_PTRN_TRACK; a++)
+        {
+          track[trkBuffer].patternNbr[a]=0;
+        }
+        track[trkBuffer].length = 0;
+        nextPattern = track[trkBuffer].patternNbr[trk.pos];
+        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        trackNeedSaved = TRUE;
+        needLcdUpdate = TRUE;
+      }
     }//end shift
 
     //write selected pattern in the current track position
     if (enterBtn.justRelease && !trackJustSaved){
       track[trkBuffer].patternNbr[trk.pos] = curPattern;
-      trk.pos++;
+      if ( curPattern != END_OF_TRACK ) trk.pos++;               // [Neuromancer] Do not advance beyond END_OF_TRACK marker
       if (trk.pos > MAX_PTRN_TRACK) trk.pos = MAX_PTRN_TRACK;
       nextPattern = track[trkBuffer].patternNbr[trk.pos];
+      if ( nextPattern == 0 && curPattern != 0 ) {
+        nextPattern = curPattern;
+        selectedPatternChanged = TRUE;
+      }
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-      track[trkBuffer].length = trk.pos;
+      if ( track[trkBuffer].length < trk.pos ) // Only change the length when larger
+      {
+        track[trkBuffer].length = trk.pos;
+      }
       trackNeedSaved = TRUE;
       needLcdUpdate = TRUE;
     }
   }//END IF MODE TRACK WRITE
 
     //////////////////////////MODE TRACK PLAY/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (curSeqMode == TRACK_PLAY)
+  if (curSeqMode == TRACK_PLAY || ( curSeqMode == MUTE && prevSeqMode == TRACK_PLAY) )
   {
     if (trackPosNeedIncremante){//(endMeasure)
       trk.pos++;
@@ -847,7 +917,6 @@ void SeqParameter()
       if(curPattern != nextPattern) selectedPatternChanged = TRUE;
       trackPosNeedIncremante = FALSE;
       needLcdUpdate = TRUE;
-
     }
     //go to first measure
     if (clearBtn.justPressed){
@@ -884,35 +953,37 @@ void SeqParameter()
     trackJustSaved = TRUE;
     timeSinceSaved = millis();
   }
-  //this function is to not incremente trk.pos when released enterBtn after Saved track
+  //this function is to not increment trk.pos when released enterBtn after Saved track
   if (millis() - timeSinceSaved > HOLD_TIME){                                               
     trackJustSaved = FALSE;
   }
 
   if (selectedPatternChanged)
   {
-    //Serial.println("changed!!");
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
     patternNeedSaved = FALSE;
-    LoadPattern(nextPattern);
+    if ( nextPattern != END_OF_TRACK )
+    {
+      LoadPattern(nextPattern);
+    }
     curPattern = nextPattern;
     nextPatternReady = TRUE;
   }
 
-  if(nextPatternReady){///In pattern play mode this peace of code execute in the PPQ Count function
-    //Serial.println("Ready!!");
-    //if ((isRunning && endMeasure) || !isRunning ){//|| (curSeqMode != PTRN_PLAY))
-    // Serial.println("endMeasure!!");
+  if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function
     nextPatternReady = FALSE;
     keybOct = DEFAULT_OCT;
     noteIndex = 0;
     InitMidiNoteOff();
     ptrnBuffer = !ptrnBuffer;
     //Serial.println("switched!!");
-    InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
-    SetHHPattern();
-    InstToStepWord();
+    if ( curPattern != END_OF_TRACK )
+    {
+      InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
+      SetHHPattern();
+      InstToStepWord();
+    }
   }
 
   if (patternWasEdited)
@@ -938,6 +1009,7 @@ void SeqParameter()
   if (curSeqMode == MUTE){
     MuteButtonGet();
     if (encBtn.pressed){
+#if SHIFT_MUTE_ALL
       // Mute all instruments when shift is pressed
       if (shiftBtn) {
         // Avoid filling muteInst with all 1's
@@ -949,10 +1021,15 @@ void SeqParameter()
         muteLeds = 0;                                                                   // [1.028] new MuteButtonGet function
         //InitMuteBtnCounter();                                                         //   
       }
+#else
+      muteInst = 0;
+      muteLeds = 0;                                                                   // [1.028] new MuteButtonGet function
+      //InitMuteBtnCounter();
+#endif      
     }
   } 
 
-  //We still incremente pattern group in those mode
+  //We still increment pattern group in those mode
   if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP ){
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
       group.pos++;
@@ -964,9 +1041,3 @@ void SeqParameter()
     } 
   }
 }
-
-
-
-
-
-

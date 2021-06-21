@@ -41,8 +41,6 @@ ISR(TIMER3_COMPA_vect) {       // [zabox] flam
 } 
   
   
-  
-
 //Tick proceed each pulse
 void CountPPQN()
 {
@@ -149,24 +147,24 @@ void CountPPQN()
       {
         InitMidiNoteOff();
 #if MIDI_EXT_CHANNEL
-        MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
+        if ( pattern[ptrnBuffer].velocity[EXT_INST][curStep] > 0 )
+        {
+          unsigned int MIDIVelocity = pattern[ptrnBuffer].velocity[EXT_INST][curStep];
+          MIDIVelocity = map(MIDIVelocity, instVelLow[EXT_INST], instVelHigh[EXT_INST], MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);                                    
+          if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
+          MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], MIDIVelocity);           
+          midiNoteOnActive = TRUE;
+        }
 #else
         MidiSendNoteOn(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
-#endif
         midiNoteOnActive = TRUE;
+#endif
         noteIndexCpt++;//incremente external inst note index
       }
       if (noteIndexCpt > pattern[ptrnBuffer].extLength){
         noteIndexCpt = 0;
       }
-      
-/*      
-      delayMicroseconds(2000);
-      if (bitRead(pattern[ptrnBuffer].inst[CH], curStep) && !bitRead(muteInst, CH)) tempDoutTrig = B10;//CH trig                        // [zabox] + check if OH/CH mute               // [zabox v1.028] now handled inside timer2 isr
-      else if (bitRead(pattern[ptrnBuffer].inst[OH], curStep) && !bitRead(muteInst, OH)) tempDoutTrig = 0;// OH trig                    // [zabox] + check if OH/CH mute
-      SetDoutTrig(tempDoutTrig);
-*/      
-      
+            
       //TRIG_HIGH;
       //ResetDoutTrig();
       stepCount++;
@@ -176,8 +174,8 @@ void CountPPQN()
       endMeasure = TRUE;
       trackPosNeedIncremante = TRUE;                                                
       stepCount = 0;
-      //In pattern play mode this peace of code execute in the PPQNCount function
-      if(nextPatternReady && curSeqMode == PTRN_PLAY){
+      //In pattern play mode this piece of code executes here
+      if(nextPatternReady && curSeqMode == PTRN_PLAY ){
         nextPatternReady = FALSE;
         keybOct = DEFAULT_OCT;
         noteIndex = 0;
@@ -187,11 +185,7 @@ void CountPPQN()
         SetHHPattern();
         InstToStepWord();
       }
-    }
-//    if (ppqn % pattern[ptrnBuffer].scale == 4 && stepCount == 0){ 
-//      endMeasure = FALSE;
-//    }
-  
+    }  
   }
   
   ppqn++;                                                                 // [1.028] more consistent to run the counter from 0-95

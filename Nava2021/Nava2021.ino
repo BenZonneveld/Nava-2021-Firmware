@@ -27,6 +27,12 @@ LiquidCrystal lcd(18, 19, 20, 21, 22, 23);
 ////////////////////////Setup//////////////////////
 void setup()
 {
+#if DEBUG
+  Serial.begin(115200);
+  Serial.print("freeMemory()=");
+  Serial.println(freeMemory());
+
+#endif
   InitIO();//cf Dio
   InitButtonCounter();//cf Button
   
@@ -90,12 +96,6 @@ void setup()
   MIDI.turnThruOff();                                       // [zabox] fixes double real time messages on midi out
 
 
-#if DEBUG
-  Serial.begin(115200);
-  Serial.print("freeMemory()=");
-  Serial.println(freeMemory());
-
-#endif
   sei();
 
   //-----------------------------------------------
@@ -119,9 +119,8 @@ void setup()
 ////////////////////////Loop///////////////////////
 void loop()
 {
-  
   Expander();                                                             // [1.028] expander
-  SetTrigPeriod(TRIG_LENGHT);
+  SetTrigPeriod(TRIG_LENGTH);
   InitMidiRealTime();
   MIDI.read();
   //SetMux();//!!!! if SetMUX() loop there is noise on HT out and a less noise on HH noise too !!!!
@@ -134,6 +133,7 @@ void loop()
   } ledUpdateCounter++;
   
   SeqConfiguration();
+  
   SeqParameter();
   KeyboardUpdate();
   LcdUpdate();
@@ -154,11 +154,7 @@ void loop()
     if (ppqn != ppqn_old) {
       //Serial.println(ppqn);
       ppqn_old = ppqn;
-    }
-    
-    
+    }    
 #endif
-
-
 
 }

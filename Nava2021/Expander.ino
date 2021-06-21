@@ -17,7 +17,7 @@ void Expander()
        
     MIDI.read();
     TriggerOffTimer();
-    if (!(gateInst & 1)) SetTrigPeriod(TRIG_LENGHT);
+    if (!(gateInst & 1)) SetTrigPeriod(TRIG_LENGTH);
     
     ButtonGetExpander();
     SetLedsExpander();

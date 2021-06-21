@@ -46,7 +46,17 @@ void LcdUpdate()
         lcd.print(seq.RXchannel);
         break;
       case 2:// second page
-        lcd.print("pCh mte eXT nc. ");                             // [zabox]
+        lcd.print("pCh mte ");
+#if MIDI_EXT_CHANNEL      
+        lcd.print("eXT ");
+#else
+        lcd.print("nc. ");
+#endif
+#if CONFIG_BOOTMODE
+        lcd.print("mod ");
+#else                        
+        lcd.print("nc. ");                             // [zabox]
+#endif
         lcd.setCursor(cursorPos[curIndex],0);
         lcd.print(letterUpConfPage2[curIndex]);
         lcd.setCursor(0,1);
@@ -66,7 +76,13 @@ void LcdUpdate()
         lcd.print("xxx");
 #endif        
         lcd.setCursor(12,1);
+#if CONFIG_BOOTMODE
+        char bootmode[3];
+        strcpy_P(bootmode,(char*)pgm_read_word(&(nameBootMode[seq.BootMode])));
+        lcd.print(bootmode);
+#else        
         lcd.print("xxx");
+#endif        
         break;
       }
 
@@ -81,6 +97,7 @@ void LcdUpdate()
     else{
       switch (curSeqMode){
       case PTRN_PLAY:
+ptrn_play:      
         lcd.setCursor(0,0);
         lcd.print("  Pattern Play  ");
         lcd.setCursor(0,1);
@@ -94,42 +111,11 @@ void LcdUpdate()
         break;
       case PTRN_STEP:
       case PTRN_TAP:
+ptrn_step:      
         if (curInst == TOTAL_ACC){
           LcdPrintTotalAcc();
         }
-        else if (shufBtn.pressed){
-  /*        
-          if (shiftBtn) {                                                           // [zabox] [1.027] flam
-            lcd.setCursor(0,0);
-            lcd.print(" Flam value     ");
-            lcd.setCursor(0,1);
-            LcdClearLine();
-            lcd.setCursor(1,1);
-            lcd.print("-");
-            lcd.setCursor(4,1);
-            LcdPrintLine(8);
-            lcd.setCursor(14,1);
-            lcd.print("+");
-            lcd.setCursor(3 + pattern[ptrnBuffer].flam,1);
-            lcd.print((char)219);
-          }
-          else {
-            lcd.setCursor(0,0);
-            lcd.print(" Shuffle value  ");
-            lcd.setCursor(0,1);
-            LcdClearLine();
-            lcd.setCursor(1,1);
-            lcd.print("-");
-            lcd.setCursor(4,1);
-            LcdPrintLine(7);
-            lcd.setCursor(14,1);
-            lcd.print("+");
-            lcd.setCursor(3 + pattern[ptrnBuffer].shuffle,1);
-            lcd.print((char)219);
-          }
-          
-          */
-          
+        else if (shufBtn.pressed){         
           lcd.setCursor(0,0);
           lcd.print("Shuffle:        ");
           lcd.setCursor(9,0);
@@ -142,7 +128,6 @@ void LcdUpdate()
           LcdPrintLine(8);
           lcd.setCursor(8 + pattern[ptrnBuffer].flam, 1);
           lcd.print((char)219);        
-          
         }
         else if (keyboardMode){
           lcd.setCursor(0,0);
@@ -188,23 +173,27 @@ void LcdUpdate()
         previousMode = PTRN_STEP;
         break;
       case MUTE:
-        if (previousMode == PTRN_STEP){
-          lcd.setCursor(0,1);
-          lcd.print("   ");
-          lcd.setCursor(0,1);
-          lcd.print(char(curBank+65));
-          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
+        switch (previousMode)
+        {
+          case PTRN_STEP:
+            goto ptrn_step;
+            break;
+          case PTRN_TAP:
+            goto ptrn_step;
+            break;
+          case PTRN_PLAY:
+            goto ptrn_play;
+            break;
+          case TRACK_WRITE:
+            goto trck_write;
+            break;
+          case TRACK_PLAY:
+            goto trck_play;
+            break;
         }
-        else if (previousMode == PTRN_PLAY){
-          lcd.setCursor(2,1);
-          lcd.print("   ");
-          lcd.setCursor(2,1);
-          lcd.print(char(curBank+65));
-          lcd.print(curPattern - (curBank*NBR_PATTERN) + 1);                     // [zabox] step button alignement
-        }
-
         break;
       case TRACK_WRITE:
+trck_write:
         lcd.setCursor(0,0);
         lcd.print("pos ptr len num ");
         lcd.setCursor(cursorPos[curIndex],0);
@@ -214,8 +203,13 @@ void LcdUpdate()
         lcd.setCursor(0,1);
         lcd.print(trk.pos + 1);                                                 // [zabox] 
         lcd.setCursor(4,1);
-        lcd.print((char)((curPattern / 16) + 65));
-        lcd.print((curPattern - (((curPattern / 16)*NBR_PATTERN)) + 1));        // [zabox] step button alignement
+        if (curPattern == END_OF_TRACK )
+        {
+          lcd.print("END");
+        } else {
+          lcd.print((char)((curPattern / 16) + 65));
+          lcd.print((curPattern - (((curPattern / 16)*NBR_PATTERN)) + 1));        // [zabox] step button alignement
+        }
         lcd.setCursor(8,1);
         lcd.print(track[trkBuffer].length);
         lcd.setCursor(13,1);
@@ -223,6 +217,7 @@ void LcdUpdate()
         previousMode = TRACK_WRITE;
         break;
       case TRACK_PLAY:
+trck_play:      
         lcd.setCursor(0,0);
         lcd.print("   Track Play   ");
         lcd.setCursor(0,1);
@@ -232,9 +227,14 @@ void LcdUpdate()
         lcd.print(trk.pos + 1);                                                 // [zabox]
         lcd.setCursor(8,1);
         lcd.print("ptrn:");
-        lcd.print((char)((curPattern / 16) + 65));
-        lcd.print((curPattern - (((curPattern / 16)*NBR_PATTERN)) + 1));        // [zabox] step button alignement
-         previousMode = TRACK_PLAY;
+        if (curPattern == END_OF_TRACK )
+        {
+          lcd.print("END");
+        } else {
+          lcd.print((char)((curPattern / 16) + 65));
+          lcd.print((curPattern - (((curPattern / 16)*NBR_PATTERN)) + 1));        // [zabox] step button alignement
+        }
+        previousMode = TRACK_PLAY;
         break;
       }
     }
@@ -277,12 +277,14 @@ void LcdPrintTempo()
 {
   lcd.write(byte(5));
   lcd.print("-");
-  if (seq.sync == MASTER)lcd.print(seq.bpm);
-  else {
+  if (seq.sync == MASTER){
+    lcd.print(seq.bpm);
+  } else {
     lcd.print((char)219);
     lcd.print((char)219);
     lcd.print((char)219);
   }
+  lcd.print("  ");
 }
 
 //print special line--------------------------------------------------
