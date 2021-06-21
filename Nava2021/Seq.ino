@@ -951,12 +951,6 @@ void SeqParameter()
     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     //trkBuffer = !trkBuffer;
   }
-
-  // Transmit Midi System Exclusive
-  if ( seq.configMode && seq.configPage == 3 && enterBtn.justPressed )
-  {
-    MidiSendSysex(sysExDump, sysExParam);  
-  }
   
   if (trackNeedSaved && enterBtn.hold)
   {

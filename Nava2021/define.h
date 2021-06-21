@@ -333,6 +333,9 @@ struct SeqConfig {
 #endif  
 #if CONFIG_BOOTMODE
   SeqMode BootMode;
+#endif
+#if MIDI_HAS_SYSEX
+  boolean SysExMode;
 #endif  
   unsigned int bpm;
   unsigned int defaultBpm;// stored in the eeprom
@@ -546,8 +549,10 @@ byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 #endif // MIDI_DRUMNOTES_OUT
 
 #if MIDI_HAS_SYSEX
+#define SYSEX_BUFFER_SIZE 2100
 byte sysExDump = 0;
 byte sysExParam = 0;
+byte SysEx[SYSEX_BUFFER_SIZE];
 #endif
 
 //Din synchro----------------------------------------

@@ -247,6 +247,7 @@ void EncGet()
           break;
         }
     }
+#if MIDI_HAS_SYSEX
     else if (seq.configPage == 3)
     {
       switch(curIndex)
@@ -289,6 +290,7 @@ void EncGet()
           }
       }          
     }
+#endif    
   }
   else{
     seq.bpm = EncGet(seq.bpm,1);

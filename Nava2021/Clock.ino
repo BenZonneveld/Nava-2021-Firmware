@@ -9,7 +9,6 @@ ISR(TIMER1_COMPA_vect) {
   CountPPQN();
 }
 
-
 ISR(TIMER2_COMPA_vect) {     // [zabox] [v1.028] 2ms trig off isr. improves led flickering a lot and improves external instrument midi out lag
 
   TRIG_TIMER_STOP;           // [zabox] one shot
