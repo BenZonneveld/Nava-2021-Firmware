@@ -441,9 +441,9 @@ byte lastHHtrigged;// remmeber last OH or CH was trigged to prevent OH noise whe
 //Velocity table match with original TR909
 //0, 0, HT, RM, HC, HH, RIDE, CRASH, BD, SD, LT, MT, TA, EXT, CH, OH
 byte instVelHigh[NBR_INST]={
-  1, 1, 50, 50, 50, 108, 112, 107, 50, 50, 50, 50, 1, 1, 111, 109};
+  1, 1, 50, 50, 50, 108, 112, 107, 50, 50, 50, 50, 1, 50, 111, 109};
 byte instVelLow[NBR_INST]={
-  0, 0, 25, 25, 25, 50, 111, 106, 25, 25, 25, 25, 0, 0, 80, 108};
+  0, 0, 25, 25, 25, 50, 111, 106, 25, 25, 25, 25, 0, 25, 80, 108};
 
 //Track----------------------------------------------
 typedef struct Track Track;
@@ -538,8 +538,8 @@ byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
                               46}; // OH
                               
 #define MIDI_ACCENT_VELOCITY 127
-#define MIDI_HIGH_VELOCITY (MIDI_ACCENT_VELOCITY-16) 
-#define MIDI_LOW_VELOCITY (MIDI_HIGH_VELOCITY-16)
+#define MIDI_HIGH_VELOCITY (MIDI_ACCENT_VELOCITY-24)
+#define MIDI_LOW_VELOCITY (MIDI_HIGH_VELOCITY-24)
 unsigned int lastInstrumentMidiOut = 0;
 byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 #endif // MIDI_DRUMNOTES_OUT

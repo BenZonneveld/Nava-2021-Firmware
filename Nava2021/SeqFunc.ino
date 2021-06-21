@@ -96,7 +96,7 @@ void InitPattern()
     pattern[ptrnBuffer].velocity[RIDE][stp] = instVelHigh[RIDE];//RIDE
     pattern[ptrnBuffer].velocity[TOTAL_ACC][stp] = HIGH_VEL;//TOTAL_ACC
     pattern[ptrnBuffer].velocity[TRIG_OUT][stp] = HIGH_VEL;//TRIG_OUT
-    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
+//    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
   }
   switch (pattern[ptrnBuffer].scale){
   case  SCALE_16:
