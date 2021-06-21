@@ -7,7 +7,7 @@
 #define define_h
 
 //DEBUG
-#define DEBUG 1
+#define DEBUG 0
 
   #if DEBUG
    unsigned int stepValue_old = 0;
@@ -331,7 +331,9 @@ struct SeqConfig {
 #if MIDI_EXT_CHANNEL
   byte EXTchannel; //EXT Instrument TX Channel   [Neuromancer]
 #endif  
-
+#if CONFIG_BOOTMODE
+  SeqMode BootMode;
+#endif  
   unsigned int bpm;
   unsigned int defaultBpm;// stored in the eeprom
   byte dir;
@@ -504,13 +506,8 @@ const char *letterUpExtInst[MAX_CUR_POS]={
   "I", "N", "L", "O"};
 const char *letterUpConfPage1[MAX_CUR_POS]={
   "S", "B", "M", "M"};
-#if MIDI_EXT_CHANNEL  
 const char *letterUpConfPage2[MAX_CUR_POS]={                          // [zabox] N to M for mute mode
-  "P", "M", "E", "N"};
-#else
-const char *letterUpConfPage2[MAX_CUR_POS]={                          // [zabox] N to M for mute mode
-  "P", "M", "N", "N"};
-#endif
+  "P", "M", "E", "M"};
 
 //MIDI-----------------------------------------------
 volatile boolean midiNoteOnActive = FALSE;

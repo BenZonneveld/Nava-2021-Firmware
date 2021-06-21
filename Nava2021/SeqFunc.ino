@@ -14,6 +14,7 @@ void InitSeq()
   seq.configMode = FALSE;
   randomSeed(analogRead(0));
   seq.dir = FORWARD;
+  curSeqMode = seq.BootMode;
   seq.bpm = seq.defaultBpm;
   SetSeqSync();                               // [zabox] [1.028] moved
   seq.syncChanged = FALSE;

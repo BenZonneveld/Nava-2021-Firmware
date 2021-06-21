@@ -1,5 +1,8 @@
 Features in this release:
 
+Configuration:
+* New option on Config page 2 to select the boot mode for the Nava. Feature #16
+
 MIDI:
 * MIDI out of drumsounds playing in a pattern
 * MIDI select for bank and pattern. Notes 61-68 select the bank, 72-87 select the pattern
