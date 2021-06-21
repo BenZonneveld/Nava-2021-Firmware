@@ -46,7 +46,17 @@ void LcdUpdate()
         lcd.print(seq.RXchannel);
         break;
       case 2:// second page
-        lcd.print("pCh mte eXT nc. ");                             // [zabox]
+        lcd.print("pCh mte ");
+#if MIDI_EXT_CHANNEL      
+        lcd.print("eXT ");
+#else
+        lcd.print("nc. ");
+#endif
+#if CONFIG_BOOTMODE
+        lcd.print("mod ");
+#else                        
+        lcd.print("nc. ");                             // [zabox]
+#endif
         lcd.setCursor(cursorPos[curIndex],0);
         lcd.print(letterUpConfPage2[curIndex]);
         lcd.setCursor(0,1);
@@ -66,7 +76,13 @@ void LcdUpdate()
         lcd.print("xxx");
 #endif        
         lcd.setCursor(12,1);
+#if CONFIG_BOOTMODE
+        char bootmode[3];
+        strcpy_P(bootmode,(char*)pgm_read_word(&(nameBootMode[seq.BootMode])));
+        lcd.print(bootmode);
+#else        
         lcd.print("xxx");
+#endif        
         break;
       }
 
