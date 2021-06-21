@@ -7,6 +7,7 @@ MIDI:
 * MIDI out of drumsounds playing in a pattern
 * MIDI select for bank and pattern. Notes 61-68 select the bank, 72-87 select the pattern
 * Separate channel for the external instrument, selectable in config page 2
+* EXT now has 2 levels + total accent implemented. Closes #15
 
 Muting:
 * Shift+step in Mute mode solos the instrument (shift+encoder mutes all) [sandormatyi]
@@ -26,3 +27,7 @@ Bugfixes:
 - Issue #12: Flam bug with external instrument and others
 - Issue #13: Switching from keyboardMode to config page doesn't work
 - Issie #21: Pattern from track is not updated when going to track play mode.
+
+Removed:
+* Allow step editing when the sequencer is not running. 
+

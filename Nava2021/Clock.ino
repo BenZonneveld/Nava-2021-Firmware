@@ -147,11 +147,18 @@ void CountPPQN()
       {
         InitMidiNoteOff();
 #if MIDI_EXT_CHANNEL
-        MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
+        if ( pattern[ptrnBuffer].velocity[EXT_INST][curStep] > 0 )
+        {
+          unsigned int MIDIVelocity = pattern[ptrnBuffer].velocity[EXT_INST][curStep];
+          MIDIVelocity = map(MIDIVelocity, instVelLow[EXT_INST], instVelHigh[EXT_INST], MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);                                    
+          if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
+          MidiSendNoteOn(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], MIDIVelocity);           
+          midiNoteOnActive = TRUE;
+        }
 #else
         MidiSendNoteOn(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt], HIGH_VEL);
-#endif
         midiNoteOnActive = TRUE;
+#endif
         noteIndexCpt++;//incremente external inst note index
       }
       if (noteIndexCpt > pattern[ptrnBuffer].extLength){
