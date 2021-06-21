@@ -27,65 +27,93 @@ void LcdUpdate()
     if (seq.configMode)
     {
       lcd.setCursor(0,0);
-      switch (seq.configPage){
-      case 1:// first page
-        lcd.print("syn bpm mTX mRX ");
-        lcd.setCursor(cursorPos[curIndex],0);
-        lcd.print(letterUpConfPage1[curIndex]);
-        lcd.setCursor(0,1);
-        LcdClearLine();
-        lcd.setCursor(0,1);
-        char  sync[2];
-        strcpy_P(sync, (char*)pgm_read_word(&(nameSync[seq.sync])));
-        lcd.print(sync);
-        lcd.setCursor(4,1);
-        lcd.print(seq.defaultBpm);
-        lcd.setCursor(9,1);
-        lcd.print(seq.TXchannel);
-        lcd.setCursor(13,1);
-        lcd.print(seq.RXchannel);
-        break;
-      case 2:// second page
-        lcd.print("pCh mte ");
+      switch (seq.configPage)
+      {
+        case 1:// first page
+        {
+          lcd.print("syn bpm mTX mRX ");
+          lcd.setCursor(cursorPos[curIndex],0);
+          lcd.print(letterUpConfPage1[curIndex]);
+          lcd.setCursor(0,1);
+          LcdClearLine();
+          lcd.setCursor(0,1);
+          char  sync[2];
+          strcpy_P(sync, (char*)pgm_read_word(&(nameSync[seq.sync])));
+          lcd.print(sync);
+          lcd.setCursor(4,1);
+          lcd.print(seq.defaultBpm);
+          lcd.setCursor(9,1);
+          lcd.print(seq.TXchannel);
+          lcd.setCursor(13,1);
+          lcd.print(seq.RXchannel);
+          break;
+        }
+        case 2:// second page
+        {
+          lcd.print("pCh mte ");
 #if MIDI_EXT_CHANNEL      
-        lcd.print("eXT ");
+          lcd.print("eXT ");
 #else
-        lcd.print("nc. ");
+          lcd.print("nc. ");
 #endif
 #if CONFIG_BOOTMODE
-        lcd.print("mod ");
+          lcd.print("mod ");
 #else                        
-        lcd.print("nc. ");                             // [zabox]
+          lcd.print("nc. ");                             // [zabox]
 #endif
-        lcd.setCursor(cursorPos[curIndex],0);
-        lcd.print(letterUpConfPage2[curIndex]);
-        lcd.setCursor(0,1);
-        LcdClearLine();
-        lcd.setCursor(0,1);
-        char  ptrnSyncChange[2];
-        strcpy_P(ptrnSyncChange, (char*)pgm_read_word(&(namePtrnChange[seq.ptrnChangeSync])));
-        lcd.print(ptrnSyncChange);
-        lcd.setCursor(4,1);
-        char  mute[2];
-        strcpy_P(mute, (char*)pgm_read_word(&(nameMute[seq.muteModeHH])));
-        lcd.print(mute);
-        lcd.setCursor(8,1);
+          lcd.setCursor(cursorPos[curIndex],0);
+          lcd.print(letterUpConfPage2[curIndex]);
+          lcd.setCursor(0,1);
+          LcdClearLine();
+          lcd.setCursor(0,1);
+          char  ptrnSyncChange[2];
+          strcpy_P(ptrnSyncChange, (char*)pgm_read_word(&(namePtrnChange[seq.ptrnChangeSync])));
+          lcd.print(ptrnSyncChange);
+          lcd.setCursor(4,1);
+          char  mute[2];
+          strcpy_P(mute, (char*)pgm_read_word(&(nameMute[seq.muteModeHH])));
+          lcd.print(mute);
+          lcd.setCursor(8,1);
 #if MIDI_EXT_CHANNEL        
-        lcd.print(seq.EXTchannel);
+          lcd.print(seq.EXTchannel);
 #else
-        lcd.print("xxx");
+          lcd.print("xxx");
 #endif        
-        lcd.setCursor(12,1);
+          lcd.setCursor(12,1);
 #if CONFIG_BOOTMODE
-        char bootmode[3];
-        strcpy_P(bootmode,(char*)pgm_read_word(&(nameBootMode[seq.BootMode])));
-        lcd.print(bootmode);
+          char bootmode[3];
+          strcpy_P(bootmode,(char*)pgm_read_word(&(nameBootMode[seq.BootMode])));
+          lcd.print(bootmode);
 #else        
-        lcd.print("xxx");
+          lcd.print("xxx");
 #endif        
-        break;
+          break;
+        }
+#if MIDI_HAS_SYSEX        
+      case 3: // Config page 3
+        {  
+          lcd.print("System Exclusive");
+          lcd.setCursor(0,1);
+          LcdClearLine();
+          lcd.setCursor(0,1);
+          lcd.print("Dump ");
+          char  sysex[5];
+          strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[sysExDump])));
+          lcd.print(sysex);
+          if ( sysExDump < 2 )
+          {
+            lcd.print(" : ");
+            if ( sysExDump == 0 )
+            {
+              lcd.print(char(sysExParam+65));
+            } else {
+              lcd.print(sysExParam + 1);
+            }
+          }
+          break;
+        }
+#endif        
       }
-
     }
     else if (seq.sync == EXPANDER) {                                               // [1.028] Expander
       lcd.setCursor(0,0);

@@ -246,7 +246,48 @@ void EncGet()
 #endif                 
           break;
         }
-    }    
+    }
+    else if (seq.configPage == 3)
+    {
+      switch(curIndex)
+      {
+        case 1:
+          {
+            sysExDump = EncGet(sysExDump, 1);               //pattern change sync select
+            sysExDump = constrain(sysExDump, 0, 3);
+            static byte prevsysExDump;
+            if (sysExDump != prevsysExDump){
+              prevsysExDump = sysExDump;
+              needLcdUpdate = TRUE;
+            }
+            break;
+          }
+        case 2:
+          {
+            if ( sysExDump < 2 )
+            {
+              sysExParam = EncGet(sysExParam, 1);               //pattern change sync select
+              if ( sysExDump == 0 )
+              {
+                sysExParam = constrain(sysExParam, 0, MAX_BANK); // Banks
+              } else {
+                sysExParam = constrain(sysExParam, 0, MAX_TRACK-1); // Tracks
+              }
+              static byte prevsysExParam;
+              if (sysExParam != prevsysExParam){
+                prevsysExParam = sysExParam;
+                needLcdUpdate = TRUE;
+              }
+            }
+            break;
+          }
+        case 3:
+        case 4:
+          {
+            break;
+          }
+      }          
+    }
   }
   else{
     seq.bpm = EncGet(seq.bpm,1);

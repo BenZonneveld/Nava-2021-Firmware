@@ -63,6 +63,14 @@ const char txt_BOOTMODE3[] PROGMEM = "Step";
 const char txt_BOOTMODE4[] PROGMEM = "Tap ";
 #endif
 
+#if MIDI_HAS_SYSEX
+const char txt_SYSEX0[] PROGMEM = "Bank";
+const char txt_SYSEX1[] PROGMEM = "Track";
+const char txt_SYSEX2[] PROGMEM = "Config";
+const char txt_SYSEX3[] PROGMEM = "Full";
+PROGMEM const char * const nameSysex[]= { txt_SYSEX0, txt_SYSEX1, txt_SYSEX2, txt_SYSEX3};
+#endif
+
 const char txt_MUTE0[] PROGMEM   ="C/O";                                        // [zabox] HH mute mode
 const char txt_MUTE1[] PROGMEM   ="HH";                                         //
 

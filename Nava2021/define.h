@@ -78,7 +78,7 @@
 
 //LCD
 #define MAX_CUR_POS 4
-#define MAX_CONF_PAGE 2
+#define MAX_CONF_PAGE 3
 
 //Utility
 #define TOGGLE 0
@@ -543,6 +543,11 @@ byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
 unsigned int lastInstrumentMidiOut = 0;
 byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 #endif // MIDI_DRUMNOTES_OUT
+
+#if MIDI_HAS_SYSEX
+byte sysExDump = 0;
+byte sysExParam = 0;
+#endif
 
 //Din synchro----------------------------------------
 boolean dinStartState = LOW;

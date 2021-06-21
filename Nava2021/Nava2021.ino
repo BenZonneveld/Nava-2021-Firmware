@@ -99,8 +99,6 @@ void setup()
   sei();
 
   //-----------------------------------------------
-
-  DumpConfig();
   
   lcd.clear();
   lcd.setCursor(0, 0);
