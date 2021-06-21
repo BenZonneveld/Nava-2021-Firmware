@@ -223,7 +223,7 @@ void MuteButtonGet()
   muteButtons = (dinSr[1] << 8) | dinSr[0];
 
   if (muteButtons != lastMuteButtons) {                                                     // [1.028] runs only when a button is pressed (important for expander mode)
-#ifdef SHIFT_MUTE_ALL
+#if SHIFT_MUTE_ALL
     // If shift is held down, solo the selected instrument
     if (shiftBtn) {
       for (byte a = 0; a < NBR_STEP_BTN; a++) {
@@ -268,7 +268,7 @@ void MuteButtonGet()
           }      
         }      
       }
-#ifdef SHIFT_MUTE_ALL      
+#if SHIFT_MUTE_ALL      
     }
 #endif    
   }

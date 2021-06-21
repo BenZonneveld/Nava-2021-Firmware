@@ -211,7 +211,10 @@ void SaveSeqSetup()
   Wire.write((byte)(seq.muteModeHH));                                  // [zabox]
 #if MIDI_EXT_CHANNEL
   Wire.write((byte)(seq.EXTchannel));  // [Neuromancer]
-#endif  
+#endif
+#if CONFIG_BOOTMODE
+  Wire.write((byte)(seq.BootMode)); // [Neuromancer]
+#endif    
   Wire.endTransmission();//end page transmission
   delay(DELAY_WR);//delay between each write page
 }
@@ -238,7 +241,11 @@ void LoadSeqSetup()
 #if MIDI_EXT_CHANNEL  
   seq.EXTchannel = (Wire.read() & 0xFF);
   seq.EXTchannel = constrain(seq.EXTchannel, 1 ,16);
-#endif  
+#endif
+#if CONFIG_BOOTMODE
+  unsigned int bootmode = (Wire.read() & 0xFF);
+  seq.BootMode = (SeqMode)constrain(bootmode, 0 ,4);
+#endif   
 }
 
 //Save pattern group
@@ -390,9 +397,12 @@ void InitEEprom()
   Wire.write((byte)(1));//seq.RXchannel));
   Wire.write((byte)(1));//seq.ptrnChangeSync));
   Wire.write((byte)(1));//seq.muteModeHH));  
-#ifdef MIDI_EXT_CHANNEL
+#if MIDI_EXT_CHANNEL
   Wire.write((byte)(2));//seq.EXTchannel);
 #endif
+#if CONFIG_BOOTMODE
+  Wire.write((byte)(SeqMode::PTRN_STEP)); // Bootmode
+#endif   
   Wire.endTransmission();//end page transmission
   delay(DELAY_WR);//delay between each write page
   /*Serial.print("setup offset add=");

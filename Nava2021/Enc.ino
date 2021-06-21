@@ -221,7 +221,7 @@ void EncGet()
           }
           break;
         case 2:
-#if MIDI_EXT_CHANNEL > 0      
+#if MIDI_EXT_CHANNEL      
           seq.EXTchannel = EncGet(seq.EXTchannel, 1);
           seq.EXTchannel = constrain(seq.EXTchannel, 1, 16);
           static unsigned int prevEXT;
@@ -232,7 +232,18 @@ void EncGet()
           }
           break;
 #endif        
-        case 3:         
+        case 3:
+#if CONFIG_BOOTMODE
+          seq.BootMode = (SeqMode)EncGet(seq.BootMode, 1);
+          seq.BootMode = (SeqMode)constrain((unsigned int)seq.BootMode, 0, 4);
+          static SeqMode prevBootMode;
+          if ( seq.BootMode != prevBootMode )
+          {
+            prevBootMode = seq.BootMode;
+            seq.setupNeedSaved = TRUE;
+            needLcdUpdate = TRUE;
+          }
+#endif                 
           break;
         }
     }    
