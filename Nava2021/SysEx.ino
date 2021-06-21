@@ -142,8 +142,10 @@ void MidiSendSysex(byte Type, byte Param)
   {
     case 0: // Bank
         DumpBank(Param);
+        break;
     case 1: // Track
         DumpTrack(Param);
+        break;
     case 2: // Config
         DumpConfig();
     case 3: // Full

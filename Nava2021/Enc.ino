@@ -253,7 +253,7 @@ void EncGet()
       {
         case 0:
           {
-            sysExDump = EncGet(sysExDump, 1);               //pattern change sync select
+            sysExDump = EncGet(sysExDump, 1);               //type select
             sysExDump = constrain(sysExDump, 0, 3);
             static byte prevsysExDump;
             if (sysExDump != prevsysExDump){
@@ -266,14 +266,15 @@ void EncGet()
           {
             if ( sysExDump < 2 )
             {
-              sysExParam = EncGet(sysExParam, 1);               //pattern change sync select
+              static byte prevsysExParam;
+              sysExParam = EncGet(sysExParam, 1);               //bank select
               if ( sysExDump == 0 )
               {
                 sysExParam = constrain(sysExParam, 0, MAX_BANK); // Banks
               } else {
                 sysExParam = constrain(sysExParam, 0, MAX_TRACK-1); // Tracks
               }
-              static byte prevsysExParam;
+              
               if (sysExParam != prevsysExParam){
                 prevsysExParam = sysExParam;
                 needLcdUpdate = TRUE;
