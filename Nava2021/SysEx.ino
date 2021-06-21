@@ -136,6 +136,21 @@ void DumpConfig()
   free(SysEx);
 }
 
+void MidiSendSysex(byte Type, byte Param)
+{
+  switch(Type)
+  {
+    case 0: // Bank
+        DumpBank(Param);
+    case 1: // Track
+        DumpTrack(Param);
+    case 2: // Config
+        DumpConfig();
+    case 3: // Full
+      break; 
+  }
+}
+
 void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
 {
   

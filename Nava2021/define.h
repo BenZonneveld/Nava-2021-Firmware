@@ -508,7 +508,8 @@ const char *letterUpConfPage1[MAX_CUR_POS]={
   "S", "B", "M", "M"};
 const char *letterUpConfPage2[MAX_CUR_POS]={                          // [zabox] N to M for mute mode
   "P", "M", "E", "M"};
-
+const char *letterUpConfPage3[2]{ "T", "S"};
+ 
 //MIDI-----------------------------------------------
 volatile boolean midiNoteOnActive = FALSE;
 boolean midiStart;

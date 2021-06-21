@@ -251,7 +251,7 @@ void EncGet()
     {
       switch(curIndex)
       {
-        case 1:
+        case 0:
           {
             sysExDump = EncGet(sysExDump, 1);               //pattern change sync select
             sysExDump = constrain(sysExDump, 0, 3);
@@ -262,7 +262,7 @@ void EncGet()
             }
             break;
           }
-        case 2:
+        case 1:
           {
             if ( sysExDump < 2 )
             {
@@ -281,8 +281,8 @@ void EncGet()
             }
             break;
           }
+        case 2:
         case 3:
-        case 4:
           {
             break;
           }

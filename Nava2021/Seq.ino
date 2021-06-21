@@ -18,7 +18,13 @@ void SeqParameter()
   //-------------------Encoder button---------------------------
   if(encBtn.justPressed){
     curIndex++;
-    if (curIndex >= MAX_CUR_POS)  curIndex = 0;
+    if (curIndex >= MAX_CUR_POS ) curIndex = 0;   
+#if MIDI_HAS_SYSEX
+    if ( seq.configMode && seq.configPage == 3 ) {
+      if (sysExDump < 2 && curIndex > 1 ) curIndex = 0;
+      if (sysExDump > 1 && curIndex > 0 ) curIndex = 0;
+    }
+#endif     
     needLcdUpdate = TRUE;
   }
   //-------------------play button---------------------------
@@ -945,6 +951,13 @@ void SeqParameter()
     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     //trkBuffer = !trkBuffer;
   }
+
+  // Transmit Midi System Exclusive
+  if ( seq.configMode && seq.configPage == 3 && enterBtn.justPressed )
+  {
+    MidiSendSysex(sysExDump, sysExParam);  
+  }
+  
   if (trackNeedSaved && enterBtn.hold)
   {
     trackNeedSaved = FALSE;

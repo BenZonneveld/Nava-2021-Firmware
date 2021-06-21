@@ -92,17 +92,23 @@ void LcdUpdate()
 #if MIDI_HAS_SYSEX        
       case 3: // Config page 3
         {  
-          lcd.print("System Exclusive");
+          if ( sysExDump < 2 )
+          {
+            lcd.print("type    select  ");
+          } else {
+            lcd.print("type            ");
+          }
+          lcd.setCursor(cursorPos[curIndex*2],0);
+          lcd.print(letterUpConfPage3[curIndex]);
           lcd.setCursor(0,1);
           LcdClearLine();
           lcd.setCursor(0,1);
-          lcd.print("Dump ");
           char  sysex[5];
           strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[sysExDump])));
           lcd.print(sysex);
+          lcd.setCursor(8,1);
           if ( sysExDump < 2 )
           {
-            lcd.print(" : ");
             if ( sysExDump == 0 )
             {
               lcd.print(char(sysExParam+65));
