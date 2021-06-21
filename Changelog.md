@@ -11,6 +11,7 @@
 - Bug: Track play pattern name not updated [\#21](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/21)
 - Track Write: do not reset current pattern [\#20](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/20)
 - Feature request: Mode at startup should be selectable. [\#16](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/16)
+- EXT Instrument should have 2 velocity levels. [\#15](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/15)
 - Tempo display isn't always updated. [\#14](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/14)
 
 ## [Nava2021Neuro-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210621) (2021-06-20)

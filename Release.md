@@ -27,3 +27,7 @@ Bugfixes:
 - Issue #12: Flam bug with external instrument and others
 - Issue #13: Switching from keyboardMode to config page doesn't work
 - Issie #21: Pattern from track is not updated when going to track play mode.
+
+Removed:
+* Allow step editing when the sequencer is not running. 
+
