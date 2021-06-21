@@ -178,7 +178,7 @@ void SetLeds()
       }
       
     }
-    else 
+    else if (isRunning && !instBtn){ 
       stepLedsHigh = stepLedsLow = 0;//initialize step Leds variable 
       for (int stp = 0; stp < NBR_STEP; stp++){
         if (curFlam) {                                                                       // [zabox] [1.027] flam
