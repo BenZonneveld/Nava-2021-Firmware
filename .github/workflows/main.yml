@@ -1,5 +1,5 @@
 # This is the name of the workflow, visible on GitHub UI.
-name: Build Sysex Code
+name: Development Build Check
 
 # Here we tell GitHub to run the workflow when a commit
 # is pushed or a Pull Request is opened.
@@ -61,8 +61,7 @@ jobs:
           arduino-cli core install --additional-urls="https://mcudude.github.io/MightyCore/package_MCUdude_MightyCore_index.json" ${{ matrix.arduino-platform }}
 
       - name: Install libraries
-        run: arduino-cli lib install LiquidCrystal
-             arduino-cli lib install Arduino_CRC32
+        run: arduino-cli lib install LiquidCrystal Arduino_CRC32
           
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.
