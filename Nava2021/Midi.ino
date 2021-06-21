@@ -96,6 +96,17 @@ void DisconnectMidiHandleRealTime()
   MIDI.disconnectCallbackFromType(Continue);
 }
 
+#if MIDI_HAS_SYSEX
+void ConnectMidiSysex()
+{
+  MIDI.setHandleSystemExclusive(HandleSystemExclusive);
+}
+
+void DisconnectMidiSysex()
+{
+  MIDI.disconnectCallbackFromType(SystemExclusive);
+}
+#endif
 
 //Connect midi real time callback                         // [zabox] [1.028]
 void ConnectMidiHandleNote()
@@ -110,7 +121,6 @@ void DisconnectMidiHandleNote()
   MIDI.disconnectCallbackFromType(NoteOn);
   MIDI.disconnectCallbackFromType(NoteOff);
 }
-
 
 //Handle noteON
 void HandleNoteOn(byte channel, byte pitch, byte velocity)

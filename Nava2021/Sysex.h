@@ -1,3 +1,7 @@
+#define SYSEX_BUFFER_SIZE   2048
+
+#define START_OF_SYSEX      0xF0
+#define END_OF_SYSEX        0xF7
 #define SYSEX_MANUFACTURER  0x7d
 // The next two give us "909" bitshifted to the left to fit into 7 bits of MIDI data.
 

@@ -100,6 +100,8 @@ void setup()
 
   //-----------------------------------------------
 
+  DumpConfig();
+  
   lcd.clear();
   lcd.setCursor(0, 0);
 #ifndef VERSION_DATE  

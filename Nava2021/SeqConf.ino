@@ -19,8 +19,6 @@ void SeqConfiguration()
 
 }
 
-
-
 void SetSeqSync() 
 {
     //Sync configuration
@@ -33,8 +31,9 @@ void SetSeqSync()
       break;
     case SLAVE:
       TimerStop();
-      initTrigTimer();                        
-      DisconnectMidiHandleNote();
+      initTrigTimer();
+      ConnectMidiHandleNote();                        
+      //DisconnectMidiHandleNote();
       ConnectMidiHandleRealTime();
       break;
     case EXPANDER:
@@ -48,4 +47,3 @@ void SetSeqSync()
       break;
     }
 }
-
