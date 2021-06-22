@@ -111,9 +111,62 @@ uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t s
   return(sysexSize+1);
 }
 
-void DumpPattern(byte selectedPattern)
+void DumpPattern(byte patternNbr)
 {
+  byte RawData[PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  int datacount = 0;
 
+  unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
+  WireBeginTX(adress); 
+  Wire.endTransmission();
+  Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request a 64 bytes page
+  //TRIG-----------------------------------------------
+  for(int i =0; i<NBR_INST;i++){
+    RawData[datacount] = (unsigned long)((Wire.read() & 0xFF) | (( Wire.read() << 8) & 0xFF00));
+    // Serial.println(Wire.read());
+    datacount++;
+  }
+  //SETUP-----------------------------------------------
+  RawData[datacount++] = Wire.read();
+  RawData[datacount++] = Wire.read();
+  RawData[datacount++] = Wire.read();                                                         // [zabox] [1.027] flam
+  RawData[datacount++] = Wire.read();                                                            // [zabox] [1.027] flam
+  RawData[datacount++] = Wire.read();
+  RawData[datacount++] = Wire.read();
+  RawData[datacount++] = Wire.read();
+  RawData[datacount++] = Wire.read();
+  for(int a = 0; a < 24; a++){
+    RawData[datacount++]=Wire.read();
+  }
+  //EXT INST-----------------------------------------------
+  for(int nbrPage = 0; nbrPage < 2; nbrPage++){
+      MIDI.read();
+    adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_SETUP_OFFSET);
+    WireBeginTX(adress);
+    Wire.endTransmission();
+    Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request of  64 bytes
+
+    for (byte j = 0; j < MAX_PAGE_SIZE; j++){
+      RawData[datacount++] = Wire.read();
+    }
+  }
+  //VELOCITY-----------------------------------------------
+  for(int nbrPage = 0; nbrPage < 4; nbrPage++){
+      MIDI.read();
+    adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_EXT_OFFSET);
+    WireBeginTX(adress);
+    Wire.endTransmission();
+    Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request of  64 bytes
+    for (byte i = 0; i < 4; i++){//loop as many instrument for a page
+      for (byte j = 0; j < NBR_STEP; j++){
+        RawData[datacount++] = (Wire.read() & 0xFF);
+      }
+    }
+  }
+
+  uint16_t transmit_size=build_sysex(SysEx, RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
+
+  MIDI.sendSysEx(transmit_size,SysEx,true);
 }
 
 void DumpBank(byte selectedBank)

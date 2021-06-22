@@ -272,7 +272,13 @@ void EncGet()
               if ( sysExDump == 0 )
               {
                 sysExParam = constrain(sysExParam, 0, MAX_BANK); // Banks
-              } else {
+              } 
+              else if ( sysExDump == 1 )
+              {
+                sysExParam = constrain(sysExParam, 0, MAX_PTRN-1); // Patterns
+              } 
+              else if ( sysExDump == 2 ) 
+              {
                 sysExParam = constrain(sysExParam, 0, MAX_TRACK-1); // Tracks
               }
               

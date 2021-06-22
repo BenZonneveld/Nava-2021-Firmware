@@ -113,7 +113,11 @@ void LcdUpdate()
             {
               sysExParam = constrain(sysExParam, 0, MAX_BANK); // Banks
               lcd.print(char(sysExParam+65));
-            } else {
+            } else if (sysExDump == 1) {
+              sysExParam = constrain(sysExParam, 0, MAX_PTRN-1); // Patterns
+              lcd.print(char((sysExParam / 16)+65));
+              lcd.print(sysExParam - ((sysExParam / 16)*NBR_PATTERN) + 1);
+            } else if  (sysExDump == 2) {
               sysExParam = constrain(sysExParam, 0, MAX_TRACK-1); // Tracks
               lcd.print(sysExParam + 1);
             }
