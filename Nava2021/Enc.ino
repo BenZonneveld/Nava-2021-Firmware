@@ -265,7 +265,7 @@ void EncGet()
           }
         case 1:
           {
-            if ( sysExDump < 2 )
+            if ( sysExDump < SYSEX_MAXPARAM )
             {
               static byte prevsysExParam;
               sysExParam = EncGet(sysExParam, 1);               //bank select

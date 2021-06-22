@@ -75,13 +75,13 @@ uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t s
 
   // Add the crc and end of sysex at the end
   Serial.print("Checksum pos: "); Serial.println(sysexSize);
-  sysex[sysexSize++] = (checksum & 0xf0000000) >> 28;
-  sysex[sysexSize++] = (checksum & 0xf000000) >> 24;
-  sysex[sysexSize++] = (checksum & 0xf00000) >> 20;
-  sysex[sysexSize++] = (checksum & 0xf0000) >> 16;
-  sysex[sysexSize++] = (checksum & 0xf000) >> 12;
-  sysex[sysexSize++] = (checksum & 0xf00) >> 8;
-  sysex[sysexSize++] = (checksum & 0xf0) >> 4;
+  sysex[sysexSize++] = (checksum >> 28) & 0xf;
+  sysex[sysexSize++] = (checksum >> 24) & 0xf;
+  sysex[sysexSize++] = (checksum >> 20) & 0xf;
+  sysex[sysexSize++] = (checksum >> 16) & 0xf;
+  sysex[sysexSize++] = (checksum >> 12) & 0xf;
+  sysex[sysexSize++] = (checksum >> 8) & 0xf;
+  sysex[sysexSize++] = (checksum >> 4) & 0xf;
   sysex[sysexSize++] = checksum & 0xf;
 //  sysexSize=sysexSize+data_to_sysex((uint8_t *)&checksum, sysex+sysexSize,4);
   sysex[sysexSize]=END_OF_SYSEX;
@@ -109,6 +109,11 @@ uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t s
 #endif
   // return system exclusive size
   return(sysexSize+1);
+}
+
+void DumpPattern(byte selectedPattern)
+{
+
 }
 
 void DumpBank(byte selectedBank)
@@ -223,15 +228,18 @@ void MidiSendSysex(byte Type, byte Param)
 {
   switch(Type)
   {
-    case 0: // Bank
+    case NAVA_BANK_DMP: // Bank
         DumpBank(Param);
         break;
-    case 1: // Track
+    case NAVA_PTRN_DMP: // Pattern
+        DumpPattern(Param);
+        break;
+    case NAVA_TRACK_DMP: // Track
         DumpTrack(Param);
         break;
-    case 2: // Config
+    case NAVA_CONFIG_DMP: // Config
         DumpConfig();
-    case 3: // Full
+    case NAVA_FULL_DMP: // Full
       break; 
   }
 }
@@ -239,6 +247,7 @@ void MidiSendSysex(byte Type, byte Param)
 #if DEBUG
 void PrintSysex(byte *sysex, int size)
 {
+  Serial.print("Print Sysex size: "); Serial.println(size);
   for(int i=0; i<size; i++)
   {
     if ( i % 8 == 0 ) 
@@ -252,15 +261,15 @@ void PrintSysex(byte *sysex, int size)
   Serial.print("Sysex Size: "); Serial.println(size);
 
 }
+
 #endif
 void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
 {
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
-  Serial.println("Sysex Received");   
   int16_t DataPointer=6;
   // Check if the sysex is for us.
-//  if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
-//  RawSysEx[RawSize -1]= END_OF_SYSEX;
+  if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
+  RawSysEx[RawSize -1]= END_OF_SYSEX;
 
   // Get type and parameter
   byte Type=RawSysEx[4];
@@ -289,10 +298,47 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
   
   Serial.println("Received Sysex");
   Serial.print("RawSize: ");Serial.println(RawSize);
-  char  sysex[5];
-  strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[Type])));
-  Serial.print("Type: "); Serial.println(sysex);
+//  char  sysex[12];
+//  strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[Type])));
+  Serial.print("Type: "); Serial.println(Type,HEX);
 
+  switch(Type)
+  {
+  case NAVA_BANK_REQ: 
+    {
+      if ( Param < 8 )
+      { 
+        Serial.print("Dumping bank : "); Serial.println(char(Param + 65));
+        DumpBank(Param);
+      }
+      break; 
+    }
+  case NAVA_PTRN_REQ:
+    {
+      if ( Param < 128 )
+      {
+        Serial.print("Dumping Pattern: ");Serial.println(Param);
+        DumpPattern(Param);
+      }
+      break;  
+    }
+  case NAVA_TRACK_REQ:
+    {
+      if ( Param < 16 )
+      {
+        Serial.print("Dumping track: ");Serial.println(Param);
+        DumpTrack(Param);
+      }
+      break;
+    }
+  case NAVA_CONFIG_REQ:
+    { 
+      Serial.println("Dumping Config");
+      DumpConfig();
+      break;
+    }
+    
+  }
   PrintSysex(RawSysEx, RawSize);
 }
 

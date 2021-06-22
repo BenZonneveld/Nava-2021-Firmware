@@ -92,7 +92,7 @@ void LcdUpdate()
 #if MIDI_HAS_SYSEX        
       case 3: // Config page 3
         {  
-          if ( sysExDump < 2 )
+          if ( sysExDump < SYSEX_MAXPARAM )
           {
             lcd.print("type    select  ");
           } else {
@@ -107,7 +107,7 @@ void LcdUpdate()
           strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[sysExDump])));
           lcd.print(sysex);
           lcd.setCursor(8,1);
-          if ( sysExDump < 2 )
+          if ( sysExDump < SYSEX_MAXPARAM )
           {
             if ( sysExDump == 0 )
             {
