@@ -51,7 +51,6 @@ void SeqConfiguration()
 
 void SetSeqSync() 
 {
-  Serial.println("Sync active");
   //Sync configuration
   switch (seq.sync){                             // [zabox] [1.028] added expander mode
   case MASTER: 

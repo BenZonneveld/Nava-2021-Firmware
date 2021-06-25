@@ -21,7 +21,7 @@ Arduino_CRC32 crc; // See https://github.com/bakercp/CRC32 for info
  * (BYTE4 & 0x7F) (BYTE5 & 0x7F) (BYTE6 & 0x7F) 
  * (BYTE7 & 0x7F)  
  */
-
+ 
 uint16_t data_to_sysex(uint8_t *data, uint8_t *sysex, uint16_t len) {
   uint16_t retlen = 0;
   uint16_t cnt;
@@ -84,7 +84,7 @@ uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t s
   sysex[sysexSize++] = (checksum >> 4) & 0xf;
   sysex[sysexSize++] = checksum & 0xf;
 //  sysexSize=sysexSize+data_to_sysex((uint8_t *)&checksum, sysex+sysexSize,4);
-  sysex[sysexSize]=END_OF_SYSEX;
+  sysex[sysexSize++]=END_OF_SYSEX;
 
 #ifdef DEBUG
   Serial.println();
@@ -107,13 +107,16 @@ uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t s
     }
   }
 #endif
+  MIDI.sendSysEx(sysexSize,sysex,true);
   // return system exclusive size
-  return(sysexSize+1);
+  return(sysexSize);
 }
 
 void DumpPattern(byte patternNbr)
 {
-  byte RawData[PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte RawData[PTRN_SIZE];
+  Serial.print("Pattern Rawdata size: "); Serial.println(PTRN_SIZE);
+  memory("Dump Pattern");
   int datacount = 0;
 
   unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
@@ -165,14 +168,14 @@ void DumpPattern(byte patternNbr)
   }
 
   uint16_t transmit_size=build_sysex(SysEx, RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
-
-  MIDI.sendSysEx(transmit_size,SysEx,true);
+  memory("Dump ptr transmit");
 }
 
 void DumpBank(byte selectedBank)
 {
-  byte RawData[4*PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte *RawData=(byte *)calloc(4*PTRN_SIZE, sizeof(byte)); // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
   int datacount = 0;
+  
   for ( int BankPart=0; BankPart < 4; BankPart++)
   { 
     int datacount = 0;
@@ -226,15 +229,16 @@ void DumpBank(byte selectedBank)
       }
     }
 
-    uint16_t transmit_size=build_sysex(SysEx, RawData, sizeof(RawData), NAVA_BANK_DMP, selectedBank + 16* BankPart);
+    uint16_t transmit_size=build_sysex(SysEx, RawData, 4*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
 
-    MIDI.sendSysEx(transmit_size,SysEx,true);
+    free(RawData);
   }
 }
 
 void DumpTrack(byte trackNbr)
 {
-  byte RawData[TRACK_SIZE];
+  byte *RawData=(byte *)calloc(TRACK_SIZE, sizeof(byte));
+//  byte RawData[TRACK_SIZE];
   
   unsigned long adress;
   for(int nbrPage = 0; nbrPage < TRACK_SIZE/MAX_PAGE_SIZE; nbrPage++){
@@ -251,8 +255,8 @@ void DumpTrack(byte trackNbr)
 //  byte highbyte = (byte)track[trkBuffer].patternNbr[1023];
 //  track[trkBuffer].length =  (unsigned long)(lowbyte | highbyte << 8);
 
-  uint16_t transmit_size=build_sysex(SysEx, RawData, sizeof(RawData), NAVA_TRACK_DMP, trackNbr);
-  MIDI.sendSysEx(transmit_size,SysEx,true);
+  uint16_t transmit_size=build_sysex(SysEx, RawData, TRACK_SIZE, NAVA_TRACK_DMP, trackNbr);
+  free(RawData);
 }
 
 void DumpConfig()
@@ -274,7 +278,25 @@ void DumpConfig()
   uint16_t transmit_size=build_sysex(SysEx, RawData, SETUP_SIZE, NAVA_CONFIG_DMP,0);
 
   free(RawData);
-  MIDI.sendSysEx(transmit_size,SysEx,true);
+}
+
+void GetConfig(byte *sysex)
+{
+  byte *RawData=(byte *)calloc(SETUP_SIZE, sizeof(byte));
+
+  sysex_to_data(sysex + 6, RawData, 74);
+  seq.sync = RawData[0];
+  seq.defaultBpm = RawData[1];
+  seq.TXchannel = RawData[2];
+  seq.RXchannel = RawData[3];
+  seq.ptrnChangeSync = RawData[4];
+  seq.muteModeHH = RawData[5];
+  seq.EXTchannel = RawData[6];
+  seq.BootMode  = (SeqMode)RawData[7];
+
+  SaveSeqSetup();
+  SetSeqSync();
+  needLcdUpdate = true;
 }
 
 void MidiSendSysex(byte Type, byte Param)
@@ -327,7 +349,8 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
   // Get type and parameter
   byte Type=RawSysEx[4];
   byte Param=RawSysEx[5];
-
+  byte BlckCnt = RawSysEx[6];
+  
   // Do calculate checksum and compare to received checksum
   uint32_t checksum = crc.calc(RawSysEx, RawSize - CHECKSUMSIZE -1);
   uint32_t RxChecksum = 0;
@@ -341,19 +364,14 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
 #if DEBUG
   Serial.print("Calculated checksum: "); Serial.println(checksum, HEX);
   Serial.print("Received checksum: "); Serial.println(RxChecksum, HEX);
+  PrintSysex(RawSysEx, RawSize);
 #endif  
+
   if ( checksum != RxChecksum )
   {
     Serial.print("CREATE ERROR HANDLING");
     return;
   }
-
-  
-  Serial.println("Received Sysex");
-  Serial.print("RawSize: ");Serial.println(RawSize);
-//  char  sysex[12];
-//  strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[Type])));
-  Serial.print("Type: "); Serial.println(Type,HEX);
 
   switch(Type)
   {
@@ -390,9 +408,13 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
       DumpConfig();
       break;
     }
-    
+   case NAVA_CONFIG_DMP:
+    {
+      Serial.println("Received a Config");
+      GetConfig(RawSysEx);
+      break; 
+    }
   }
-  PrintSysex(RawSysEx, RawSize);
 }
 
 #endif // MIDI_HAS_SYSEX
