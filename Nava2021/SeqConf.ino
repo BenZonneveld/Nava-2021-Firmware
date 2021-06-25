@@ -33,11 +33,11 @@ void SeqConfiguration()
     {
       seq.SysExMode = true;
       Serial.println("Sysex Receive enabled");
-      TimerStop();
+//      TimerStop();
       initTrigTimer();
       DisconnectMidiHandleNote();                        
       DisconnectMidiHandleRealTime();
-      ConnectMidiSysex();
+//      ConnectMidiSysex();
     }
   } else {
     if ( seq.SysExMode == true )
@@ -51,16 +51,15 @@ void SeqConfiguration()
 
 void SetSeqSync() 
 {
-  Serial.println("Sync active");
   //Sync configuration
   switch (seq.sync){                             // [zabox] [1.028] added expander mode
   case MASTER: 
     initTrigTimer();                          
     DisconnectMidiHandleRealTime();
     DisconnectMidiHandleNote();
-#if MIDI_HAS_SYSEX    
-    DisconnectMidiSysex();
-#endif    
+//#if MIDI_HAS_SYSEX    
+//    DisconnectMidiSysex();
+//#endif    
     TimerStart();//cf timer
     break;
   case SLAVE:
@@ -69,18 +68,18 @@ void SetSeqSync()
     ConnectMidiHandleNote();                        
     //DisconnectMidiHandleNote();
     ConnectMidiHandleRealTime();
-#if MIDI_HAS_SYSEX    
-    DisconnectMidiSysex();
-#endif    
+//#if MIDI_HAS_SYSEX    
+//    DisconnectMidiSysex();
+//#endif    
     break;
   case EXPANDER:
     TimerStop();
     initExpTimer();                 
     DisconnectMidiHandleRealTime();
     ConnectMidiHandleNote();
-#if MIDI_HAS_SYSEX    
-    DisconnectMidiSysex();
-#endif    
+//#if MIDI_HAS_SYSEX    
+//    DisconnectMidiSysex();
+//#endif    
     stepLeds = 0;
     configLed = 0;
     menuLed = 0;

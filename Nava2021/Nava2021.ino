@@ -29,8 +29,7 @@ void setup()
 {
 #if DEBUG
   Serial.begin(115200);
-  Serial.print("freeMemory()=");
-  Serial.println(freeMemory());
+
 
 #endif
   InitIO();//cf Dio
@@ -95,6 +94,7 @@ void setup()
   MIDI.setInputChannel(seq.RXchannel);
   MIDI.turnThruOff();                                       // [zabox] fixes double real time messages on midi out
 
+  ConnectMidiSysex();
 
   sei();
 
@@ -157,3 +157,13 @@ void loop()
 #endif
 
 }
+
+#ifdef DEBUG
+void memory(char *label)
+{
+  Serial.print("freeMemory() in ");
+  Serial.print(label);
+  Serial.print(" =");
+  Serial.println(freeMemory());
+}
+#endif

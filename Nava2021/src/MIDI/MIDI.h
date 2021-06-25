@@ -58,7 +58,7 @@
 #define MIDI_CHANNEL_OMNI		0
 #define MIDI_CHANNEL_OFF		17			// and over
 
-#define MIDI_SYSEX_ARRAY_SIZE	255			// Maximum size is 65535 bytes.
+#define MIDI_SYSEX_ARRAY_SIZE	255		// Maximum size is 65535 bytes.
 
 /*! Type definition for practical use (because "unsigned char" is a bit long to write.. )*/
 typedef uint8_t byte;
@@ -147,7 +147,7 @@ public:
 	void sendPitchBend(double PitchValue,byte Channel);
 	void sendPolyPressure(byte NoteNumber,byte Pressure,byte Channel);
 	void sendAfterTouch(byte Pressure,byte Channel);
-	void sendSysEx(int length, const byte *const array,bool ArrayContainsBoundaries = false);	
+	void sendSysEx(uint16_t length, const byte *const array,bool ArrayContainsBoundaries = false);	
 	void sendTimeCodeQuarterFrame(byte TypeNibble, byte ValuesNibble);
 	void sendTimeCodeQuarterFrame(byte data);
 	void sendSongPosition(unsigned int Beats);

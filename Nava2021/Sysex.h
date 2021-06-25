@@ -7,6 +7,9 @@
 #define SYSEX_DEVID_1 0x07
 #define SYSEX_DEVID_2 0x1A
 
+// The header consist of START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2, cmd, param, blockcount
+
+#define HEADERSIZE      7
 // Sysex Commands:
 #define NAVA_BANK_DMP   0x00
 #define NAVA_PTRN_DMP   0x01

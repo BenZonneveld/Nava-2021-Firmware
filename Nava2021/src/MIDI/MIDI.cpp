@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include "Arduino.h"			// If using an old (pre-1.0) version of Arduino, use WConstants.h instead of Arduino.h
 #include "HardwareSerial.h"
-
+#include "../MemoryFree/MemoryFree.h"
 
 /*! \brief Main instance (the class comes pre-instantiated). */
 MIDI_Class MIDI;
@@ -315,16 +315,15 @@ void MIDI_Class::sendPitchBend(double PitchValue,
  \param ArrayContainsBoundaries  When set to 'true', 0xF0 & 0xF7 bytes (start & stop SysEx) will NOT be sent (and therefore must be included in the array).
  default value is set to 'false' for compatibility with previous versions of the library.
  */
-void MIDI_Class::sendSysEx(int length,
+void MIDI_Class::sendSysEx(uint16_t length,
 						   const byte *const array,
 						   bool ArrayContainsBoundaries)
 {
-	
-	if (ArrayContainsBoundaries == false) {
-		
+
+  if (ArrayContainsBoundaries == false) {
 		USE_SERIAL_PORT.write(0xF0);
 		
-		for (int i=0;i<length;++i) {
+		for (uint16_t i=0;i<length;++i) {
 			
 			USE_SERIAL_PORT.write(array[i]);
 			
@@ -335,10 +334,13 @@ void MIDI_Class::sendSysEx(int length,
 	}
 	else {
 		
-		for (int i=0;i<length;++i) {
+		for (uint16_t i=0;i<length;++i) {
 			
-			USE_SERIAL_PORT.write(array[i]);
-			
+			while ( !( UCSR1A & (1<<UDRE1)) )
+				;
+/* Put data into buffer, sends the data */
+			UDR1 = array[i];
+//			USE_SERIAL_PORT.write(array[i]);			
 		}
 		
 	}
