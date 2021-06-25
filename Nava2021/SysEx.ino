@@ -21,6 +21,16 @@ Arduino_CRC32 crc; // See https://github.com/bakercp/CRC32 for info
  * (BYTE4 & 0x7F) (BYTE5 & 0x7F) (BYTE6 & 0x7F) 
  * (BYTE7 & 0x7F)  
  */
+
+ void EnableSysexMode()
+ {
+  seq.SysExMode = true;
+  Serial.println("Sysex Receive enabled");
+  TimerStop();
+  initTrigTimer();
+  DisconnectMidiHandleNote();                        
+  DisconnectMidiHandleRealTime();
+ }
  
 uint16_t data_to_sysex(uint8_t *data, uint8_t *sysex, uint16_t len) {
   uint16_t retlen = 0;
@@ -60,46 +70,47 @@ uint16_t sysex_to_data(uint8_t *sysex, uint8_t *data, uint16_t len) {
   return cnt2;
 }
 
-uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8_t param)
+uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8_t param)
 {     
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2, sysex_type, param};
-
+  uint8_t *SysEx = (uint8_t *)MIDI.getSysExArray();
+  
   // Copy the header to the buffer
-  memcpy(sysex, header, sizeof(header));
+  memcpy(SysEx, header, sizeof(header));
 
   // Convert data for 7 bit transfers
-  uint16_t sysexSize=sizeof(header) + sysexSize + data_to_sysex(data,sysex+sizeof(header),datasize);
+  uint16_t sysexSize=sizeof(header) + data_to_sysex(data,SysEx+sizeof(header),datasize);
 
   // Calculate checksum for the sysex
-  uint32_t checksum = crc.calc(sysex, sysexSize);
+  uint32_t checksum = crc.calc(SysEx, sysexSize);
 
   // Add the crc and end of sysex at the end
   Serial.print("Checksum pos: "); Serial.println(sysexSize);
-  sysex[sysexSize++] = (checksum >> 28) & 0xf;
-  sysex[sysexSize++] = (checksum >> 24) & 0xf;
-  sysex[sysexSize++] = (checksum >> 20) & 0xf;
-  sysex[sysexSize++] = (checksum >> 16) & 0xf;
-  sysex[sysexSize++] = (checksum >> 12) & 0xf;
-  sysex[sysexSize++] = (checksum >> 8) & 0xf;
-  sysex[sysexSize++] = (checksum >> 4) & 0xf;
-  sysex[sysexSize++] = checksum & 0xf;
+  SysEx[sysexSize++] = (checksum >> 28) & 0xf;
+  SysEx[sysexSize++] = (checksum >> 24) & 0xf;
+  SysEx[sysexSize++] = (checksum >> 20) & 0xf;
+  SysEx[sysexSize++] = (checksum >> 16) & 0xf;
+  SysEx[sysexSize++] = (checksum >> 12) & 0xf;
+  SysEx[sysexSize++] = (checksum >> 8) & 0xf;
+  SysEx[sysexSize++] = (checksum >> 4) & 0xf;
+  SysEx[sysexSize++] = checksum & 0xf;
 //  sysexSize=sysexSize+data_to_sysex((uint8_t *)&checksum, sysex+sysexSize,4);
-  sysex[sysexSize++]=END_OF_SYSEX;
+  SysEx[sysexSize++]=END_OF_SYSEX;
 
 #ifdef DEBUG
   Serial.println();
   Serial.print("Rawdata Size: ");Serial.println(datasize);
-  Serial.print("Header Size: ");Serial.println(sizeof(header));
+  Serial.print("Header Size: ");Serial.println(HEADERSIZE);
   Serial.println("Checksum: ");Serial.println(checksum,HEX);
-  for(int i=sysexSize-9; i<SYSEX_BUFFER_SIZE; i++)
+  for(int i=0; i<sysexSize + 1; i++)
   {
     if ( i % 8 == 0 ) 
     {
       Serial.println();
       Serial.print(i,HEX);Serial.print(":\t");
     }
-    Serial.print("0x");Serial.print(sysex[i], HEX); Serial.print("\t");
-    if ( sysex[i] == END_OF_SYSEX ) 
+    Serial.print("0x");Serial.print(SysEx[i], HEX); Serial.print("\t");
+    if ( SysEx[i] == END_OF_SYSEX ) 
     {
       Serial.println();
       Serial.print("Sysex Size: "); Serial.println(i+1);
@@ -107,7 +118,7 @@ uint16_t build_sysex(uint8_t *sysex, uint8_t *data, uint16_t datasize, uint8_t s
     }
   }
 #endif
-  MIDI.sendSysEx(sysexSize,sysex,true);
+  MIDI.sendSysEx(sysexSize,SysEx,true);
   // return system exclusive size
   return(sysexSize);
 }
@@ -167,7 +178,7 @@ void DumpPattern(byte patternNbr)
     }
   }
 
-  uint16_t transmit_size=build_sysex(SysEx, RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
+  uint16_t transmit_size=build_sysex(RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
   memory("Dump ptr transmit");
 }
 
@@ -229,10 +240,27 @@ void DumpBank(byte selectedBank)
       }
     }
 
-    uint16_t transmit_size=build_sysex(SysEx, RawData, 4*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
-
+    uint16_t transmit_size=build_sysex( RawData, 4*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
+    memory("Bank Dump TX");
     free(RawData);
   }
+}
+
+void GetBank(byte * sysex)
+{
+  byte *RawData=(byte *)calloc(2* PTRN_SIZE, sizeof(byte));
+
+  uint8_t BankId = sysex[5] & 0xF;
+  uint8_t ptrnGrp = (sysex[5] - BankId) / 16;
+
+  sysex_to_data(sysex + 6, RawData, 2063); // Transmitted Bank block = 2064 bytes;
+
+  //
+  Serial.print("BankId: ");Serial.println(BankId);
+  Serial.print("ptrnGrp: ");Serial.println(ptrnGrp);
+  free(RawData);
+  
+  needLcdUpdate = true;
 }
 
 void DumpTrack(byte trackNbr)
@@ -255,7 +283,7 @@ void DumpTrack(byte trackNbr)
 //  byte highbyte = (byte)track[trkBuffer].patternNbr[1023];
 //  track[trkBuffer].length =  (unsigned long)(lowbyte | highbyte << 8);
 
-  uint16_t transmit_size=build_sysex(SysEx, RawData, TRACK_SIZE, NAVA_TRACK_DMP, trackNbr);
+  uint16_t transmit_size=build_sysex(RawData, TRACK_SIZE, NAVA_TRACK_DMP, trackNbr);
   free(RawData);
 }
 
@@ -275,7 +303,7 @@ void DumpConfig()
   RawData[7]=(byte)(seq.BootMode); // [Neuromancer]
 #endif
 
-  uint16_t transmit_size=build_sysex(SysEx, RawData, SETUP_SIZE, NAVA_CONFIG_DMP,0);
+  uint16_t transmit_size=build_sysex( RawData, SETUP_SIZE, NAVA_CONFIG_DMP,0);
 
   free(RawData);
 }
@@ -338,18 +366,20 @@ void PrintSysex(byte *sysex, int size)
 }
 
 #endif
-void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
+void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
 {
+//  Serial.println(MIDI:)
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
   int16_t DataPointer=6;
   // Check if the sysex is for us.
+  Serial.println("Handle Sysex");
+  
   if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
   RawSysEx[RawSize -1]= END_OF_SYSEX;
 
   // Get type and parameter
   byte Type=RawSysEx[4];
   byte Param=RawSysEx[5];
-  byte BlckCnt = RawSysEx[6];
   
   // Do calculate checksum and compare to received checksum
   uint32_t checksum = crc.calc(RawSysEx, RawSize - CHECKSUMSIZE -1);
@@ -373,6 +403,13 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
     return;
   }
 
+  seq.configMode = true;
+  seq.configPage = 3;
+  needLcdUpdate = TRUE;
+  EnableSysexMode();
+
+  Serial.print("Type = "); Serial.println(Type, HEX);
+  
   switch(Type)
   {
   case NAVA_BANK_REQ: 
@@ -380,15 +417,27 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
       if ( Param < 8 )
       { 
         Serial.print("Dumping bank : "); Serial.println(char(Param + 65));
+        sysExParam = Param;
+        sysExDump = NAVA_BANK_DMP;
         DumpBank(Param);
       }
       break; 
+    }
+  case NAVA_BANK_DMP:
+    {
+      sysExDump = NAVA_BANK_DMP;
+      Serial.println("Received a Bank Part");
+      sysExParam = Param & 0xf;
+      GetBank(RawSysEx);
+      break;     
     }
   case NAVA_PTRN_REQ:
     {
       if ( Param < 128 )
       {
         Serial.print("Dumping Pattern: ");Serial.println(Param);
+        sysExDump = NAVA_PTRN_DMP;
+        sysExParam = Param;
         DumpPattern(Param);
       }
       break;  
@@ -398,6 +447,8 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
       if ( Param < 16 )
       {
         Serial.print("Dumping track: ");Serial.println(Param);
+        sysExDump = NAVA_TRACK_DMP;
+        sysExParam = Param;
         DumpTrack(Param);
       }
       break;
@@ -405,11 +456,13 @@ void HandleSystemExclusive(byte * RawSysEx, byte RawSize)
   case NAVA_CONFIG_REQ:
     { 
       Serial.println("Dumping Config");
+      sysExDump = NAVA_CONFIG_DMP;
       DumpConfig();
       break;
     }
    case NAVA_CONFIG_DMP:
     {
+      sysExDump = NAVA_CONFIG_DMP;
       Serial.println("Received a Config");
       GetConfig(RawSysEx);
       break; 

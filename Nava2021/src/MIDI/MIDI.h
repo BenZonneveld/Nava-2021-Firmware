@@ -58,7 +58,7 @@
 #define MIDI_CHANNEL_OMNI		0
 #define MIDI_CHANNEL_OFF		17			// and over
 
-#define MIDI_SYSEX_ARRAY_SIZE	255			// Maximum size is 65535 bytes.
+#define MIDI_SYSEX_ARRAY_SIZE	2100			// Maximum size is 65535 bytes.
 
 /*! Type definition for practical use (because "unsigned char" is a bit long to write.. )*/
 typedef uint8_t byte;
@@ -221,7 +221,7 @@ public:
 	void setHandleProgramChange(void (*fptr)(byte channel, byte number));
 	void setHandleAfterTouchChannel(void (*fptr)(byte channel, byte pressure));
 	void setHandlePitchBend(void (*fptr)(byte channel, int bend));
-	void setHandleSystemExclusive(void (*fptr)(byte * array, byte size));
+	void setHandleSystemExclusive(void (*fptr)(byte * array, uint16_t size));
 	void setHandleTimeCodeQuarterFrame(void (*fptr)(byte data));
 	void setHandleSongPosition(void (*fptr)(unsigned int beats));
 	void setHandleSongSelect(void (*fptr)(byte songnumber));
@@ -265,7 +265,7 @@ private:
 	void (*mProgramChangeCallback)(byte channel, byte);
 	void (*mAfterTouchChannelCallback)(byte channel, byte);
 	void (*mPitchBendCallback)(byte channel, int);
-	void (*mSystemExclusiveCallback)(byte * array, byte size);
+	void (*mSystemExclusiveCallback)(byte * array, uint16_t size);
 	void (*mTimeCodeQuarterFrameCallback)(byte data);
 	void (*mSongPositionCallback)(unsigned int beats);
 	void (*mSongSelectCallback)(byte songnumber);

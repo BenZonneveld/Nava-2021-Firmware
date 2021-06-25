@@ -518,6 +518,7 @@ bool MIDI_Class::parse(byte inChannel)
 	
 	// If the buffer is full -> Don't Panic! Call the Vogons to destroy it.
 	if (bytes_available == 128) {
+		Serial.println("Vogons destroyed our buffer");
 		USE_SERIAL_PORT.flush();
 	}	
 	else {
@@ -928,7 +929,7 @@ void MIDI_Class::setHandleControlChange(void (*fptr)(byte channel, byte number, 
 void MIDI_Class::setHandleProgramChange(void (*fptr)(byte channel, byte number))				{ mProgramChangeCallback = fptr; }
 void MIDI_Class::setHandleAfterTouchChannel(void (*fptr)(byte channel, byte pressure))			{ mAfterTouchChannelCallback = fptr; }
 void MIDI_Class::setHandlePitchBend(void (*fptr)(byte channel, int bend))						{ mPitchBendCallback = fptr; }
-void MIDI_Class::setHandleSystemExclusive(void (*fptr)(byte * array, byte size))				{ mSystemExclusiveCallback = fptr; }
+void MIDI_Class::setHandleSystemExclusive(void (*fptr)(byte * array, uint16_t size))			{ mSystemExclusiveCallback = fptr; }
 void MIDI_Class::setHandleTimeCodeQuarterFrame(void (*fptr)(byte data))							{ mTimeCodeQuarterFrameCallback = fptr; }
 void MIDI_Class::setHandleSongPosition(void (*fptr)(unsigned int beats))						{ mSongPositionCallback = fptr; }
 void MIDI_Class::setHandleSongSelect(void (*fptr)(byte songnumber))								{ mSongSelectCallback = fptr; }
@@ -1000,7 +1001,13 @@ void MIDI_Class::launchCallback()
 		case AfterTouchChannel:		if (mAfterTouchChannelCallback != NULL)		mAfterTouchChannelCallback(mMessage.channel,mMessage.data1);	break;
 			
 		case ProgramChange:			if (mProgramChangeCallback != NULL)			mProgramChangeCallback(mMessage.channel,mMessage.data1);	break;
-		case SystemExclusive:		if (mSystemExclusiveCallback != NULL)		mSystemExclusiveCallback(mMessage.sysex_array,mMessage.data1);	break;
+		case SystemExclusive:
+				if (mSystemExclusiveCallback != NULL)
+				{
+//					size = mMessage.data1 + (256*mMessage.data2);
+					mSystemExclusiveCallback(mMessage.sysex_array,getSysExArrayLength());
+				}
+				break;
 			
 			// Occasional messages
 		case TimeCodeQuarterFrame:	if (mTimeCodeQuarterFrameCallback != NULL)	mTimeCodeQuarterFrameCallback(mMessage.data1);	break;
