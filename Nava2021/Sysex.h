@@ -7,6 +7,7 @@
 #define SYSEX_DEVID_1 0x07
 #define SYSEX_DEVID_2 0x1A
 
+#define HEADERSIZE      6
 // Sysex Commands:
 #define NAVA_BANK_DMP   0x00
 #define NAVA_PTRN_DMP   0x01

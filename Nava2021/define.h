@@ -550,7 +550,7 @@ byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 
 #if MIDI_HAS_SYSEX
 #define SYSEX_MAXPARAM 3    // Parameters up to this number get a select option.
-#define SYSEX_BUFFER_SIZE 512
+#define SYSEX_BUFFER_SIZE 2100
 byte sysExDump = 0;
 byte sysExParam = 0;
 byte SysEx[SYSEX_BUFFER_SIZE];
