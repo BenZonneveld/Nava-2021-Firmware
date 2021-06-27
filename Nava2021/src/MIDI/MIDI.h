@@ -58,7 +58,7 @@
 #define MIDI_CHANNEL_OMNI		0
 #define MIDI_CHANNEL_OFF		17			// and over
 
-#define MIDI_SYSEX_ARRAY_SIZE	2100			// Maximum size is 65535 bytes.
+#define MIDI_SYSEX_ARRAY_SIZE	257			// Maximum size is 65535 bytes.
 
 /*! Type definition for practical use (because "unsigned char" is a bit long to write.. )*/
 typedef uint8_t byte;

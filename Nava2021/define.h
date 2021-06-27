@@ -78,7 +78,11 @@
 
 //LCD
 #define MAX_CUR_POS 4
+#if MIDI_HAS_SYSEX
 #define MAX_CONF_PAGE 3
+#else
+#define MAX_CONF_PAGE 2
+#endif
 
 //Utility
 #define TOGGLE 0
@@ -521,7 +525,11 @@ boolean midiContinue;
 boolean instWasMidiTrigged[NBR_INST] ={
   FALSE};
 byte midiVelocity[NBR_INST]={
-  100};
+ 100};
+
+#define MIDI_ACCENT_VELOCITY 16
+#define MIDI_HIGH_VELOCITY (127-MIDI_ACCENT_VELOCITY)
+#define MIDI_LOW_VELOCITY (MIDI_HIGH_VELOCITY-32)
 
 #if MIDI_DRUMNOTES_OUT
 byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
@@ -541,9 +549,6 @@ byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
                               42, // CH
                               46}; // OH
                               
-#define MIDI_ACCENT_VELOCITY 127
-#define MIDI_HIGH_VELOCITY (MIDI_ACCENT_VELOCITY-24)
-#define MIDI_LOW_VELOCITY (MIDI_HIGH_VELOCITY-24)
 unsigned int lastInstrumentMidiOut = 0;
 byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 #endif // MIDI_DRUMNOTES_OUT

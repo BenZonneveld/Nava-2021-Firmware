@@ -676,7 +676,7 @@ bool MIDI_Class::parse(byte inChannel)
 						if (getTypeFromStatusByte(mPendingMessage[0]) == SystemExclusive) {
 							
 							// Store System Exclusive array in midimsg structure
-							for (byte i=0;i<MIDI_SYSEX_ARRAY_SIZE;i++) {
+							for (uint16_t i=0;i<MIDI_SYSEX_ARRAY_SIZE;i++) {   // To allow larger sysex messages
 								mMessage.sysex_array[i] = mPendingMessage[i];
 							}
 							

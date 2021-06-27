@@ -18,8 +18,8 @@
 #include "features.h"
 #include "define.h"
 #include "string.h"
-#include "src/MIDI/MIDI.h"
-
+//#include "src/MIDI/MIDI.h"
+#include <MIDI.h>
 #include "src/MemoryFree/MemoryFree.h"
 
 LiquidCrystal lcd(18, 19, 20, 21, 22, 23);
@@ -94,7 +94,7 @@ void setup()
   MIDI.setInputChannel(seq.RXchannel);
   MIDI.turnThruOff();                                       // [zabox] fixes double real time messages on midi out
 
-  ConnectMidiSysex();
+//  ConnectMidiSysex();
 
   sei();
 
@@ -113,6 +113,7 @@ void setup()
   delay(1000);
   LcdUpdate();                                              // [1.028] if started in expader mode
 
+  memory("End of Setup");
 }
 
 ////////////////////////Loop///////////////////////
