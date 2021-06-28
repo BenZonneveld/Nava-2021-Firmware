@@ -1,3 +1,5 @@
+#pragma once
+
 #define START_OF_SYSEX      0xF0
 #define END_OF_SYSEX        0xF7
 
@@ -22,3 +24,14 @@
 #define NAVA_TRACK_REQ  0x42
 #define NAVA_CONFIG_REQ 0x43
 #define NAVA_FULL_REQ   0x44
+
+struct SysexPortSettings
+{
+    static const bool UseRunningStatus = false;
+    static const bool HandleNullVelocityNoteOnAsNoteOff = true;
+    static const bool Use1ByteParsing = true;
+    static const unsigned SysExMaxSize = 128;
+    static const bool UseSenderActiveSensing = false;
+    static const bool UseReceiverActiveSensing = false;
+    static const uint16_t SenderActiveSensingPeriodicity = 0;
+};

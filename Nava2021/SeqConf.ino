@@ -32,7 +32,6 @@ void SeqConfiguration()
     if ( seq.SysExMode == false )
     {
       EnableSysexMode();
-//      ConnectMidiSysex();
     }
   } else {
     if ( seq.SysExMode == true )

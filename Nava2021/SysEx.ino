@@ -30,6 +30,8 @@ Arduino_CRC32 crc; // See https://github.com/bakercp/CRC32 for info
   initTrigTimer();
   DisconnectMidiHandleNote();                        
   DisconnectMidiHandleRealTime();
+//  MIDI.Settings.SysExMaxSize(Serial1,500,MIDI.Platform);
+  ConnectMidiSysex();
  }
  
 uint16_t data_to_sysex(uint8_t *data, uint8_t *sysex, uint16_t len) {
@@ -323,7 +325,7 @@ void GetConfig(byte *sysex)
   seq.BootMode  = (SeqMode)RawData[7];
 
   SaveSeqSetup();
-  SetSeqSync();
+//  SetSeqSync();
   needLcdUpdate = true;
 }
 
@@ -373,7 +375,8 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
   int16_t DataPointer=6;
   // Check if the sysex is for us.
   Serial.println("Handle Sysex");
-  
+
+  PrintSysex(RawSysEx, RawSize);
   if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
   RawSysEx[RawSize -1]= END_OF_SYSEX;
 
@@ -406,7 +409,7 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
   seq.configMode = true;
   seq.configPage = 3;
   needLcdUpdate = TRUE;
-  EnableSysexMode();
+ // EnableSysexMode();
 
   Serial.print("Type = "); Serial.println(Type, HEX);
   

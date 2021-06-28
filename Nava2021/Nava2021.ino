@@ -20,7 +20,22 @@
 #include "string.h"
 //#include "src/MIDI/MIDI.h"
 #include <MIDI.h>
+
+#if MIDI_HAS_SYSEX
+ struct MySettings : public midi::DefaultSettings
+ {
+    static const long BaudRate = 31250;
+    static const unsigned SysExMaxSize = 2100; // Accept SysEx messages up to 1024 bytes long.
+ };
+
+MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, MIDI, MySettings);
+#else
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
+#endif
+
+#if DEBUG
 #include "src/MemoryFree/MemoryFree.h"
+#endif
 
 LiquidCrystal lcd(18, 19, 20, 21, 22, 23);
 
@@ -29,7 +44,6 @@ void setup()
 {
 #if DEBUG
   Serial.begin(115200);
-
 
 #endif
   InitIO();//cf Dio
