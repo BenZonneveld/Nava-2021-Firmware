@@ -75,8 +75,8 @@ uint16_t sysex_to_data(uint8_t *sysex, uint8_t *data, uint16_t len) {
 uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8_t param)
 {     
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2, sysex_type, param};
-  uint8_t *SysEx = (uint8_t *)MIDI.getSysExArray();
-  
+  //uint8_t *SysEx = (uint8_t *)MIDI.getSysExArray();
+  uint8_t SysEx[2100];
   // Copy the header to the buffer
   memcpy(SysEx, header, sizeof(header));
 
@@ -99,7 +99,7 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
 //  sysexSize=sysexSize+data_to_sysex((uint8_t *)&checksum, sysex+sysexSize,4);
   SysEx[sysexSize++]=END_OF_SYSEX;
 
-#ifdef DEBUG
+#if DEBUG == 2
   Serial.println();
   Serial.print("Rawdata Size: ");Serial.println(datasize);
   Serial.print("Header Size: ");Serial.println(HEADERSIZE);
@@ -120,6 +120,7 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
     }
   }
 #endif
+  memory("Just before sending sysex");
   MIDI.sendSysEx(sysexSize,SysEx,true);
   // return system exclusive size
   return(sysexSize);
@@ -186,71 +187,33 @@ void DumpPattern(byte patternNbr)
 
 void DumpBank(byte selectedBank)
 {
-  byte *RawData=(byte *)calloc(4*PTRN_SIZE, sizeof(byte)); // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte RawData[SYSEX_BANK_PARTS*PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
   int datacount = 0;
   
-  for ( int BankPart=0; BankPart < 4; BankPart++)
+  for ( int BankPart=0; BankPart < SYSEX_BANK_PARTS; BankPart++)
   { 
     int datacount = 0;
     uint8_t patternNbr = selectedBank * 16 + (8 * BankPart);
-  
     unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
     WireBeginTX(adress); 
     Wire.endTransmission();
     Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request a 64 bytes page
     //TRIG-----------------------------------------------
-    for(int i =0; i<NBR_INST;i++){
-      RawData[datacount] = (unsigned long)((Wire.read() & 0xFF) | (( Wire.read() << 8) & 0xFF00));
-      // Serial.println(Wire.read());
-      datacount++;
+    for (uint16_t i = 0; i < (PTRN_SIZE * SYSEX_BANK_PARTS); i++)//loop as many instrument for a page
+    {
+      RawData[datacount++] = (Wire.read() & 0xFF);
     }
-    //SETUP-----------------------------------------------
-    RawData[datacount++] = Wire.read();
-    RawData[datacount++] = Wire.read();
-    RawData[datacount++] = Wire.read();                                                         // [zabox] [1.027] flam
-    RawData[datacount++] = Wire.read();                                                            // [zabox] [1.027] flam
-    RawData[datacount++] = Wire.read();
-    RawData[datacount++] = Wire.read();
-    RawData[datacount++] = Wire.read();
-    RawData[datacount++] = Wire.read();
-    for(int a = 0; a < 24; a++){
-      RawData[datacount++]=Wire.read();
-    }
-    //EXT INST-----------------------------------------------
-    for(int nbrPage = 0; nbrPage < 2; nbrPage++){
-        MIDI.read();
-      adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_SETUP_OFFSET);
-      WireBeginTX(adress);
-      Wire.endTransmission();
-      Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request of  64 bytes
-  
-      for (byte j = 0; j < MAX_PAGE_SIZE; j++){
-        RawData[datacount++] = Wire.read();
-      }
-    }
-    //VELOCITY-----------------------------------------------
-    for(int nbrPage = 0; nbrPage < 4; nbrPage++){
-        MIDI.read();
-      adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_EXT_OFFSET);
-      WireBeginTX(adress);
-      Wire.endTransmission();
-      Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request of  64 bytes
-      for (byte i = 0; i < 4; i++){//loop as many instrument for a page
-        for (byte j = 0; j < NBR_STEP; j++){
-          RawData[datacount++] = (Wire.read() & 0xFF);
-        }
-      }
-    }
-
-    uint16_t transmit_size=build_sysex( RawData, 4*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
-    memory("Bank Dump TX");
-    free(RawData);
+    
+    uint16_t transmit_size=build_sysex( RawData, SYSEX_BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
+    char memstring[32];
+    sprintf(memstring,"Bank Dump TX part %i\n", BankPart);
+    memory(memstring);
   }
 }
 
 void GetBank(byte * sysex)
 {
-  byte *RawData=(byte *)calloc(2* PTRN_SIZE, sizeof(byte));
+  byte RawData[SYSEX_BANK_PARTS * PTRN_SIZE];
 
   uint8_t BankId = sysex[5] & 0xF;
   uint8_t ptrnGrp = (sysex[5] - BankId) / 16;
@@ -260,15 +223,12 @@ void GetBank(byte * sysex)
   //
   Serial.print("BankId: ");Serial.println(BankId);
   Serial.print("ptrnGrp: ");Serial.println(ptrnGrp);
-  free(RawData);
-  
   needLcdUpdate = true;
 }
 
 void DumpTrack(byte trackNbr)
 {
-  byte *RawData=(byte *)calloc(TRACK_SIZE, sizeof(byte));
-//  byte RawData[TRACK_SIZE];
+  byte RawData[TRACK_SIZE];
   
   unsigned long adress;
   for(int nbrPage = 0; nbrPage < TRACK_SIZE/MAX_PAGE_SIZE; nbrPage++){
@@ -286,12 +246,11 @@ void DumpTrack(byte trackNbr)
 //  track[trkBuffer].length =  (unsigned long)(lowbyte | highbyte << 8);
 
   uint16_t transmit_size=build_sysex(RawData, TRACK_SIZE, NAVA_TRACK_DMP, trackNbr);
-  free(RawData);
 }
 
 void DumpConfig()
 {
-  byte *RawData=(byte *)calloc(SETUP_SIZE, sizeof(byte));
+  byte RawData[SETUP_SIZE];
   RawData[0]=(byte)(seq.sync); 
   RawData[1]=(byte)(seq.defaultBpm);
   RawData[2]=(byte)(seq.TXchannel);
@@ -306,13 +265,11 @@ void DumpConfig()
 #endif
 
   uint16_t transmit_size=build_sysex( RawData, SETUP_SIZE, NAVA_CONFIG_DMP,0);
-
-  free(RawData);
 }
 
 void GetConfig(byte *sysex)
 {
-  byte *RawData=(byte *)calloc(SETUP_SIZE, sizeof(byte));
+  byte RawData[SETUP_SIZE];
 
   sysex_to_data(sysex + 6, RawData, 74);
   seq.sync = RawData[0];
