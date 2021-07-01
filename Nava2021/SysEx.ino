@@ -129,8 +129,6 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
 void DumpPattern(byte patternNbr)
 {
   byte RawData[PTRN_SIZE];
-  Serial.print("Pattern Rawdata size: "); Serial.println(PTRN_SIZE);
-  memory("Dump Pattern");
   int datacount = 0;
 
   unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
@@ -139,9 +137,8 @@ void DumpPattern(byte patternNbr)
   Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request a 64 bytes page
   //TRIG-----------------------------------------------
   for(int i =0; i<NBR_INST;i++){
-    RawData[datacount] = (unsigned long)((Wire.read() & 0xFF) | (( Wire.read() << 8) & 0xFF00));
-    // Serial.println(Wire.read());
-    datacount++;
+    RawData[datacount++] = Wire.read(); 
+    RawData[datacount++] = Wire.read();
   }
   //SETUP-----------------------------------------------
   RawData[datacount++] = Wire.read();
@@ -157,7 +154,6 @@ void DumpPattern(byte patternNbr)
   }
   //EXT INST-----------------------------------------------
   for(int nbrPage = 0; nbrPage < 2; nbrPage++){
-      MIDI.read();
     adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_SETUP_OFFSET);
     WireBeginTX(adress);
     Wire.endTransmission();
@@ -169,7 +165,6 @@ void DumpPattern(byte patternNbr)
   }
   //VELOCITY-----------------------------------------------
   for(int nbrPage = 0; nbrPage < 4; nbrPage++){
-      MIDI.read();
     adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_EXT_OFFSET);
     WireBeginTX(adress);
     Wire.endTransmission();
@@ -180,40 +175,76 @@ void DumpPattern(byte patternNbr)
       }
     }
   }
-
   uint16_t transmit_size=build_sysex(RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
   memory("Dump ptr transmit");
 }
 
 void DumpBank(byte selectedBank)
 {
-  byte RawData[SYSEX_BANK_PARTS*PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte RawData[BANK_PARTS*PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
   int datacount = 0;
   
-  for ( int BankPart=0; BankPart < SYSEX_BANK_PARTS; BankPart++)
+  for ( int BankPart=0; BankPart < BANK_PARTS; BankPart++)
   { 
     int datacount = 0;
-    uint8_t patternNbr = selectedBank * 16 + (8 * BankPart);
-    unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
-    WireBeginTX(adress); 
-    Wire.endTransmission();
-    Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request a 64 bytes page
-    //TRIG-----------------------------------------------
-    for (uint16_t i = 0; i < (PTRN_SIZE * SYSEX_BANK_PARTS); i++)//loop as many instrument for a page
+    uint8_t patNum = selectedBank * 16 + (BANK_PARTS * BankPart);
+
+    for ( int ptrn = 0 ; ptrn < ( NBR_PATTERN / BANK_PARTS ); ptrn++ )
     {
-      RawData[datacount++] = (Wire.read() & 0xFF);
-    }
+      uint8_t patternNbr = patNum + ptrn; 
+      Serial.print("Pattern Nbr: "); Serial.println(patternNbr);
+      unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
+      WireBeginTX(adress); 
+      Wire.endTransmission();
+      Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request a 64 bytes page
+      //TRIG-----------------------------------------------
+      for(int i =0; i<NBR_INST;i++){
+        RawData[datacount++] = Wire.read(); 
+        RawData[datacount++] = Wire.read();
+      }
+      //SETUP-----------------------------------------------
+      RawData[datacount++] = Wire.read();
+      RawData[datacount++] = Wire.read();
+      RawData[datacount++] = Wire.read();                                                         // [zabox] [1.027] flam
+      RawData[datacount++] = Wire.read();                                                            // [zabox] [1.027] flam
+      RawData[datacount++] = Wire.read();
+      RawData[datacount++] = Wire.read();
+      RawData[datacount++] = Wire.read();
+      RawData[datacount++] = Wire.read();
+      for(int a = 0; a < 24; a++){
+        RawData[datacount++]=Wire.read();
+      }
+      //EXT INST-----------------------------------------------
+      for(int nbrPage = 0; nbrPage < 2; nbrPage++){
+        adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_SETUP_OFFSET);
+        WireBeginTX(adress);
+        Wire.endTransmission();
+        Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request of  64 bytes
     
-    uint16_t transmit_size=build_sysex( RawData, SYSEX_BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
-    char memstring[32];
-    sprintf(memstring,"Bank Dump TX part %i\n", BankPart);
-    memory(memstring);
+        for (byte j = 0; j < MAX_PAGE_SIZE; j++){
+          RawData[datacount++] = Wire.read();
+        }
+      }
+      //VELOCITY-----------------------------------------------
+      for(int nbrPage = 0; nbrPage < 4; nbrPage++){
+        adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_EXT_OFFSET);
+        WireBeginTX(adress);
+        Wire.endTransmission();
+        Wire.requestFrom(HRDW_ADDRESS,MAX_PAGE_SIZE); //request of  64 bytes
+        for (byte i = 0; i < 4; i++){//loop as many instrument for a page
+          for (byte j = 0; j < NBR_STEP; j++){
+            RawData[datacount++] = (Wire.read() & 0xFF);
+          }
+        }
+      }
+    }
+    uint16_t transmit_size=build_sysex( RawData, BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
   }
 }
 
 void GetBank(byte * sysex)
 {
-  byte RawData[SYSEX_BANK_PARTS * PTRN_SIZE];
+  byte RawData[BANK_PARTS * PTRN_SIZE];
 
   uint8_t BankId = sysex[5] & 0xF;
   uint8_t ptrnGrp = (sysex[5] - BankId) / 16;
@@ -241,9 +272,6 @@ void DumpTrack(byte trackNbr)
       RawData[i + (MAX_PAGE_SIZE * nbrPage)] = (Wire.read() & 0xFF); 
     }
   }
-//  byte lowbyte = (byte)track[trkBuffer].patternNbr[1022];
-//  byte highbyte = (byte)track[trkBuffer].patternNbr[1023];
-//  track[trkBuffer].length =  (unsigned long)(lowbyte | highbyte << 8);
 
   uint16_t transmit_size=build_sysex(RawData, TRACK_SIZE, NAVA_TRACK_DMP, trackNbr);
 }

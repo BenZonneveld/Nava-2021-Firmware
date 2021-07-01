@@ -7,8 +7,9 @@
 #define define_h
 
 //DEBUG
+#ifndef VERSION_DATE
 #define DEBUG 1
-
+#endif
   #if DEBUG
    unsigned int stepValue_old = 0;
    byte ppqn_old = 14;
