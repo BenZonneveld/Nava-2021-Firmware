@@ -302,10 +302,10 @@ void GetBank(byte * sysex, uint16_t RawSize)
 //      Wire.endTransmission();//end page transmission
 //      delay(DELAY_WR);//delay between each write page
       adress = (unsigned long)(PTRN_OFFSET + (16*BankId + BANK_PARTS * ptrnGrp) * PTRN_SIZE) + i;
-      Serial.println();Serial.print("Address: "); Serial.print(adress/ PTRN_SIZE);Serial.print(" : ");
+      Serial.print("Address: "); Serial.println(adress);
 //      WireBeginTX(adress);
     }
-    Serial.print(NavaData[i],HEX);Serial.print(" ");
+//    Serial.print(NavaData[i],HEX);Serial.print(" ");
 //    Wire.write((byte)(NavaData[i]));
   }
 //  Wire.endTransmission();//end page transmission
