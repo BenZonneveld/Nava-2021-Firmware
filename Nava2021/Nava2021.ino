@@ -22,13 +22,17 @@
 #include <MIDI.h>
 
 #if MIDI_HAS_SYSEX
- struct MySettings : public midi::DefaultSettings
- {
-    static const long BaudRate = 31250;
-    static const unsigned SysExMaxSize = 2100; // Accept SysEx messages up to 1024 bytes long.
- };
+struct MySettings : public midi::DefaultSettings
+{
+//    static const long BaudRate = 31250;
+    static const unsigned SysExMaxSize = 2176; // Accept SysEx messages up to 1024 bytes long.
+    static const bool UseRunningStatus = true;
+};
 
-MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, MIDI, MySettings);
+//MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, MIDI, MySettings);  // This does NOT change the Sysex Settings !!!
+midi::SerialMIDI<HardwareSerial> Serial1MIDI(Serial1);
+midi::MidiInterface<midi::SerialMIDI<HardwareSerial>, MySettings> MIDI((midi::SerialMIDI<HardwareSerial>&)Serial1MIDI);
+
 #else
 MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 #endif
@@ -45,6 +49,8 @@ void setup()
 #if DEBUG
   Serial.begin(115200);
 
+//  Serial.print("Sysex Size: ");
+//  Serial.println(MySettings);
 #endif
   InitIO();//cf Dio
   InitButtonCounter();//cf Button

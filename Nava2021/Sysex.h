@@ -26,6 +26,7 @@
 #define NAVA_FULL_REQ   0x44
 
 #define BANK_PARTS      4
+
 struct SysexPortSettings
 {
     static const bool UseRunningStatus = false;

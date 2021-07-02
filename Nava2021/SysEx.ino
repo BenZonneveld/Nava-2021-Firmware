@@ -121,6 +121,7 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
   }
 #endif
   memory("Just before sending sysex");
+  Serial.print("Sysex TX size: "); Serial.println(sysexSize);
   MIDI.sendSysEx(sysexSize,SysEx,true);
   // return system exclusive size
   return(sysexSize);
@@ -177,6 +178,35 @@ void DumpPattern(byte patternNbr)
   }
   uint16_t transmit_size=build_sysex(RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
   memory("Dump ptr transmit");
+}
+
+void GetPattern(byte * sysex, uint16_t RawSize)
+{
+  byte NavaData[PTRN_SIZE];
+  uint8_t patternNbr = sysex[5];
+  RawSize = RawSize - 6; // Size of the header
+  RawSize = RawSize - 9; // The checksum at the end + EOX
+  uint16_t NavaBytes = sysex_to_data(sysex + 6, NavaData, RawSize); // Transmitted Bank block = 2064 bytes;
+
+  unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
+  WireBeginTX(adress); 
+  //TRIG-----------------------------------------------
+  for (uint16_t i = 0; i < PTRN_SIZE; i++){
+    if ( (i % MAX_PAGE_SIZE) == 0 && i > 0) 
+    {
+      Wire.endTransmission();//end page transmission
+      delay(DELAY_WR);//delay between each write page
+      adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE) + i;
+      WireBeginTX(adress);
+      Serial.print("Page: "); Serial.println(i); 
+    }
+    Wire.write((byte)(NavaData[i]));
+  }
+  Wire.endTransmission();//end page transmission
+  delay(DELAY_WR);//delay between each write page
+  
+  Serial.print("Get Pattern");Serial.println(patternNbr);
+//  Serial.print("Nava Bytes: "); Serial.println(NavaBytes);
 }
 
 void DumpBank(byte selectedBank)
@@ -242,18 +272,22 @@ void DumpBank(byte selectedBank)
   }
 }
 
-void GetBank(byte * sysex)
+void GetBank(byte * sysex, uint16_t RawSize)
 {
   byte RawData[BANK_PARTS * PTRN_SIZE];
 
   uint8_t BankId = sysex[5] & 0xF;
   uint8_t ptrnGrp = (sysex[5] - BankId) / 16;
+  RawSize = RawSize - 6; // Size of the header
+  RawSize = RawSize - 9; // The checksum at the end + EOX
+  uint16_t NavaBytes = sysex_to_data(sysex + 6, RawData, RawSize); // Transmitted Bank block = 2064 bytes;
 
-  sysex_to_data(sysex + 6, RawData, 2063); // Transmitted Bank block = 2064 bytes;
+  // Todo: write RawData to EEPROM
 
-  //
   Serial.print("BankId: ");Serial.println(BankId);
   Serial.print("ptrnGrp: ");Serial.println(ptrnGrp);
+  Serial.print("Nava Bytes: "); Serial.println(NavaBytes);
+
   needLcdUpdate = true;
 }
 
@@ -274,6 +308,11 @@ void DumpTrack(byte trackNbr)
   }
 
   uint16_t transmit_size=build_sysex(RawData, TRACK_SIZE, NAVA_TRACK_DMP, trackNbr);
+}
+
+void GetTrack(byte *sysex, uint16_t RawSize)
+{
+  
 }
 
 void DumpConfig()
@@ -335,7 +374,7 @@ void MidiSendSysex(byte Type, byte Param)
 }
 
 #if DEBUG
-void PrintSysex(byte *sysex, int size)
+void PrintSysex(byte *sysex, unsigned size)
 {
   Serial.print("Print Sysex size: "); Serial.println(size);
   for(int i=0; i<size; i++)
@@ -353,15 +392,16 @@ void PrintSysex(byte *sysex, int size)
 }
 
 #endif
-void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
+void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
 {
 //  Serial.println(MIDI:)
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
   int16_t DataPointer=6;
   // Check if the sysex is for us.
-  Serial.println("Handle Sysex");
+//  Serial.println("Handle Sysex");
+memory("handle sysex");
 
-  PrintSysex(RawSysEx, RawSize);
+//  PrintSysex(RawSysEx, RawSize);
   if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
   RawSysEx[RawSize -1]= END_OF_SYSEX;
 
@@ -382,7 +422,7 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
 #if DEBUG
   Serial.print("Calculated checksum: "); Serial.println(checksum, HEX);
   Serial.print("Received checksum: "); Serial.println(RxChecksum, HEX);
-  PrintSysex(RawSysEx, RawSize);
+//  PrintSysex(RawSysEx, RawSize);
 #endif  
 
   if ( checksum != RxChecksum )
@@ -397,7 +437,7 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
  // EnableSysexMode();
 
   Serial.print("Type = "); Serial.println(Type, HEX);
-  
+Serial.print("Rawsize: "); Serial.println(RawSize);  
   switch(Type)
   {
   case NAVA_BANK_REQ: 
@@ -413,10 +453,9 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
     }
   case NAVA_BANK_DMP:
     {
-      sysExDump = NAVA_BANK_DMP;
       Serial.println("Received a Bank Part");
-      sysExParam = Param & 0xf;
-      GetBank(RawSysEx);
+      if ( RawSize != 2063 ) return;
+      GetBank(RawSysEx, RawSize);
       break;     
     }
   case NAVA_PTRN_REQ:
@@ -430,6 +469,16 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
       }
       break;  
     }
+   case NAVA_PTRN_DMP:
+    {
+      if ( Param < 128 )
+      {
+        Serial.print("Getting Pattern: ");Serial.println(Param);
+        if ( RawSize != 527 ) return;
+        GetPattern(RawSysEx, RawSize);
+      }
+      break;  
+    }
   case NAVA_TRACK_REQ:
     {
       if ( Param < 16 )
@@ -440,6 +489,14 @@ void HandleSystemExclusive(byte * RawSysEx, uint16_t RawSize)
         DumpTrack(Param);
       }
       break;
+    }
+  case NAVA_TRACK_DMP:
+    {
+      if ( Param < 16 )
+      {
+        if ( RawSize != 1186 ) return;
+        GetTrack(RawSysEx, RawSize);
+      }
     }
   case NAVA_CONFIG_REQ:
     { 
