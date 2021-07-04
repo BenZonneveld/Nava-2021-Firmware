@@ -268,7 +268,7 @@ void DumpBank(byte selectedBank)
         }
       }
     }
-    uint16_t transmit_size=build_sysex( RawData, BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + BANK_PARTS * BankPart);
+    uint16_t transmit_size=build_sysex( RawData, BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, (selectedBank + 16* BankPart)); // Shift the bankpart to the left.
   }
 }
 
