@@ -215,7 +215,7 @@ void DumpBank(byte selectedBank)
   for ( int BankPart=0; BankPart < BANK_PARTS; BankPart++)
   { 
     int datacount = 0;
-    uint8_t patNum = selectedBank * 16 + (BANK_PARTS * BankPart);
+    uint8_t patNum = selectedBank * NBR_PATTERN + (BANK_PARTS * BankPart);
 
     for ( int ptrn = 0 ; ptrn < ( NBR_PATTERN / BANK_PARTS ); ptrn++ )
     {
@@ -268,7 +268,7 @@ void DumpBank(byte selectedBank)
         }
       }
     }
-    uint16_t transmit_size=build_sysex( RawData, BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + 16* BankPart);
+    uint16_t transmit_size=build_sysex( RawData, BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, selectedBank + BANK_PARTS * BankPart);
   }
 }
 
@@ -288,29 +288,19 @@ void GetBank(byte * sysex, uint16_t RawSize)
   Serial.print("Nava Bytes: "); Serial.println(NavaBytes);
 #endif
   
-  if ( ptrnGrp == 0 )
-  {
-//        PrintSysex(sysex, RawSize);
-        Serial.println(16*BankId + BANK_PARTS * ptrnGrp);
-  }
-  unsigned long adress = (unsigned long)(PTRN_OFFSET + (16*BankId + BANK_PARTS * ptrnGrp) * PTRN_SIZE);
-//  WireBeginTX(adress); 
+  unsigned long adress;
   //TRIG-----------------------------------------------
-  for (uint16_t i = 0; i < BANK_PARTS * PTRN_SIZE; i++){
-    if ( (i % MAX_PAGE_SIZE) == 0 && i > 0) 
+  for (uint16_t nbrPage = 0; nbrPage < (BANK_PARTS * PTRN_SIZE)/MAX_PAGE_SIZE; nbrPage++)
+  {
+    adress = (unsigned long)(PTRN_OFFSET + ((NBR_PATTERN*BankId + BANK_PARTS * ptrnGrp) * PTRN_SIZE) + nbrPage * MAX_PAGE_SIZE);
+    WireBeginTX(adress);
+    for ( int i = 0 ; i < MAX_PAGE_SIZE ; i++ )
     {
-//      Wire.endTransmission();//end page transmission
-//      delay(DELAY_WR);//delay between each write page
-      adress = (unsigned long)(PTRN_OFFSET + (16*BankId + BANK_PARTS * ptrnGrp) * PTRN_SIZE) + i;
-      Serial.print("Address: "); Serial.println(adress);
-//      WireBeginTX(adress);
+      Wire.write((byte)(NavaData[i + ( MAX_PAGE_SIZE * nbrPage)]));
     }
-//    Serial.print(NavaData[i],HEX);Serial.print(" ");
-//    Wire.write((byte)(NavaData[i]));
+    Wire.endTransmission();//end of 64 bytes transfer
+    delay(DELAY_WR);//delay between each write page
   }
-//  Wire.endTransmission();//end page transmission
-
-  needLcdUpdate = true;
 }
 
 void DumpTrack(byte trackNbr)
