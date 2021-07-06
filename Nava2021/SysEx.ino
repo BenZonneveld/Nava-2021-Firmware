@@ -365,6 +365,13 @@ void GetConfig(byte *sysex)
   needLcdUpdate = true;
 }
 
+void DumpLevels()
+{
+  byte RawData[32];
+  memcpy(&RawData, instVelHigh, 16); // Copy High Velocity Values
+  memcpy(&RawData+16, instVelLow, 16);
+  uint16_t transmit_size=build_sysex( RawData, 32, NAVA_LEVELS_DMP,0);
+}
 void MidiSendSysex(byte Type, byte Param)
 {
   switch(Type)
@@ -409,6 +416,8 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
 //  Serial.println(MIDI:)
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
   int16_t DataPointer=6;
+
+  Serial.println("Handle System Exclusive");
   // Check if the sysex is for us.
   if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
 
@@ -511,11 +520,20 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
       DumpConfig();
       break;
     }
-   case NAVA_CONFIG_DMP:
+  case NAVA_CONFIG_DMP:
     {
-      sysExDump = NAVA_CONFIG_DMP;
       GetConfig(RawSysEx);
       break; 
+    }
+  case NAVA_LEVELS_REQ:
+    {
+      sysExDump = NAVA_LEVELS_DMP;
+      DumpLevels();
+      break; 
+    }
+  case NAVA_LEVELS_DMP:
+    {
+      break;
     }
   }
 }

@@ -15,16 +15,16 @@
 #define NAVA_PTRN_DMP   0x01
 #define NAVA_TRACK_DMP  0x02
 #define NAVA_CONFIG_DMP 0x03
-#define NAVA_FULL_DMP   0x04
-
+#define NAVA_LEVELS_DMP 0x04
+#define NAVA_FULL_DMP   0x05
 
 // Request command's 
 #define NAVA_BANK_REQ   0x40
 #define NAVA_PTRN_REQ   0x41
 #define NAVA_TRACK_REQ  0x42
 #define NAVA_CONFIG_REQ 0x43
-#define NAVA_FULL_REQ   0x44
-
+#define NAVA_LEVELS_REQ 0x44
+#define NAVA_FULL_REQ   0x45
 #define BANK_PARTS      4
 
 struct SysexPortSettings
