@@ -186,7 +186,7 @@ void DumpPattern(byte patternNbr)
 
 void GetPattern(byte * sysex, uint16_t RawSize)
 {
-  byte NavaData[PTRN_SIZE];
+  byte NavaData[PTRN_SIZE + 32];
   uint8_t patternNbr = sysex[5];
   RawSize = RawSize - 6; // Size of the header
   RawSize = RawSize - 9; // The checksum at the end + EOX
@@ -284,7 +284,7 @@ void DumpBank(byte selectedBank)
 
 void GetBank(byte * sysex, uint16_t RawSize)
 {
-  byte NavaData[BANK_PARTS * PTRN_SIZE];
+  byte NavaData[BANK_PARTS * PTRN_SIZE + 32];
 
   uint8_t BankId = sysex[5] & 0xF;
   uint8_t ptrnGrp = (sysex[5] - BankId) / 16;
