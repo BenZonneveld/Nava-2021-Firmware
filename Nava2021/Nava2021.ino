@@ -25,7 +25,7 @@
 struct MySettings : public midi::DefaultSettings
 {
 //    static const long BaudRate = 31250;
-    static const unsigned SysExMaxSize = 2176; // Accept SysEx messages up to 1024 bytes long.
+    static const unsigned SysExMaxSize = 2176; // Accept SysEx messages up to 2176 bytes long.
     static const bool UseRunningStatus = true;
 };
 

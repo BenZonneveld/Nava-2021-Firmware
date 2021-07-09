@@ -127,7 +127,7 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
 
 void DumpPattern(byte patternNbr)
 {
-  byte RawData[PTRN_SIZE];
+  byte RawData[PTRN_SIZE + 32];
   int datacount = 0;
 
   unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
@@ -174,7 +174,11 @@ void DumpPattern(byte patternNbr)
       }
     }
   }
-  uint16_t transmit_size=build_sysex(RawData, sizeof(RawData), NAVA_PTRN_DMP, patternNbr);
+  memcpy(&RawData[datacount], instVelHigh, 16); // Copy High Velocity Values
+  datacount += 16;
+  memcpy(&RawData[datacount], instVelLow, 16);
+  datacount += 16;
+  uint16_t transmit_size=build_sysex(RawData, datacount, NAVA_PTRN_DMP, patternNbr);
 #ifdef DEBUG
   memory("Dump ptr transmit");
 #endif
@@ -209,7 +213,7 @@ void GetPattern(byte * sysex, uint16_t RawSize)
 
 void DumpBank(byte selectedBank)
 {
-  byte RawData[BANK_PARTS*PTRN_SIZE]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte RawData[BANK_PARTS*PTRN_SIZE + 32]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
   int datacount = 0;
   
   for ( int BankPart=0; BankPart < BANK_PARTS; BankPart++)
@@ -268,7 +272,13 @@ void DumpBank(byte selectedBank)
         }
       }
     }
-    uint16_t transmit_size=build_sysex( RawData, BANK_PARTS*PTRN_SIZE, NAVA_BANK_DMP, (selectedBank + 16* BankPart)); // Shift the bankpart to the left.
+    // Instrument Levels
+    memcpy(&RawData[datacount], instVelHigh, 16); // Copy High Velocity Values
+    datacount += 16;
+    memcpy(&RawData[datacount], instVelLow, 16);
+    datacount += 16;
+
+    uint16_t transmit_size=build_sysex( RawData, datacount, NAVA_BANK_DMP, (selectedBank + 16* BankPart)); // Shift the bankpart to the left.
   }
 }
 
@@ -369,7 +379,7 @@ void DumpLevels()
 {
   byte RawData[32];
   memcpy(&RawData, instVelHigh, 16); // Copy High Velocity Values
-  memcpy(&RawData+16, instVelLow, 16);
+  memcpy(&RawData[16], instVelLow, 16);
   uint16_t transmit_size=build_sysex( RawData, 32, NAVA_LEVELS_DMP,0);
 }
 void MidiSendSysex(byte Type, byte Param)
@@ -472,7 +482,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     }
   case NAVA_BANK_DMP:
     {
-      if ( RawSize != 2063 ) return;
+      if ( RawSize != SYSEX_BANK_SIZE ) return;
       GetBank(RawSysEx, RawSize);
       break;     
     }
@@ -490,7 +500,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     {
       if ( Param < 128 )
       {
-        if ( RawSize != 527 ) return;
+        if ( RawSize != SYSEX_PTRN_SIZE ) return;
         GetPattern(RawSysEx, RawSize);
       }
       break;  
@@ -509,7 +519,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     {
       if ( Param < 16 )
       {
-        if ( RawSize != 1186 ) return;
+        if ( RawSize != SYSEX_TRACK_SIZE ) return;
         GetTrack(RawSysEx, RawSize);
       }
     }
@@ -522,6 +532,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     }
   case NAVA_CONFIG_DMP:
     {
+      if ( RawSize != SYSEX_CONFIG_SIZE ) return;
       GetConfig(RawSysEx);
       break; 
     }

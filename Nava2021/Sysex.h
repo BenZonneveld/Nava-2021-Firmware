@@ -27,6 +27,10 @@
 #define NAVA_FULL_REQ   0x45
 #define BANK_PARTS      4
 
+#define SYSEX_PTRN_SIZE   564
+#define SYSEX_BANK_SIZE   2100
+#define SYSEX_TRACK_SIZE  1186
+#define SYSEX_CONFIG_SIZE 89
 struct SysexPortSettings
 {
     static const bool UseRunningStatus = false;
