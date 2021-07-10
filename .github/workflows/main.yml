@@ -61,7 +61,7 @@ jobs:
           arduino-cli core install --additional-urls="https://mcudude.github.io/MightyCore/package_MCUdude_MightyCore_index.json" ${{ matrix.arduino-platform }}
 
       - name: Install libraries
-        run: arduino-cli lib install LiquidCrystal Arduino_CRC32
+        run: arduino-cli lib install LiquidCrystal Arduino_CRC32 "MIDI Library"
           
       # Finally, we compile the sketch, using the FQBN that was set
       # in the build matrix.

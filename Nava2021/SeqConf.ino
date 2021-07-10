@@ -31,13 +31,7 @@ void SeqConfiguration()
   { 
     if ( seq.SysExMode == false )
     {
-      seq.SysExMode = true;
-      Serial.println("Sysex Receive enabled");
-      TimerStop();
-      initTrigTimer();
-      DisconnectMidiHandleNote();                        
-      DisconnectMidiHandleRealTime();
-      ConnectMidiSysex();
+      EnableSysexMode();
     }
   } else {
     if ( seq.SysExMode == true )

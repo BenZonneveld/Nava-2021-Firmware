@@ -90,21 +90,22 @@ void ConnectMidiHandleRealTime()
 //Disconnect midi real time callback
 void DisconnectMidiHandleRealTime()
 {
-  MIDI.disconnectCallbackFromType(Clock);
-  MIDI.disconnectCallbackFromType(Start);
-  MIDI.disconnectCallbackFromType(Stop);
-  MIDI.disconnectCallbackFromType(Continue);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Clock);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Start);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Stop);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Continue);
 }
 
 #if MIDI_HAS_SYSEX
 void ConnectMidiSysex()
 {
+  Serial.println("Sysex Connected");
   MIDI.setHandleSystemExclusive(HandleSystemExclusive);
 }
 
 void DisconnectMidiSysex()
 {
-  MIDI.disconnectCallbackFromType(SystemExclusive);
+  MIDI.disconnectCallbackFromType(midi::MidiType::SystemExclusive);
 }
 #endif
 
@@ -118,8 +119,8 @@ void ConnectMidiHandleNote()
 //Disconnect midi real time callback                      // [zabox] [1.028]
 void DisconnectMidiHandleNote()
 {
-  MIDI.disconnectCallbackFromType(NoteOn);
-  MIDI.disconnectCallbackFromType(NoteOff);
+  MIDI.disconnectCallbackFromType(midi::MidiType::NoteOn);
+  MIDI.disconnectCallbackFromType(midi::MidiType::NoteOff);
 }
 
 //Handle noteON
