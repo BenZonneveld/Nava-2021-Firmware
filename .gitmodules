@@ -1,0 +1,3 @@
+[submodule "Editor-for-the-Nava"]
+	path = Editor-for-the-Nava
+	url = git@github.com:BenZonneveld/Editor-for-the-Nava.git

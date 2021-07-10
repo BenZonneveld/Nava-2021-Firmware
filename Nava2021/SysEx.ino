@@ -410,6 +410,7 @@ void MidiSendSysex(byte Type, byte Param)
   switch(Type)
   {
     case NAVA_BANK_DMP: // Bank
+    Serial.println("Dump Bank");
         DumpBank(Param);
         break;
     case NAVA_PTRN_DMP: // Pattern
