@@ -133,7 +133,6 @@ void setup()
   delay(1000);
   LcdUpdate();                                              // [1.028] if started in expader mode
 
-  memory("End of Setup");
 }
 
 ////////////////////////Loop///////////////////////
