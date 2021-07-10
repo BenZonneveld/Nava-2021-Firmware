@@ -16,7 +16,11 @@
 
 ## [Nava2021Neuro-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210621) (2021-06-20)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210621...Nava2021Neuro-20210621)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210710...Nava2021Neuro-20210621)
+
+## [Nava2021Neuro-20210710](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210710) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210621...Nava2021Neuro-20210710)
 
 ## [Nava2021beta-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021beta-20210621) (2021-06-20)
 
