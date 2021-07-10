@@ -246,7 +246,57 @@ void EncGet()
 #endif                 
           break;
         }
-    }    
+    }
+#if MIDI_HAS_SYSEX
+    else if (seq.configPage == 3)
+    {
+      switch(curIndex)
+      {
+        case 0:
+          {
+            sysExDump = EncGet(sysExDump, 1);               //type select
+            sysExDump = constrain(sysExDump, 0, 3);
+            static byte prevsysExDump;
+            if (sysExDump != prevsysExDump){
+              prevsysExDump = sysExDump;
+              needLcdUpdate = TRUE;
+            }
+            break;
+          }
+        case 1:
+          {
+            if ( sysExDump < SYSEX_MAXPARAM )
+            {
+              static byte prevsysExParam;
+              sysExParam = EncGet(sysExParam, 1);               //bank select
+              if ( sysExDump == 0 )
+              {
+                sysExParam = constrain(sysExParam, 0, MAX_BANK); // Banks
+              } 
+              else if ( sysExDump == 1 )
+              {
+                sysExParam = constrain(sysExParam, 0, MAX_PTRN-1); // Patterns
+              } 
+              else if ( sysExDump == 2 ) 
+              {
+                sysExParam = constrain(sysExParam, 0, MAX_TRACK-1); // Tracks
+              }
+              
+              if (sysExParam != prevsysExParam){
+                prevsysExParam = sysExParam;
+                needLcdUpdate = TRUE;
+              }
+            }
+            break;
+          }
+        case 2:
+        case 3:
+          {
+            break;
+          }
+      }          
+    }
+#endif    
   }
   else{
     seq.bpm = EncGet(seq.bpm,1);

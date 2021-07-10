@@ -27,65 +27,105 @@ void LcdUpdate()
     if (seq.configMode)
     {
       lcd.setCursor(0,0);
-      switch (seq.configPage){
-      case 1:// first page
-        lcd.print("syn bpm mTX mRX ");
-        lcd.setCursor(cursorPos[curIndex],0);
-        lcd.print(letterUpConfPage1[curIndex]);
-        lcd.setCursor(0,1);
-        LcdClearLine();
-        lcd.setCursor(0,1);
-        char  sync[2];
-        strcpy_P(sync, (char*)pgm_read_word(&(nameSync[seq.sync])));
-        lcd.print(sync);
-        lcd.setCursor(4,1);
-        lcd.print(seq.defaultBpm);
-        lcd.setCursor(9,1);
-        lcd.print(seq.TXchannel);
-        lcd.setCursor(13,1);
-        lcd.print(seq.RXchannel);
-        break;
-      case 2:// second page
-        lcd.print("pCh mte ");
+      switch (seq.configPage)
+      {
+        case 1:// first page
+        {
+          lcd.print("syn bpm mTX mRX ");
+          lcd.setCursor(cursorPos[curIndex],0);
+          lcd.print(letterUpConfPage1[curIndex]);
+          lcd.setCursor(0,1);
+          LcdClearLine();
+          lcd.setCursor(0,1);
+          char  sync[2];
+          strcpy_P(sync, (char*)pgm_read_word(&(nameSync[seq.sync])));
+          lcd.print(sync);
+          lcd.setCursor(4,1);
+          lcd.print(seq.defaultBpm);
+          lcd.setCursor(9,1);
+          lcd.print(seq.TXchannel);
+          lcd.setCursor(13,1);
+          lcd.print(seq.RXchannel);
+          break;
+        }
+        case 2:// second page
+        {
+          lcd.print("pCh mte ");
 #if MIDI_EXT_CHANNEL      
-        lcd.print("eXT ");
+          lcd.print("eXT ");
 #else
-        lcd.print("nc. ");
+          lcd.print("nc. ");
 #endif
 #if CONFIG_BOOTMODE
-        lcd.print("mod ");
+          lcd.print("mod ");
 #else                        
-        lcd.print("nc. ");                             // [zabox]
+          lcd.print("nc. ");                             // [zabox]
 #endif
-        lcd.setCursor(cursorPos[curIndex],0);
-        lcd.print(letterUpConfPage2[curIndex]);
-        lcd.setCursor(0,1);
-        LcdClearLine();
-        lcd.setCursor(0,1);
-        char  ptrnSyncChange[2];
-        strcpy_P(ptrnSyncChange, (char*)pgm_read_word(&(namePtrnChange[seq.ptrnChangeSync])));
-        lcd.print(ptrnSyncChange);
-        lcd.setCursor(4,1);
-        char  mute[2];
-        strcpy_P(mute, (char*)pgm_read_word(&(nameMute[seq.muteModeHH])));
-        lcd.print(mute);
-        lcd.setCursor(8,1);
+          lcd.setCursor(cursorPos[curIndex],0);
+          lcd.print(letterUpConfPage2[curIndex]);
+          lcd.setCursor(0,1);
+          LcdClearLine();
+          lcd.setCursor(0,1);
+          char  ptrnSyncChange[2];
+          strcpy_P(ptrnSyncChange, (char*)pgm_read_word(&(namePtrnChange[seq.ptrnChangeSync])));
+          lcd.print(ptrnSyncChange);
+          lcd.setCursor(4,1);
+          char  mute[2];
+          strcpy_P(mute, (char*)pgm_read_word(&(nameMute[seq.muteModeHH])));
+          lcd.print(mute);
+          lcd.setCursor(8,1);
 #if MIDI_EXT_CHANNEL        
-        lcd.print(seq.EXTchannel);
+          lcd.print(seq.EXTchannel);
 #else
-        lcd.print("xxx");
+          lcd.print("xxx");
 #endif        
-        lcd.setCursor(12,1);
+          lcd.setCursor(12,1);
 #if CONFIG_BOOTMODE
-        char bootmode[3];
-        strcpy_P(bootmode,(char*)pgm_read_word(&(nameBootMode[seq.BootMode])));
-        lcd.print(bootmode);
+          char bootmode[3];
+          strcpy_P(bootmode,(char*)pgm_read_word(&(nameBootMode[seq.BootMode])));
+          lcd.print(bootmode);
 #else        
-        lcd.print("xxx");
+          lcd.print("xxx");
 #endif        
-        break;
+          break;
+        }
+#if MIDI_HAS_SYSEX        
+      case 3: // Config page 3
+        {  
+          if ( sysExDump < SYSEX_MAXPARAM )
+          {
+            lcd.print("type    select  ");
+          } else {
+            lcd.print("type            ");
+          }
+          lcd.setCursor(cursorPos[curIndex*2],0);
+          lcd.print(letterUpConfPage3[curIndex]);
+          lcd.setCursor(0,1);
+          LcdClearLine();
+          lcd.setCursor(0,1);
+          char  sysex[5];
+          strcpy_P(sysex, (char*)pgm_read_word(&(nameSysex[sysExDump])));
+          lcd.print(sysex);
+          lcd.setCursor(8,1);
+          if ( sysExDump < SYSEX_MAXPARAM )
+          {
+            if ( sysExDump == 0 )
+            {
+              sysExParam = constrain(sysExParam, 0, MAX_BANK); // Banks
+              lcd.print(char(sysExParam+65));
+            } else if (sysExDump == 1) {
+              sysExParam = constrain(sysExParam, 0, MAX_PTRN-1); // Patterns
+              lcd.print(char((sysExParam / 16)+65));
+              lcd.print(sysExParam - ((sysExParam / 16)*NBR_PATTERN) + 1);
+            } else if  (sysExDump == 2) {
+              sysExParam = constrain(sysExParam, 0, MAX_TRACK-1); // Tracks
+              lcd.print(sysExParam + 1);
+            }
+          }
+          break;
+        }
+#endif        
       }
-
     }
     else if (seq.sync == EXPANDER) {                                               // [1.028] Expander
       lcd.setCursor(0,0);
