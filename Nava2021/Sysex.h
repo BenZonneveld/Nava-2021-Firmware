@@ -25,6 +25,9 @@
 #define NAVA_CONFIG_REQ 0x43
 #define NAVA_LEVELS_REQ 0x44
 #define NAVA_FULL_REQ   0x45
+#define NAVA_FBANK_REQ  0x46
+#define NAVA_FTRACK_REQ 0x47
+#define NAVA_ACK        0x48
 #define BANK_PARTS      4
 
 #define SYSEX_PTRN_SIZE   564

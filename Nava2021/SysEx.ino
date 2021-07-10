@@ -179,9 +179,6 @@ void DumpPattern(byte patternNbr)
   memcpy(&RawData[datacount], instVelLow, 16);
   datacount += 16;
   uint16_t transmit_size=build_sysex(RawData, datacount, NAVA_PTRN_DMP, patternNbr);
-#ifdef DEBUG
-  memory("Dump ptr transmit");
-#endif
 }
 
 void GetPattern(byte * sysex, uint16_t RawSize)
@@ -206,9 +203,6 @@ void GetPattern(byte * sysex, uint16_t RawSize)
     Wire.write((byte)(NavaData[i]));
   }
   Wire.endTransmission();//end page transmission
-#if DEBUG  
-  Serial.print("Get Pattern");Serial.println(patternNbr);
-#endif
 }
 
 void DumpBank(byte selectedBank)
@@ -224,9 +218,6 @@ void DumpBank(byte selectedBank)
     for ( int ptrn = 0 ; ptrn < ( NBR_PATTERN / BANK_PARTS ); ptrn++ )
     {
       uint8_t patternNbr = patNum + ptrn; 
-#if DEBUG      
-      Serial.print("Pattern Nbr: "); Serial.println(patternNbr);
-#endif      
       unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
       WireBeginTX(adress); 
       Wire.endTransmission();
@@ -292,11 +283,6 @@ void GetBank(byte * sysex, uint16_t RawSize)
   RawSize = RawSize - 6; // Size of the header
   RawSize = RawSize - 9; // The checksum at the end + EOX
   uint16_t NavaBytes = sysex_to_data(sysex + 6, NavaData, RawSize); // Transmitted Bank block = 2064 bytes;
-#if DEBUG
-  Serial.print("BankId: ");Serial.println(BankId);
-  Serial.print("ptrnGrp: ");Serial.println(ptrnGrp);
-  Serial.print("Nava Bytes: "); Serial.println(NavaBytes);
-#endif
   
   unsigned long adress;
   //TRIG-----------------------------------------------
@@ -340,11 +326,6 @@ void GetTrack(byte *sysex, uint16_t RawSize)
   RawSize = RawSize - 9; // The checksum at the end + EOX
   uint16_t NavaBytes = sysex_to_data(sysex + 6, NavaData, RawSize); // Transmitted Bank block = 2064 bytes;
 
-//  byte lowbyte =  (byte)(track[trkBuffer].length & 0xFF);
-//  byte highbyte = (byte)((track[trkBuffer].length >> 8) & 0xFF);
-//  track[trkBuffer].patternNbr[1022] = lowbyte;
-//  track[trkBuffer].patternNbr[1023] = highbyte;
-
   unsigned long adress;
   for(int nbrPage = 0; nbrPage < TRACK_SIZE/MAX_PAGE_SIZE; nbrPage++){
     adress = (unsigned long)(PTRN_OFFSET + (trackNbr * TRACK_SIZE) + (MAX_PAGE_SIZE * nbrPage) + TRACK_OFFSET);
@@ -355,10 +336,6 @@ void GetTrack(byte *sysex, uint16_t RawSize)
     Wire.endTransmission();//end of 64 bytes transfer
     delay(DELAY_WR);//delay between each write page
   }
-
-#if DEBUG  
-  Serial.print("Get track ");Serial.println(trackNbr);
-#endif
 }
 
 void DumpConfig()
@@ -406,6 +383,28 @@ void DumpLevels()
   memcpy(&RawData[16], instVelLow, 16);
   uint16_t transmit_size=build_sysex( RawData, 32, NAVA_LEVELS_DMP,0);
 }
+
+void NavaAck()
+{
+  byte RawData[1];
+  uint16_t transmit_size=build_sysex(RawData,0,NAVA_ACK,0);
+}
+
+void DumpFull()
+{
+  for (uint8_t bank=0; bank < NBR_BANK; bank ++)
+  {
+    DumpBank(bank);
+  }
+  delay(54);
+  for ( uint8_t trk = 0 ; trk < MAX_TRACK; trk++)
+  {
+    DumpTrack(trk);
+  }
+  delay(64);
+  DumpConfig();
+}
+
 void MidiSendSysex(byte Type, byte Param)
 {
   switch(Type)
@@ -421,8 +420,10 @@ void MidiSendSysex(byte Type, byte Param)
         break;
     case NAVA_CONFIG_DMP: // Config
         DumpConfig();
-    case NAVA_FULL_DMP: // Full
-      break; 
+        break;
+    case NAVA_FULL_DMP: // Full, actually an easy way to dump all banks tracks and config data
+        DumpFull();
+        break; 
   }
 }
 
@@ -451,7 +452,6 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
   int16_t DataPointer=6;
 
-  Serial.println("Handle System Exclusive");
   // Check if the sysex is for us.
   if ( memcmp(header, RawSysEx, sizeof(header)) != 0 ) return;
 
@@ -471,12 +471,6 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
     RxChecksum = ( RxChecksum << 4 ) | RawSysEx[i-1];
   }
 
-#if DEBUG
-  Serial.print("Calculated checksum: "); Serial.println(checksum, HEX);
-  Serial.print("Received checksum: "); Serial.println(RxChecksum, HEX);
-//  PrintSysex(RawSysEx, RawSize);
-#endif  
-
   if ( checksum != RxChecksum )
   {
 //    Serial.print("CREATE ERROR HANDLING");
@@ -488,14 +482,11 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
   needLcdUpdate = TRUE;
  // EnableSysexMode();
 
-#if DEBUG
-  Serial.print("Type = "); Serial.println(Type, HEX);
-Serial.print("Rawsize: "); Serial.println(RawSize);  
-#endif
   switch(Type)
   {
   case NAVA_BANK_REQ: 
     {
+      Serial.print("Bank Req Param: ");Serial.println(Param);
       if ( Param < 8 )
       { 
         sysExParam = Param;
@@ -508,6 +499,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     {
       if ( RawSize != SYSEX_BANK_SIZE ) return;
       GetBank(RawSysEx, RawSize);
+      NavaAck();
       break;     
     }
   case NAVA_PTRN_REQ:
@@ -526,6 +518,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
       {
         if ( RawSize != SYSEX_PTRN_SIZE ) return;
         GetPattern(RawSysEx, RawSize);
+        NavaAck();
       }
       break;  
     }
@@ -545,6 +538,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
       {
         if ( RawSize != SYSEX_TRACK_SIZE ) return;
         GetTrack(RawSysEx, RawSize);
+        NavaAck();
       }
       break;
     }
@@ -559,6 +553,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     {
       if ( RawSize != SYSEX_CONFIG_SIZE ) return;
       GetConfig(RawSysEx);
+      NavaAck();
       break; 
     }
   case NAVA_LEVELS_REQ:
@@ -569,6 +564,31 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
     }
   case NAVA_LEVELS_DMP:
     {
+      break;
+    }
+  case NAVA_FULL_REQ:
+    {
+      DumpFull();
+      break;
+    }
+  case NAVA_FBANK_REQ:
+    {
+      for (uint8_t bnk = 0 ; bnk <= MAX_BANK; bnk++)
+      {
+        sysExParam = bnk;
+        sysExDump = NAVA_BANK_DMP;
+        DumpBank(bnk);
+      }
+      break;
+    }
+  case NAVA_FTRACK_REQ:
+    {
+      for( uint8_t trk = 0 ; trk < MAX_TRACK; trk++)
+      {
+        sysExDump = NAVA_TRACK_DMP;
+        sysExParam = trk;
+        DumpTrack(trk);
+      }
       break;
     }
   }
