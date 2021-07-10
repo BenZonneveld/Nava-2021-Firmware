@@ -334,7 +334,31 @@ void DumpTrack(byte trackNbr)
 
 void GetTrack(byte *sysex, uint16_t RawSize)
 {
-  
+  byte NavaData[TRACK_SIZE];
+  uint8_t trackNbr = sysex[5];
+  RawSize = RawSize - 6; // Size of the header
+  RawSize = RawSize - 9; // The checksum at the end + EOX
+  uint16_t NavaBytes = sysex_to_data(sysex + 6, NavaData, RawSize); // Transmitted Bank block = 2064 bytes;
+
+//  byte lowbyte =  (byte)(track[trkBuffer].length & 0xFF);
+//  byte highbyte = (byte)((track[trkBuffer].length >> 8) & 0xFF);
+//  track[trkBuffer].patternNbr[1022] = lowbyte;
+//  track[trkBuffer].patternNbr[1023] = highbyte;
+
+  unsigned long adress;
+  for(int nbrPage = 0; nbrPage < TRACK_SIZE/MAX_PAGE_SIZE; nbrPage++){
+    adress = (unsigned long)(PTRN_OFFSET + (trackNbr * TRACK_SIZE) + (MAX_PAGE_SIZE * nbrPage) + TRACK_OFFSET);
+    WireBeginTX(adress);
+    for (byte i = 0; i < MAX_PAGE_SIZE; i++){//loop as many instrument for a page
+      Wire.write((byte)(NavaData[i + (MAX_PAGE_SIZE * nbrPage)] & 0xFF)); 
+    }
+    Wire.endTransmission();//end of 64 bytes transfer
+    delay(DELAY_WR);//delay between each write page
+  }
+
+#if DEBUG  
+  Serial.print("Get track ");Serial.println(trackNbr);
+#endif
 }
 
 void DumpConfig()
@@ -522,6 +546,7 @@ Serial.print("Rawsize: "); Serial.println(RawSize);
         if ( RawSize != SYSEX_TRACK_SIZE ) return;
         GetTrack(RawSysEx, RawSize);
       }
+      break;
     }
   case NAVA_CONFIG_REQ:
     { 
