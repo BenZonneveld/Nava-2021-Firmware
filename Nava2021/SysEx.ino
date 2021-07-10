@@ -448,7 +448,6 @@ void PrintSysex(byte *sysex, unsigned size)
 #endif
 void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
 {
-//  Serial.println(MIDI:)
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
   int16_t DataPointer=6;
 
@@ -473,14 +472,12 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
 
   if ( checksum != RxChecksum )
   {
-//    Serial.print("CREATE ERROR HANDLING");
     return;
   }
 
   seq.configMode = true;
   seq.configPage = 3;
   needLcdUpdate = TRUE;
- // EnableSysexMode();
 
   switch(Type)
   {
