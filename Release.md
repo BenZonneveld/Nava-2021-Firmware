@@ -3,6 +3,13 @@ Features in this release:
 ***** NEW *****  
 The Nava Tool Installer for windows is included in this release.
 
+** Nava Tool usa **
+* Setup your midi ports using the MIDI menu's Midi Port Settings.
+* Colored buttons have a Right Click Context menu with the options to load. save. request, dump and edit if available.
+* The track editor expects pattern names as displayed on the Nava.  
+  Separate patterns with whitespace.
+  Use EOT to set the End Of Track marker when you want the Nava to stop playing at the end of the track.
+
 Configuration:
 * New option on Config page 2 to select the boot mode for the Nava. Feature #16
 
