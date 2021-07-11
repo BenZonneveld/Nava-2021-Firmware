@@ -1,5 +1,8 @@
 Features in this release:
 
+***** NEW *****
+The Nava Tool Installer for windows is included in this release.
+
 Configuration:
 * New option on Config page 2 to select the boot mode for the Nava. Feature #16
 
@@ -9,6 +12,7 @@ MIDI:
 * Separate channel for the external instrument, selectable in config page 2
 * EXT now has 2 levels + total accent implemented. Closes #15
 * System Exclusive dumps.
+  Sysex only works in the Sysex Page which can be found on Config Page 3.
 
 Muting:
 * Shift+step in Mute mode solos the instrument (shift+encoder mutes all) [sandormatyi]
