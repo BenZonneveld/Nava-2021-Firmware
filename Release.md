@@ -1,6 +1,6 @@
 Features in this release:
 
-***** NEW *****
+***** NEW *****  
 The Nava Tool Installer for windows is included in this release.
 
 Configuration:
