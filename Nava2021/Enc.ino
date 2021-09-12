@@ -139,7 +139,7 @@ void EncGet()
   }
   ///////////////////////////////////CONFIG MODE////////////////////////////////////
   else if (seq.configMode){                                                               //  [zabox] rewrite for two complete pages & no wrong encoder updates
-    
+
     if (seq.configPage == 1) {    
       
   //---------------------Page 1----------------------------------------------------

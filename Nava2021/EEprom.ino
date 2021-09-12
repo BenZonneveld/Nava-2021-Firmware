@@ -203,6 +203,9 @@ void SaveSeqSetup()
 {
   unsigned long adress = (unsigned long)(OFFSET_SETUP);
   WireBeginTX(adress);
+#ifdef DEBUG
+  Serial.print("seq.sync = "); Serial.println(seq.sync, HEX); 
+#endif
   Wire.write((byte)(seq.sync)); 
   Wire.write((byte)(seq.defaultBpm));
   Wire.write((byte)(seq.TXchannel));

@@ -10,6 +10,7 @@ void SeqConfiguration()
     SetSeqSync();
     seq.syncChanged = FALSE;
   }
+ 
   if (seq.setupNeedSaved && enterBtn.justPressed){
     SaveSeqSetup();
     seq.setupNeedSaved = FALSE;
@@ -24,7 +25,7 @@ void SeqConfiguration()
   }
 #endif
 
-  if (seq.configMode) seq.setupNeedSaved = FALSE;
+  if (!seq.configMode) seq.setupNeedSaved = FALSE;
 
 #if MIDI_HAS_SYSEX
   if ( seq.configPage == 3)

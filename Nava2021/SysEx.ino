@@ -349,9 +349,11 @@ void DumpConfig()
   RawData[5]=(byte)(seq.muteModeHH);                                  // [zabox]
 #if MIDI_EXT_CHANNEL
   RawData[6]=(byte)(seq.EXTchannel);  // [Neuromancer]
-#endif
 #if CONFIG_BOOTMODE
   RawData[7]=(byte)(seq.BootMode); // [Neuromancer]
+#endif
+#else if CONFIG_BOOTMODE
+  RawData[6]=(byte)(seq.BootMode); // [Neuromancer]
 #endif
 
   uint16_t transmit_size=build_sysex( RawData, SETUP_SIZE, NAVA_CONFIG_DMP,0);
@@ -368,8 +370,14 @@ void GetConfig(byte *sysex)
   seq.RXchannel = RawData[3];
   seq.ptrnChangeSync = RawData[4];
   seq.muteModeHH = RawData[5];
+#if MIDI_EXT_CHANNEL
   seq.EXTchannel = RawData[6];
+#if CONFIG_BOOTMODE  
   seq.BootMode  = (SeqMode)RawData[7];
+#endif 
+#else if CONFIG_BOOTMODE  
+  seq.BootMode  = (SeqMode)RawData[6];
+#endif
 
   SaveSeqSetup();
 //  SetSeqSync();
