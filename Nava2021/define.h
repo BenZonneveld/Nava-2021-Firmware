@@ -210,10 +210,6 @@
 #define MT_F_BTN 192   //bit 6 and bit 7 of a 16bits word                 //
 #define HT_F_BTN 768   //bit 8 and bit 9 of a 16bits word                 //
 
-
-
-
-
 //Inst Match with bit shift register out (cf schematic)
 #define BD 8
 #define SD 9
@@ -549,7 +545,7 @@ byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
                               0,  // EXT_INST
                               42, // CH
                               46}; // OH
-                              
+boolean MidiOutActive[NBR_INST] = { false };                              
 unsigned int lastInstrumentMidiOut = 0;
 byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 #endif // MIDI_DRUMNOTES_OUT

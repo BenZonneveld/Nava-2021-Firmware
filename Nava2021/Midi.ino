@@ -272,7 +272,10 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
 //MidiTrigOn insturment
 void MidiTrigOn(byte inst, byte velocity)
 {
-  
+#if MIDI_DRUMNOTES_OUT  
+  if ( MidiOutActive[inst] == TRUE )
+    return;
+#endif    
   if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
  
     SetMuxTrigMidi(inst, velocity);                                                            
@@ -301,10 +304,8 @@ void MidiTrigOn(byte inst, byte velocity)
 void MidiTrigOff(byte inst)
 {
   instWasMidiTrigged[inst] = FALSE;
-  
-  
+    
   if ((gateInst >> inst) & 1U) SetMuxTrigMidi(inst, 0);                                               // [1.028]
-  
 }
 
 //Midi send all note off
@@ -331,6 +332,7 @@ void SendInstrumentMidiOut(unsigned int value)
         if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
 
         MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
+        MidiOutActive[inst] = true;
       }
     }
     lastInstrumentMidiOut = value;
@@ -347,6 +349,7 @@ void SendInstrumentMidiOff()
       if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0)
       {
         MidiSendNoteOff(seq.TXchannel,instMidiNote[inst]-12);
+        MidiOutActive[inst] = false;
       }
     }
   }
