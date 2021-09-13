@@ -317,6 +317,7 @@ void SendAllNoteOff()
 #if MIDI_DRUMNOTES_OUT
 void SendInstrumentMidiOut(unsigned int value)
 {
+  unsigned int MIDIVelocity;
   // Send MIDI notes for the playing instruments
   for(int inst=0 ; inst < NBR_INST ; inst++ )
   {
@@ -325,12 +326,32 @@ void SendInstrumentMidiOut(unsigned int value)
       if (inst >= 14 && bitRead(muteInst,5)) continue;
       if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0 )
       {
-        unsigned int MIDIVelocity = InstrumentMidiOutVelocity[inst];
-        if ( inst >= 14 ) MIDIVelocity = InstrumentMidiOutVelocity[CH];
-        MIDIVelocity = map(MIDIVelocity, instVelLow[inst], instVelHigh[inst], MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);
-                                    
-        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
+        MIDIVelocity = InstrumentMidiOutVelocity[inst];
+        if ( inst >= 14 ) 
+        {
+          MIDIVelocity = InstrumentMidiOutVelocity[CH];
+        }
+        byte Accent;
+        Accent = ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);
 
+#if REALTIME_ACCENT
+        if ( analogRead(TRIG2_PIN) > 200 )
+        {
+          Accent = (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) * ((analogRead(TRIG2_PIN) - 290 ) / 14);
+        }
+#endif  
+        MIDIVelocity = map(MIDIVelocity, instVelLow[inst], instVelHigh[inst] + Accent, MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);
+
+        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) 
+        {
+#if DEBUG
+  Serial.print("Midi Velocity: "); Serial.println(MIDIVelocity);
+  Serial.println(MIDI_ACCENT_VELOCITY);
+#endif    
+          byte midi_accent = 0;
+          midi_accent = map(Accent,0,52,0,16);
+          MIDIVelocity = MIDIVelocity + midi_accent;
+        }
         MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
         MidiOutActive[inst] = true;
       }

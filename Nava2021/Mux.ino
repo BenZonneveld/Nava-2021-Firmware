@@ -19,8 +19,6 @@ void SetMux()
   }
 #endif 
  
-  Serial.print("Accent : "); Serial.println(Accent);
-  
  //Select second Multiplexer 
   for (byte a = 0; a < 5; a++){
     
