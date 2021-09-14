@@ -545,7 +545,6 @@ byte instMidiNote[NBR_INST]={ 60, // TRIG_OUT
                               0,  // EXT_INST
                               42, // CH
                               46}; // OH
-boolean MidiOutActive[NBR_INST] = { false };                              
 unsigned int lastInstrumentMidiOut = 0;
 byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 #endif // MIDI_DRUMNOTES_OUT

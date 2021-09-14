@@ -22,7 +22,7 @@ void InitMidiNoteOff()
     if (noteIndexCpt) MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
     else MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
 #else
-    if (noteIndexCpt) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
+    if (noteIndexCpt && seq.TXchannel) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
     else MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
 #endif    
   }
@@ -272,11 +272,8 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
 //MidiTrigOn insturment
 void MidiTrigOn(byte inst, byte velocity)
 {
-#if MIDI_DRUMNOTES_OUT  
-  if ( MidiOutActive[inst] == TRUE )
-    return;
-#endif    
-  if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
+  if ( seq.sync != EXPANDER ) return;
+    if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
  
     SetMuxTrigMidi(inst, velocity);                                                            
     
@@ -318,6 +315,7 @@ void SendAllNoteOff()
 void SendInstrumentMidiOut(unsigned int value)
 {
   unsigned int MIDIVelocity;
+  if ( seq.TXchannel == 0 ) return;
   // Send MIDI notes for the playing instruments
   for(int inst=0 ; inst < NBR_INST ; inst++ )
   {
@@ -343,17 +341,12 @@ void SendInstrumentMidiOut(unsigned int value)
         MIDIVelocity = map(MIDIVelocity, instVelLow[inst], instVelHigh[inst] + Accent, MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);
 
         if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) 
-        {
-#if DEBUG
-  Serial.print("Midi Velocity: "); Serial.println(MIDIVelocity);
-  Serial.println(MIDI_ACCENT_VELOCITY);
-#endif    
+        {   
           byte midi_accent = 0;
           midi_accent = map(Accent,0,52,0,16);
           MIDIVelocity = MIDIVelocity + midi_accent;
         }
         MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
-        MidiOutActive[inst] = true;
       }
     }
     lastInstrumentMidiOut = value;
@@ -362,7 +355,9 @@ void SendInstrumentMidiOut(unsigned int value)
 
 void SendInstrumentMidiOff()
 {
-    for(int inst=0 ; inst < NBR_INST ; inst++ )
+  if ( seq.TXchannel == 0 ) return;
+  
+  for(int inst=0 ; inst < NBR_INST ; inst++ )
   {
     if ( bitRead(lastInstrumentMidiOut, inst))
     {
@@ -370,7 +365,6 @@ void SendInstrumentMidiOff()
       if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0)
       {
         MidiSendNoteOff(seq.TXchannel,instMidiNote[inst]-12);
-        MidiOutActive[inst] = false;
       }
     }
   }

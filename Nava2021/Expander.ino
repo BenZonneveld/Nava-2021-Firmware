@@ -8,13 +8,7 @@ void Expander()
 {
   
   while(seq.sync == EXPANDER) {
-    
-    #if DEBUG
-      DIN_START_LOW;
-      delayMicroseconds(1);
-      DIN_START_HIGH;
-    #endif
-       
+           
     MIDI.read();
     TriggerOffTimer();
     if (!(gateInst & 1)) SetTrigPeriod(TRIG_LENGTH);

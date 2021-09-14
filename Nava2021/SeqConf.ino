@@ -60,8 +60,11 @@ void SetSeqSync()
   case SLAVE:
     TimerStop();
     initTrigTimer();
-    ConnectMidiHandleNote();                        
-    //DisconnectMidiHandleNote();
+#if MIDI_BANK_PATTERN_CHANGE    
+    ConnectMidiHandleNote(); // Connects Notes but ignores drum notes.                       
+#else    
+    DisconnectMidiHandleNote();
+#endif    
     ConnectMidiHandleRealTime();
 #if MIDI_HAS_SYSEX    
     DisconnectMidiSysex();

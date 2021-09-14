@@ -203,9 +203,6 @@ void SaveSeqSetup()
 {
   unsigned long adress = (unsigned long)(OFFSET_SETUP);
   WireBeginTX(adress);
-#ifdef DEBUG
-  Serial.print("seq.sync = "); Serial.println(seq.sync, HEX); 
-#endif
   Wire.write((byte)(seq.sync)); 
   Wire.write((byte)(seq.defaultBpm));
   Wire.write((byte)(seq.TXchannel));
@@ -234,7 +231,11 @@ void LoadSeqSetup()
   seq.defaultBpm = (Wire.read() & 0xFF);
   seq.defaultBpm = constrain(seq.defaultBpm, MIN_BPM, MAX_BPM);
   seq.TXchannel = (Wire.read() & 0xFF);
+#if MIDI_DRUMNOTES_OUT
+  seq.TXchannel = constrain(seq.TXchannel, 0 ,16);
+#else  
   seq.TXchannel = constrain(seq.TXchannel, 1 ,16);
+#endif
   seq.RXchannel = (Wire.read() & 0xFF);
   seq.RXchannel = constrain(seq.RXchannel, 1 ,16);
   seq.ptrnChangeSync = (Wire.read() & 0xFF);

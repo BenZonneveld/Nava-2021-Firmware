@@ -172,7 +172,11 @@ void EncGet()
       case 2:
   
         seq.TXchannel = EncGet(seq.TXchannel, 1);
+#if MIDI_DRUMNOTES_OUT // Channel 0 is used to indicate "do not transmit drumnotes" 
+        seq.TXchannel = constrain(seq.TXchannel, 0, 16);
+#else                
         seq.TXchannel = constrain(seq.TXchannel, 1, 16);
+#endif        
         static unsigned int prevTX;
         if (seq.TXchannel != prevTX){
           prevTX = seq.TXchannel;

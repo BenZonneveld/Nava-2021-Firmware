@@ -43,7 +43,17 @@ void LcdUpdate()
           lcd.setCursor(4,1);
           lcd.print(seq.defaultBpm);
           lcd.setCursor(9,1);
+#if MIDI_DRUMNOTES_OUT
+          if ( seq.TXchannel > 0 )
+          {
+            lcd.print(seq.TXchannel);
+          } else {
+            lcd.setCursor(8,1);
+            lcd.print("OFF");
+          }
+#else          
           lcd.print(seq.TXchannel);
+#endif          
           lcd.setCursor(13,1);
           lcd.print(seq.RXchannel);
           break;
