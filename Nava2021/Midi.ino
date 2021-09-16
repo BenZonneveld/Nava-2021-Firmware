@@ -207,7 +207,17 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         group.priority = FALSE;
         nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
         group.pos = pattern[ptrnBuffer].groupPos;
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        if(curPattern != nextPattern)
+        {
+          needLcdUpdate = TRUE;//selected pattern changed so we need to update display
+          patternNeedSaved = FALSE;
+          if ( nextPattern != END_OF_TRACK )
+          {
+            LoadPattern(nextPattern);
+          }
+          curPattern = nextPattern;
+          nextPatternReady = TRUE;
+        }
         break;
 #endif // MIDI_BANK_PATTERN_CHANGE
       }
