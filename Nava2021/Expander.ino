@@ -8,13 +8,7 @@ void Expander()
 {
   
   while(seq.sync == EXPANDER) {
-    
-    #if DEBUG
-      DIN_START_LOW;
-      delayMicroseconds(1);
-      DIN_START_HIGH;
-    #endif
-       
+           
     MIDI.read();
     TriggerOffTimer();
     if (!(gateInst & 1)) SetTrigPeriod(TRIG_LENGTH);
@@ -22,15 +16,9 @@ void Expander()
     ButtonGetExpander();
     SetLedsExpander();
     
-    SeqConfigurationExpander();
-     
+    SeqConfigurationExpander();  
   }
-  
 }
-
-
-
-
 
 void TriggerOffTimer()
 {
@@ -46,12 +34,9 @@ void TriggerOffTimer()
         }
       }
     }
-    
   }
-  
 }
-    
-    
+     
 void ButtonGetExpander ()
 {
   if (!seq.configMode) {
@@ -104,8 +89,7 @@ void ButtonGetExpander ()
         lcd.print("                ");
       }
     }
-    
-    
+        
     if (guideBtn.justPressed) {
       showTrigLeds = !showTrigLeds;
     }
@@ -130,22 +114,12 @@ void ButtonGetExpander ()
         gateInst = 0;
         gateLeds = 0;
       }
-    }
-    
-    
-    
-    
+    }   
   } 
 }
-    
-    
-    
+      
 void SetLedsExpander()
-{
-  
-  
-  
-  
+{  
   configLed = (((tempoBtn.pressed | seq.configMode ) << 15) | (seq.setupNeedSaved << 8) | (showTrigLeds << 12) | (bankLed << 13) | (muteLed << 14)); 
   
   if (muteLed) {  

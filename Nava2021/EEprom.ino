@@ -231,7 +231,11 @@ void LoadSeqSetup()
   seq.defaultBpm = (Wire.read() & 0xFF);
   seq.defaultBpm = constrain(seq.defaultBpm, MIN_BPM, MAX_BPM);
   seq.TXchannel = (Wire.read() & 0xFF);
+#if MIDI_DRUMNOTES_OUT
+  seq.TXchannel = constrain(seq.TXchannel, 0 ,16);
+#else  
   seq.TXchannel = constrain(seq.TXchannel, 1 ,16);
+#endif
   seq.RXchannel = (Wire.read() & 0xFF);
   seq.RXchannel = constrain(seq.RXchannel, 1 ,16);
   seq.ptrnChangeSync = (Wire.read() & 0xFF);
@@ -361,21 +365,12 @@ void InitEEprom()
   Serial.println(adress);*/
   
   //Track Init
-//  Serial.println("Track Init");
-//  unsigned int trackpos = 0;
   for (unsigned long trackNbr = 0; trackNbr < MAX_TRACK; trackNbr++){
     for(unsigned long nbrPage = 0; nbrPage < (TRACK_SIZE/MAX_PAGE_SIZE); nbrPage++){// to init 1024 byte track size we need 16 pages of 64 bytes
       adress = (unsigned long)(PTRN_OFFSET + (trackNbr * TRACK_SIZE) + (MAX_PAGE_SIZE * nbrPage) + TRACK_OFFSET);
       WireBeginTX(adress);
       for (byte i = 0; i < MAX_PAGE_SIZE; i++){//loop as many instrument for a page
- //       if ( trackpos >= (TRACK_SIZE - 2)) // The track length is stored in the last 2 bytes of the patternNbr array
-//       {
           Wire.write((byte)(0));
-//        } else {
-//          Wire.write((byte)(128)); // Fill track with pattern
-//        }
-//        trackpos++;
-//        if ( trackpos >= TRACK_SIZE ) trackpos = 0;
       }
       Wire.endTransmission();//end of 64 bytes transfer
       delay(DELAY_WR);//delay between each write page

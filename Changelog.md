@@ -10,13 +10,22 @@
 - Bug: Switching to pattern play always gives step edit the first press! [\#22](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/22)
 - Bug: Track play pattern name not updated [\#21](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/21)
 - Track Write: do not reset current pattern [\#20](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/20)
+- Feature request: sysex to import and export patterns and tracks. [\#19](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/19)
 - Feature request: Mode at startup should be selectable. [\#16](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/16)
 - EXT Instrument should have 2 velocity levels. [\#15](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/15)
 - Tempo display isn't always updated. [\#14](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/14)
 
 ## [Nava2021Neuro-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210621) (2021-06-20)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210621...Nava2021Neuro-20210621)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210710...Nava2021Neuro-20210621)
+
+## [Nava2021Neuro-20210710](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210710) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210711...Nava2021Neuro-20210710)
+
+## [Nava2021Neuro-20210711](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210711) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210621...Nava2021Neuro-20210711)
 
 ## [Nava2021beta-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021beta-20210621) (2021-06-20)
 

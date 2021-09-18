@@ -4,9 +4,7 @@
 //-------------------------------------------------
 
 /////////////////////Function//////////////////////
-void MidiRead()
-{
-}
+
 //initialize midi real time variable
 void  InitMidiRealTime()
 {
@@ -24,7 +22,7 @@ void InitMidiNoteOff()
     if (noteIndexCpt) MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
     else MidiSendNoteOff(seq.EXTchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
 #else
-    if (noteIndexCpt) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
+    if (noteIndexCpt && seq.TXchannel) MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[noteIndexCpt - 1]);
     else MidiSendNoteOff(seq.TXchannel, pattern[ptrnBuffer].extNote[pattern[ptrnBuffer].extLength]);
 #endif    
   }
@@ -92,12 +90,24 @@ void ConnectMidiHandleRealTime()
 //Disconnect midi real time callback
 void DisconnectMidiHandleRealTime()
 {
-  MIDI.disconnectCallbackFromType(Clock);
-  MIDI.disconnectCallbackFromType(Start);
-  MIDI.disconnectCallbackFromType(Stop);
-  MIDI.disconnectCallbackFromType(Continue);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Clock);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Start);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Stop);
+  MIDI.disconnectCallbackFromType(midi::MidiType::Continue);
 }
 
+#if MIDI_HAS_SYSEX
+void ConnectMidiSysex()
+{
+  Serial.println("Sysex Connected");
+  MIDI.setHandleSystemExclusive(HandleSystemExclusive);
+}
+
+void DisconnectMidiSysex()
+{
+  MIDI.disconnectCallbackFromType(midi::MidiType::SystemExclusive);
+}
+#endif
 
 //Connect midi real time callback                         // [zabox] [1.028]
 void ConnectMidiHandleNote()
@@ -109,10 +119,9 @@ void ConnectMidiHandleNote()
 //Disconnect midi real time callback                      // [zabox] [1.028]
 void DisconnectMidiHandleNote()
 {
-  MIDI.disconnectCallbackFromType(NoteOn);
-  MIDI.disconnectCallbackFromType(NoteOff);
+  MIDI.disconnectCallbackFromType(midi::MidiType::NoteOn);
+  MIDI.disconnectCallbackFromType(midi::MidiType::NoteOff);
 }
-
 
 //Handle noteON
 void HandleNoteOn(byte channel, byte pitch, byte velocity)
@@ -198,7 +207,17 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
         group.priority = FALSE;
         nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
         group.pos = pattern[ptrnBuffer].groupPos;
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        if(curPattern != nextPattern)
+        {
+          needLcdUpdate = TRUE;//selected pattern changed so we need to update display
+          patternNeedSaved = FALSE;
+          if ( nextPattern != END_OF_TRACK )
+          {
+            LoadPattern(nextPattern);
+          }
+          curPattern = nextPattern;
+          nextPatternReady = TRUE;
+        }
         break;
 #endif // MIDI_BANK_PATTERN_CHANGE
       }
@@ -263,8 +282,8 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
 //MidiTrigOn insturment
 void MidiTrigOn(byte inst, byte velocity)
 {
-  
-  if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
+  if ( seq.sync != EXPANDER ) return;
+    if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
  
     SetMuxTrigMidi(inst, velocity);                                                            
     
@@ -292,10 +311,8 @@ void MidiTrigOn(byte inst, byte velocity)
 void MidiTrigOff(byte inst)
 {
   instWasMidiTrigged[inst] = FALSE;
-  
-  
+    
   if ((gateInst >> inst) & 1U) SetMuxTrigMidi(inst, 0);                                               // [1.028]
-  
 }
 
 //Midi send all note off
@@ -307,6 +324,8 @@ void SendAllNoteOff()
 #if MIDI_DRUMNOTES_OUT
 void SendInstrumentMidiOut(unsigned int value)
 {
+  unsigned int MIDIVelocity;
+  if ( seq.TXchannel == 0 ) return;
   // Send MIDI notes for the playing instruments
   for(int inst=0 ; inst < NBR_INST ; inst++ )
   {
@@ -315,12 +334,28 @@ void SendInstrumentMidiOut(unsigned int value)
       if (inst >= 14 && bitRead(muteInst,5)) continue;
       if (instMidiNote[inst] != 0 && pattern[ptrnBuffer].velocity[inst][curStep] > 0 )
       {
-        unsigned int MIDIVelocity = InstrumentMidiOutVelocity[inst];
-        if ( inst >= 14 ) MIDIVelocity = InstrumentMidiOutVelocity[CH];
-        MIDIVelocity = map(MIDIVelocity, instVelLow[inst], instVelHigh[inst], MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);
-                                    
-        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) MIDIVelocity = MIDI_ACCENT_VELOCITY;
+        MIDIVelocity = InstrumentMidiOutVelocity[inst];
+        if ( inst >= 14 ) 
+        {
+          MIDIVelocity = InstrumentMidiOutVelocity[CH];
+        }
+        byte Accent;
+        Accent = ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);
 
+#if REALTIME_ACCENT
+        if ( analogRead(TRIG2_PIN) > 200 )
+        {
+          Accent = (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) * ((analogRead(TRIG2_PIN) - 290 ) / 14);
+        }
+#endif  
+        MIDIVelocity = map(MIDIVelocity, instVelLow[inst], instVelHigh[inst] + Accent, MIDI_LOW_VELOCITY, MIDI_HIGH_VELOCITY);
+
+        if (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) 
+        {   
+          byte midi_accent = 0;
+          midi_accent = map(Accent,0,52,0,16);
+          MIDIVelocity = MIDIVelocity + midi_accent;
+        }
         MidiSendNoteOn(seq.TXchannel,instMidiNote[inst]-12,MIDIVelocity);
       }
     }
@@ -330,7 +365,9 @@ void SendInstrumentMidiOut(unsigned int value)
 
 void SendInstrumentMidiOff()
 {
-    for(int inst=0 ; inst < NBR_INST ; inst++ )
+  if ( seq.TXchannel == 0 ) return;
+  
+  for(int inst=0 ; inst < NBR_INST ; inst++ )
   {
     if ( bitRead(lastInstrumentMidiOut, inst))
     {

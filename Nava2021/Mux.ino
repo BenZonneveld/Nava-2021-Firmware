@@ -9,10 +9,18 @@ void SetMux()
 {      
 
   unsigned int temp_stepValue = stepValue & (~muteInst);                                                                      // [zabox] [1.028] solves velocity change in fading instuments (when muted) in combination with total accent
-  
+  byte Accent = 0;
+  Accent = ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);
+
+#if REALTIME_ACCENT
+  if ( analogRead(TRIG2_PIN) > 200 )
+  {
+    Accent = (bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) * ((analogRead(TRIG2_PIN) - 290 ) / 14);
+  }
+#endif 
+ 
  //Select second Multiplexer 
   for (byte a = 0; a < 5; a++){
-    
     
   //if(bitRead (stepValue, muxInst[a + 5]) || bitRead(stepValue, OH)){
     if(bitRead(temp_stepValue, muxInst[a + 5]) || (bitRead(temp_stepValue, OH) && (muxInst[a + 5] == CH ))){                 // [zabox] prevents mux from updating all velocities at a oh step
@@ -20,18 +28,19 @@ void SetMux()
       //As CH and OH share same Mux out this code is needed
      // if (bitRead(stepValue, OH && muxInst[a + 5] == CH )){                                                                 // [zabox] bracket error, caused the ext_trig bug. took me hours to spot :/
       if (bitRead(temp_stepValue, OH) && (muxInst[a + 5] == CH )){                                                            // [zabox] correct bracketing
+        
 #if MIDI_DRUMNOTES_OUT        
-        InstrumentMidiOutVelocity[muxInst[a + 5]] = pattern[ptrnBuffer].velocity[OH][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0); // [Neuromancer]: MIDI Out Velocity levels
+        InstrumentMidiOutVelocity[muxInst[a + 5]] = pattern[ptrnBuffer].velocity[OH][curStep] + Accent; // [Neuromancer]: MIDI Out Velocity levels
 #endif
-        SetDacA(pattern[ptrnBuffer].velocity[OH][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));
+        SetDacA(pattern[ptrnBuffer].velocity[OH][curStep] + Accent);
         PORTA = (PORTA & 0b00011111) | muxAddr[2];//Mask to clear last 3 bits of the PORTA
         SelectSecondMux();//Set the value to the multiplexer out
       }
       else  {
 #if MIDI_DRUMNOTES_OUT
-        InstrumentMidiOutVelocity[muxInst[a + 5]] = pattern[ptrnBuffer].velocity[muxInst[a + 5]][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);  // [Neuromancer]: MIDI Out
+        InstrumentMidiOutVelocity[muxInst[a + 5]] = pattern[ptrnBuffer].velocity[muxInst[a + 5]][curStep] + Accent;  // [Neuromancer]: MIDI Out
 #endif
-        SetDacA(pattern[ptrnBuffer].velocity[muxInst[a + 5]][curStep] + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));//Set DAC Value
+        SetDacA(pattern[ptrnBuffer].velocity[muxInst[a + 5]][curStep] + Accent);//Set DAC Value
         //Set Multiplexer address
         PORTA = (PORTA & 0b00011111) | muxAddr[a];//Mask to clear last 3 bits of the PORTA
         SelectSecondMux();//Set the value to the multiplexer out
@@ -51,9 +60,9 @@ void SetMux()
         vel &= 127;
       }
 #if MIDI_DRUMNOTES_OUT      
-      InstrumentMidiOutVelocity[muxInst[a]] = vel + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0);  // [Neuromancer]: MIDI Out
+      InstrumentMidiOutVelocity[muxInst[a]] = vel + Accent;  // [Neuromancer]: MIDI Out
 #endif
-      SetDacA(vel + ((bitRead(pattern[ptrnBuffer].inst[TOTAL_ACC], curStep)) ? (pattern[ptrnBuffer].totalAcc * 4) : 0));//Set DAC Value 
+      SetDacA(vel + Accent);//Set DAC Value 
       //Set Multiplexer address
       PORTA = (PORTA & 0b00011111) | muxAddr[a];//Mask to clear last 3 bits of the PORTA
       SelectFirstMux();//Set the value to the multiplexer out

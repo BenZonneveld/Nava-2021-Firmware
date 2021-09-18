@@ -1,5 +1,15 @@
 Features in this release:
 
+***** NEW *****  
+The Nava Tool Installer for windows is included in this release.
+
+** Nava Tool usa **
+* Setup your midi ports using the MIDI menu's Midi Port Settings.
+* Colored buttons have a Right Click Context menu with the options to load. save. request, dump and edit if available.
+* The track editor expects pattern names as displayed on the Nava.  
+  Separate patterns with whitespace.
+  Use EOT to set the End Of Track marker when you want the Nava to stop playing at the end of the track.
+
 Configuration:
 * New option on Config page 2 to select the boot mode for the Nava. Feature #16
 
@@ -8,6 +18,8 @@ MIDI:
 * MIDI select for bank and pattern. Notes 61-68 select the bank, 72-87 select the pattern
 * Separate channel for the external instrument, selectable in config page 2
 * EXT now has 2 levels + total accent implemented. Closes #15
+* System Exclusive dumps.
+  Sysex only works in the Sysex Page which can be found on Config Page 3.
 
 Muting:
 * Shift+step in Mute mode solos the instrument (shift+encoder mutes all) [sandormatyi]

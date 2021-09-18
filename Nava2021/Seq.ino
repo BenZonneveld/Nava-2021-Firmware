@@ -18,7 +18,13 @@ void SeqParameter()
   //-------------------Encoder button---------------------------
   if(encBtn.justPressed){
     curIndex++;
-    if (curIndex >= MAX_CUR_POS)  curIndex = 0;
+    if (curIndex >= MAX_CUR_POS ) curIndex = 0;   
+#if MIDI_HAS_SYSEX
+    if ( seq.configMode && seq.configPage == 3 ) {
+      if (sysExDump < SYSEX_MAXPARAM && curIndex > 1 ) curIndex = 0;
+      if (sysExDump >= SYSEX_MAXPARAM && curIndex > 0 ) curIndex = 0;
+    }
+#endif     
     needLcdUpdate = TRUE;
   }
   //-------------------play button---------------------------
@@ -36,7 +42,7 @@ void SeqParameter()
       noteIndexCpt = 0;//init ext instrument note index counter
       blinkTempo = 0;                                                               // [zabox] looks more consistent
     
-      MIDI.sendRealTime(Start);  //;MidiSend(START_CMD);
+      MIDI.sendRealTime(midi::MidiType::Start);  //;MidiSend(START_CMD);
         DIN_START_HIGH;
         dinStartState = HIGH;
     }
@@ -53,7 +59,7 @@ void SeqParameter()
     case 1:
       isStop = TRUE;
       isRunning = FALSE;
-      MIDI.sendRealTime(Stop);//;MidiSend(STOP_CMD);
+      MIDI.sendRealTime(midi::MidiType::Stop);//;MidiSend(STOP_CMD);
       DIN_START_LOW;
       dinStartState = LOW;
       break;
@@ -63,7 +69,7 @@ void SeqParameter()
         isRunning = TRUE;
         stopBtn.counter = 0;
         ppqn = 0;
-        MIDI.sendRealTime(Continue);//MidiSend(CONTINU_CMD);
+        MIDI.sendRealTime(midi::MidiType::Continue);//MidiSend(CONTINU_CMD);
         DIN_START_HIGH;
         dinStartState = HIGH;
       }
@@ -945,6 +951,7 @@ void SeqParameter()
     if(curPattern != nextPattern) selectedPatternChanged = TRUE;
     //trkBuffer = !trkBuffer;
   }
+  
   if (trackNeedSaved && enterBtn.hold)
   {
     trackNeedSaved = FALSE;
