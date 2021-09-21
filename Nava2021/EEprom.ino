@@ -110,6 +110,12 @@ void SavePattern(byte patternNbr)
 //Load Pattern
 void LoadPattern(byte patternNbr)
 {
+//#if DEBUG426
+//  if ( curSeqMode == PTRN_STEP && patternNeedSaved && group.length)
+//  {
+//    Serial.print("GroupPos: ");Serial.println(group.pos);
+//  }
+//#endif
   unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
   WireBeginTX(adress); 
   Wire.endTransmission();

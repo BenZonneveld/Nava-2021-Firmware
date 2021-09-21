@@ -352,7 +352,7 @@ void DumpConfig()
 #if CONFIG_BOOTMODE
   RawData[7]=(byte)(seq.BootMode); // [Neuromancer]
 #endif
-#else if CONFIG_BOOTMODE
+#elif CONFIG_BOOTMODE
   RawData[6]=(byte)(seq.BootMode); // [Neuromancer]
 #endif
 
@@ -375,7 +375,7 @@ void GetConfig(byte *sysex)
 #if CONFIG_BOOTMODE  
   seq.BootMode  = (SeqMode)RawData[7];
 #endif 
-#else if CONFIG_BOOTMODE  
+#elif CONFIG_BOOTMODE  
   seq.BootMode  = (SeqMode)RawData[6];
 #endif
 

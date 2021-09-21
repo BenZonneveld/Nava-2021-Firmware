@@ -47,14 +47,6 @@
 #define BTN_BANK     B1
 #define BTN_MUTE     B10
 #define BTN_TEMPO    B100
-
-#ifndef VERSION_DATE 
-// needed because I swap some pins
-#define BTN_BANK     B100
-#define BTN_MUTE     B1
-#define BTN_TEMPO    B10
-#endif
-
 #define BTN_ENTER    B1000
 #define BTN_ENCODER  B100
 #define ENC_SW_GET   PINB & BTN_ENCODER
@@ -432,6 +424,7 @@ struct GroupPattern
   boolean priority;//use to know if volatile group have priority on stored pattern group
 }
 group;
+boolean groupNeedSaved = FALSE;
 
 unsigned int tempInst[NBR_INST]={
   0};
@@ -551,10 +544,8 @@ byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 
 #if MIDI_HAS_SYSEX
 #define SYSEX_MAXPARAM 3    // Parameters up to this number get a select option.
-//#define SYSEX_BUFFER_SIZE 2100
 byte sysExDump = 0;
 byte sysExParam = 0;
-//byte SysEx[SYSEX_BUFFER_SIZE];
 #endif
 
 //Din synchro----------------------------------------

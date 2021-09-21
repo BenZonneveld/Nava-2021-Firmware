@@ -964,9 +964,18 @@ void SeqParameter()
   if (millis() - timeSinceSaved > HOLD_TIME){                                               
     trackJustSaved = FALSE;
   }
-
+  
   if (selectedPatternChanged)
   {
+#if DEBUG
+  if ( groupNeedSaved )
+  {
+//    memory("Group step edit");
+    Serial.print("GroupLength: ");Serial.println(group.length);
+    Serial.print("GroupPos: ");Serial.println(group.pos);
+  // Todo: set aside pattern data
+  }
+#endif    
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
     patternNeedSaved = FALSE;
@@ -999,13 +1008,19 @@ void SeqParameter()
     SetHHPattern();
     InstToStepWord();
     patternNeedSaved = TRUE;
+    if ( group.length ) groupNeedSaved = TRUE;
     // Serial.println("patternupdated");
   }
 
   if (patternNeedSaved && enterBtn.justPressed && !instBtn)
   {
     patternNeedSaved = FALSE;
-    SavePattern(curPattern);//pattern saved
+    if ( group.length )
+    {
+      groupNeedSaved = FALSE;
+    } else {
+      SavePattern(curPattern);//pattern saved
+    }
     LcdPrintSaved();
   }
 

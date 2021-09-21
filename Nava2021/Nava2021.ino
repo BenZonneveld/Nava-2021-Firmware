@@ -27,6 +27,7 @@ struct MySettings : public midi::DefaultSettings
 //    static const long BaudRate = 31250;
     static const unsigned SysExMaxSize = 2176; // Accept SysEx messages up to 2176 bytes long.
     static const bool UseRunningStatus = true;
+    static const bool HandleNullVelocityNoteOnAsNoteOff = true;
 };
 
 //MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, MIDI, MySettings);  // This does NOT change the Sysex Settings !!!
@@ -49,6 +50,8 @@ void setup()
 #if DEBUG
   Serial.begin(115200);
 
+  Serial.print("Pattern struct size: "); Serial.println(sizeof(struct Pattern));
+  memory("Boot");
 //  Serial.print("Sysex Size: ");
 //  Serial.println(MySettings);
 #endif
@@ -185,5 +188,6 @@ void memory(char *label)
   Serial.print(label);
   Serial.print(" =");
   Serial.println(freeMemory());
+  Serial.print("Needed: ");Serial.println(4*564 + 32);
 }
 #endif

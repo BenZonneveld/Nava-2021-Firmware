@@ -1,6 +1,6 @@
 #pragma once
 
-#define START_OF_SYSEX      0xF0
+#define START_OF_SYSEX      (char)0xF0
 #define END_OF_SYSEX        0xF7
 
 #define SYSEX_MANUFACTURER  0x7d
@@ -34,13 +34,13 @@
 #define SYSEX_BANK_SIZE   2100
 #define SYSEX_TRACK_SIZE  1186
 #define SYSEX_CONFIG_SIZE 89
-struct SysexPortSettings
+/*struct SysexPortSettings
 {
-    static const bool UseRunningStatus = false;
+    static const bool UseRunningStatus = true;
     static const bool HandleNullVelocityNoteOnAsNoteOff = true;
     static const bool Use1ByteParsing = true;
     static const unsigned SysExMaxSize = 128;
     static const bool UseSenderActiveSensing = false;
     static const bool UseReceiverActiveSensing = false;
     static const uint16_t SenderActiveSensingPeriodicity = 0;
-};
+};*/
