@@ -110,12 +110,6 @@ void SavePattern(byte patternNbr)
 //Load Pattern
 void LoadPattern(byte patternNbr)
 {
-//#if DEBUG426
-//  if ( curSeqMode == PTRN_STEP && patternNeedSaved && group.length)
-//  {
-//    Serial.print("GroupPos: ");Serial.println(group.pos);
-//  }
-//#endif
   unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
   WireBeginTX(adress); 
   Wire.endTransmission();
@@ -139,7 +133,7 @@ void LoadPattern(byte patternNbr)
   }
   //EXT INST-----------------------------------------------
   for(int nbrPage = 0; nbrPage < 2; nbrPage++){
-      MIDI.read();
+    MIDI.read();
     adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_SETUP_OFFSET);
     WireBeginTX(adress);
     Wire.endTransmission();
@@ -151,7 +145,7 @@ void LoadPattern(byte patternNbr)
   }
   //VELOCITY-----------------------------------------------
   for(int nbrPage = 0; nbrPage < 4; nbrPage++){
-      MIDI.read();
+    MIDI.read();
     adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_EXT_OFFSET);
     WireBeginTX(adress);
     Wire.endTransmission();
@@ -182,7 +176,6 @@ void SaveTrack(byte trackNbr)
     Wire.endTransmission();//end of 64 bytes transfer
     delay(DELAY_WR);//delay between each write page
   }
-
 }
 
 //Load track

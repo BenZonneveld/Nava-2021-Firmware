@@ -85,10 +85,10 @@ void PasteBufferToPattern(byte patternNum)
 //init pattern
 void InitPattern()
 {
-  if (!group.priority){
+//  if (!group.priority){
     group.length = pattern[ptrnBuffer].groupLength;
     group.firstPattern = curPattern - pattern[ptrnBuffer].groupPos;
-  }
+//  }
   //Init Ride, Crash velocity to HIGH_VEL
   for (int stp = 0; stp < NBR_STEP; stp++){
     if (pattern[ptrnBuffer].velocity[CH][stp] == 0)  pattern[ptrnBuffer].velocity[CH][stp] = instVelHigh[HH];//HH

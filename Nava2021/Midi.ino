@@ -212,7 +212,7 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
           patternNeedSaved = FALSE;
           if ( nextPattern != END_OF_TRACK )
           {
-            LoadPattern(nextPattern);
+            LoadPattern(nextPattern); // Load B
           }
           curPattern = nextPattern;
           nextPatternReady = TRUE;

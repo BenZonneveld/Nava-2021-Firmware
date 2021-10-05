@@ -175,17 +175,19 @@ void CountPPQN()
       endMeasure = TRUE;
       trackPosNeedIncremante = TRUE;                                                
       stepCount = 0;
+//    }
       //In pattern play mode this piece of code executes here
-      if(nextPatternReady && curSeqMode == PTRN_PLAY ){
-        nextPatternReady = FALSE;
-        keybOct = DEFAULT_OCT;
-        noteIndex = 0;
-        InitMidiNoteOff();
-        ptrnBuffer = !ptrnBuffer;
-        InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
-        SetHHPattern();
-        InstToStepWord();
-      }
+//      if(nextPatternReady && curSeqMode == PTRN_PLAY ){
+//        Serial.print("NextPatternReady PTRN_PLAY");
+//        nextPatternReady = FALSE;
+//        keybOct = DEFAULT_OCT;
+//        noteIndex = 0;
+//        InitMidiNoteOff();
+//        ptrnBuffer = !ptrnBuffer;
+//        InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
+//        SetHHPattern();
+//        InstToStepWord();
+//      }
     }  
   }
   

@@ -2,10 +2,13 @@
 
 ## [Unreleased](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/HEAD)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210621...HEAD)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210918...HEAD)
 
 **Closed issues:**
 
+- Config changes can't be saved [\#37](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/37)
+- Missed MIDI notes \(MIDI out\) [\#36](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/36)
+- Expander mode does not work outside settings [\#35](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/35)
 - Feature: No option to clear a track. [\#23](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/23)
 - Bug: Switching to pattern play always gives step edit the first press! [\#22](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/22)
 - Bug: Track play pattern name not updated [\#21](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/21)
@@ -15,34 +18,15 @@
 - EXT Instrument should have 2 velocity levels. [\#15](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/15)
 - Tempo display isn't always updated. [\#14](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/14)
 
-## [Nava2021Neuro-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210621) (2021-06-20)
+## [Nava2021Neuro-20210918](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210918) (2021-06-20)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210710...Nava2021Neuro-20210621)
-
-## [Nava2021Neuro-20210710](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210710) (2021-06-20)
-
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210711...Nava2021Neuro-20210710)
-
-## [Nava2021Neuro-20210711](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210711) (2021-06-20)
-
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210621...Nava2021Neuro-20210711)
-
-## [Nava2021beta-20210621](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021beta-20210621) (2021-06-20)
-
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021beta-20210619...Nava2021beta-20210621)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/907c9958af0c20a28c0d7099e6f8a259de9cb045...Nava2021Neuro-20210918)
 
 **Closed issues:**
 
 - Switching from keyboardMode to config page doesn't work [\#13](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/13)
 - Flam bug with external instrument and others [\#12](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/12)
 - Merge the source tree from sandormatyi [\#9](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/9)
-
-## [Nava2021beta-20210619](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021beta-20210619) (2021-06-19)
-
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/907c9958af0c20a28c0d7099e6f8a259de9cb045...Nava2021beta-20210619)
-
-**Closed issues:**
-
 - Pattern Change should be synced or free [\#8](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/8)
 - MIDI clock out lag [\#7](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/7)
 - DIN clock phase [\#6](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/6)

@@ -434,6 +434,9 @@ void SeqParameter()
               else curBank = FirstBitOn();
               nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
               if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+#if DEBUG
+  Serial.println("group.length set to 0 A");
+#endif                
               group.length = 0;
             }
             else{//pattern group edit------------------------------------------------------
@@ -465,6 +468,9 @@ void SeqParameter()
                 nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
                 if(enterBtn.justPressed){
                   ClearPatternGroup(nextPattern - pattern[ptrnBuffer].groupPos, pattern[ptrnBuffer].groupLength);
+#if DEBUG
+  Serial.println("group.length set to 0 B");
+#endif
                   group.length = 0;
                 }
                 group.pos = pattern[ptrnBuffer].groupPos;
@@ -748,8 +754,8 @@ void SeqParameter()
         }
         //Only one pattern selected
         else if (!doublePush){
-          group.priority = FALSE;
-          group.length = 0;//should be 0 to play the right next pattern
+          group.priority = FALSE;         
+//          group.length = 0;//should be 0 to play the right next pattern
           nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
           group.pos = pattern[ptrnBuffer].groupPos;
         }
@@ -972,36 +978,33 @@ void SeqParameter()
   
   if (selectedPatternChanged)
   {
-#if DEBUG
-  if ( groupNeedSaved )
-  {
-//    memory("Group step edit");
-    Serial.print("GroupLength: ");Serial.println(group.length);
-    Serial.print("GroupPos: ");Serial.println(group.pos);
-  // Todo: set aside pattern data
-  }
-#endif    
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
     patternNeedSaved = FALSE;
     if ( nextPattern != END_OF_TRACK )
     {
-      LoadPattern(nextPattern);
+      LoadPattern(nextPattern);    // Load A
+      if ( pattern[!ptrnBuffer].groupLength > 0 )
+      {
+        group.priority = FALSE;
+      }
+//       LoadPatternGroup(nextPattern - pattern[!ptrnBuffer].groupPos, pattern[!ptrnBuffer].groupLength);
+//      }
     }
     curPattern = nextPattern;
     nextPatternReady = TRUE;
   }
 
-  if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function
+  if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function [Neuro: Not true it seems]
     nextPatternReady = FALSE;
     keybOct = DEFAULT_OCT;
     noteIndex = 0;
     InitMidiNoteOff();
     ptrnBuffer = !ptrnBuffer;
-    //Serial.println("switched!!");
     if ( curPattern != END_OF_TRACK )
     {
       InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
+      Serial.print("group.length:");Serial.println(group.length);
       SetHHPattern();
       InstToStepWord();
     }
@@ -1058,7 +1061,9 @@ void SeqParameter()
 
   //We still increment pattern group in those mode
   if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP ){
+    
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
+      Serial.println("Handle Group increment");
       group.pos++;
       if (group.pos > group.length) group.pos = 0;
       nextPattern = group.firstPattern + group.pos;
