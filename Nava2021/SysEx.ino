@@ -25,14 +25,14 @@ Arduino_CRC32 crc; // See https://github.com/bakercp/CRC32 for info
  void EnableSysexMode()
  {
   seq.SysExMode = true;
-  Serial.println("Sysex Receive enabled");
   TimerStop();
   initTrigTimer();
   DisconnectMidiHandleNote();                        
   DisconnectMidiHandleRealTime();
 //  MIDI.Settings.SysExMaxSize(Serial1,500,MIDI.Platform);
   ConnectMidiSysex();
- }
+}
+
  
 uint16_t data_to_sysex(uint8_t *data, uint8_t *sysex, uint16_t len) {
   uint16_t retlen = 0;
@@ -76,7 +76,7 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
 {     
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2, sysex_type, param};
   //uint8_t *SysEx = (uint8_t *)MIDI.getSysExArray();
-  uint8_t SysEx[2100];
+  uint8_t SysEx[SYSEX_BUFFER_SIZE];
   // Copy the header to the buffer
   memcpy(SysEx, header, sizeof(header));
 
@@ -207,13 +207,13 @@ void GetPattern(byte * sysex, uint16_t RawSize)
 
 void DumpBank(byte selectedBank)
 {
-  byte RawData[BANK_PARTS*PTRN_SIZE + 32]; // Need to do the bank dump in two parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte RawData[BANK_PARTS*PTRN_SIZE + 32]; // Need to do the bank dump in multiple parts as there isn't enough memory to have the rawdata and the sysex array in memory.
   int datacount = 0;
   
   for ( int BankPart=0; BankPart < BANK_PARTS; BankPart++)
   { 
     int datacount = 0;
-    uint8_t patNum = selectedBank * NBR_PATTERN + (BANK_PARTS * BankPart);
+    uint8_t patNum = selectedBank * NBR_PATTERN + ((NBR_PATTERN /BANK_PARTS) * BankPart);
 
     for ( int ptrn = 0 ; ptrn < ( NBR_PATTERN / BANK_PARTS ); ptrn++ )
     {
@@ -250,6 +250,7 @@ void DumpBank(byte selectedBank)
           RawData[datacount++] = Wire.read();
         }
       }
+
       //VELOCITY-----------------------------------------------
       for(int nbrPage = 0; nbrPage < 4; nbrPage++){
         adress = (unsigned long)(PTRN_OFFSET + (patternNbr * PTRN_SIZE) + (MAX_PAGE_SIZE * nbrPage) + PTRN_EXT_OFFSET);
@@ -261,14 +262,14 @@ void DumpBank(byte selectedBank)
             RawData[datacount++] = (Wire.read() & 0xFF);
           }
         }
-      }
+      }       
     }
     // Instrument Levels
     memcpy(&RawData[datacount], instVelHigh, 16); // Copy High Velocity Values
     datacount += 16;
     memcpy(&RawData[datacount], instVelLow, 16);
     datacount += 16;
-
+    
     uint16_t transmit_size=build_sysex( RawData, datacount, NAVA_BANK_DMP, (selectedBank + 16* BankPart)); // Shift the bankpart to the left.
   }
 }
@@ -404,7 +405,7 @@ void DumpFull()
   {
     DumpBank(bank);
   }
-  delay(54);
+  delay(64);
   for ( uint8_t trk = 0 ; trk < MAX_TRACK; trk++)
   {
     DumpTrack(trk);
@@ -418,7 +419,6 @@ void MidiSendSysex(byte Type, byte Param)
   switch(Type)
   {
     case NAVA_BANK_DMP: // Bank
-    Serial.println("Dump Bank");
         DumpBank(Param);
         break;
     case NAVA_PTRN_DMP: // Pattern
@@ -436,25 +436,6 @@ void MidiSendSysex(byte Type, byte Param)
   }
 }
 
-#if DEBUG
-void PrintSysex(byte *sysex, unsigned size)
-{
-  Serial.print("Print Sysex size: "); Serial.println(size);
-  for(int i=0; i<size; i++)
-  {
-    if ( i % 8 == 0 ) 
-    {
-      Serial.println();
-      Serial.print(i,HEX);Serial.print(":\t");
-    }
-    Serial.print("0x");Serial.print(sysex[i], HEX); Serial.print("\t");
-  }
-  Serial.println();
-  Serial.print("Sysex Size: "); Serial.println(size);
-
-}
-
-#endif
 void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
 {
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2 };
@@ -492,7 +473,6 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
   {
   case NAVA_BANK_REQ: 
     {
-      Serial.print("Bank Req Param: ");Serial.println(Param);
       if ( Param < 8 )
       { 
         sysExParam = Param;
@@ -550,7 +530,6 @@ void HandleSystemExclusive(byte * RawSysEx, unsigned RawSize)
     }
   case NAVA_CONFIG_REQ:
     { 
-      Serial.println("Dumping Config");
       sysExDump = NAVA_CONFIG_DMP;
       DumpConfig();
       break;

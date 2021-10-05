@@ -28,12 +28,13 @@
 #define NAVA_FBANK_REQ  0x46
 #define NAVA_FTRACK_REQ 0x47
 #define NAVA_ACK        0x48
-#define BANK_PARTS      4
+#define BANK_PARTS      8  // Must be one of 4,8 or 16.
 
 #define SYSEX_PTRN_SIZE   564
-#define SYSEX_BANK_SIZE   2100
+#define SYSEX_BANK_SIZE   1076 // 1076 //2100
 #define SYSEX_TRACK_SIZE  1186
 #define SYSEX_CONFIG_SIZE 89
+#define SYSEX_BUFFER_SIZE SYSEX_TRACK_SIZE // 2100 when using 4 BANK_PARTS      
 /*struct SysexPortSettings
 {
     static const bool UseRunningStatus = true;

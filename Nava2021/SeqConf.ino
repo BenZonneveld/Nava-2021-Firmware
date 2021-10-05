@@ -11,7 +11,7 @@ void SeqConfiguration()
     seq.syncChanged = FALSE;
   }
  
-  if (seq.setupNeedSaved && enterBtn.justPressed){
+  if (seq.setupNeedSaved && enterBtn.justPressed && seq.configPage != 3 ){
     SaveSeqSetup();
     seq.setupNeedSaved = FALSE;
     LcdPrintSaved();

@@ -55,7 +55,6 @@ void HandleClock()
   CountPPQN();
   CountPPQN();
   DIN_CLK_LOW;                                                                    
-
 }
 
 

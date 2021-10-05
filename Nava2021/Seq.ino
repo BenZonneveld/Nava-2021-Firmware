@@ -41,7 +41,11 @@ void SeqParameter()
       shufPolarity = 0;//Init shuffle polarity
       noteIndexCpt = 0;//init ext instrument note index counter
       blinkTempo = 0;                                                               // [zabox] looks more consistent
-    
+
+//      if ( midiStart)
+//      {
+//        ppqn = 1;
+//      }
       MIDI.sendRealTime(midi::MidiType::Start);  //;MidiSend(START_CMD);
         DIN_START_HIGH;
         dinStartState = HIGH;
@@ -118,6 +122,7 @@ void SeqParameter()
       keyboardMode = FALSE;
       seq.configPage++;
       curIndex = 0;
+      if ( seq.configPage == 3 ) seq.setupNeedSaved = FALSE;
       if (seq.configPage > MAX_CONF_PAGE){
         seq.configPage = 0;
         seq.configMode  = FALSE;

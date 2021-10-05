@@ -47,15 +47,17 @@ void CountPPQN()
   if (ppqn % (PPQN/2) == 0) blinkTempo = !blinkTempo;
   if (ppqn  % (pattern[ptrnBuffer].scale/2) == 0) blinkFast = LOW;
  // if (ppqn % 4 == 0) MIDI.sendRealTime(Clock);      //MidiSend(CLOCK_CMD);//as NAVA seq is 96ppqn we need to send clock each 4 internal ppqn
-  if (ppqn % 4 == 0) {                                
-    while (!(UCSR1A & (1 << UDRE1))) {};                                            // [zabox] directly adressing the uart fixes the midi clock lag
-    UDR1 = CLOCK_CMD; //Tick
-  }
+//  if (ppqn % 4 == 0) {                                
+//    while (!(UCSR1A & (1 << UDRE1))) {};                                            // [zabox] directly adressing the uart fixes the midi clock lag
+//    UDR1 = CLOCK_CMD; //Tick
+//  }
 
   if (seq.sync == MASTER){                                                          // [zabox] has to be 0/2 for the correct phase
     if (ppqn % 4 == 0){
       DIN_CLK_HIGH;                                                               
       dinClkState = HIGH;
+      while (!(UCSR1A & (1 << UDRE1))) {};                                            // [zabox] directly adressing the uart fixes the midi clock lag
+      UDR1 = CLOCK_CMD; //Tick
     }
     else if (ppqn % 4 == 2) {
       DIN_CLK_LOW;
