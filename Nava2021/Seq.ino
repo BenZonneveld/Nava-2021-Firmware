@@ -980,16 +980,47 @@ void SeqParameter()
   {
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
-    patternNeedSaved = FALSE;
+    if ( curSeqMode != PTRN_STEP && curSeqMode != PTRN_TAP && !isRunning )
+      patternNeedSaved = FALSE;
     if ( nextPattern != END_OF_TRACK )
     {
-      LoadPattern(nextPattern);    // Load A
-      if ( pattern[!ptrnBuffer].groupLength > 0 )
-      {
-        group.priority = FALSE;
+      byte groupPos = 0;
+      if ( nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) || !group.isLoaded )
+      { 
+//        Serial.println("LoadPattern A");
+        LoadPattern(nextPattern);    // Load A
+        group.isLoaded = FALSE;
+        group.length = pattern[!ptrnBuffer].groupLength;
+        groupPos = pattern[!ptrnBuffer].groupPos;
       }
-//       LoadPatternGroup(nextPattern - pattern[!ptrnBuffer].groupPos, pattern[!ptrnBuffer].groupLength);
-//      }
+      if ( group.length > 0 )
+      {       
+//        groupPos = group.pos;
+        if ( !group.isLoaded)
+        {
+          byte firstPattern = nextPattern - pattern[!ptrnBuffer].groupPos;
+          byte groupLength = pattern[!ptrnBuffer].groupLength;
+          groupPos = pattern[!ptrnBuffer].groupPos;
+//          Serial.println("Buffer pattern group");
+          for ( byte a = 0; a <= groupLength; a++ )
+          {
+            LoadPattern(firstPattern + a);
+            memcpy(&patternGroup[a],&pattern[!ptrnBuffer], sizeof(Pattern));
+          }
+        } else {
+          groupPos = nextPattern - group.firstPattern;
+//          Serial.print("Loading groupPos ");Serial.print(groupPos);Serial.println(" from group buffer");
+        }
+        group.priority = FALSE;
+//        Serial.print("groupPos: "); Serial.println(groupPos);
+        memcpy(&pattern[!ptrnBuffer], &patternGroup[groupPos],sizeof(Pattern));
+        group.isLoaded = TRUE;
+      } 
+      else
+      {
+//        Serial.println("Unset group.isLoaded");
+        group.isLoaded = FALSE;
+      }
     }
     curPattern = nextPattern;
     nextPatternReady = TRUE;
@@ -1004,7 +1035,6 @@ void SeqParameter()
     if ( curPattern != END_OF_TRACK )
     {
       InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
-      Serial.print("group.length:");Serial.println(group.length);
       SetHHPattern();
       InstToStepWord();
     }
@@ -1060,10 +1090,15 @@ void SeqParameter()
   } 
 
   //We still increment pattern group in those mode
-  if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP ){
-    
+  if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP || curSeqMode == PTRN_TAP ){    
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
-      Serial.println("Handle Group increment");
+//     Serial.println("Handle Group increment");
+      if ( (curSeqMode == PTRN_STEP || curSeqMode == PTRN_TAP) && patternNeedSaved )
+      {
+        Serial.println("Edited Pattern in group");
+        Serial.print("group.pos: "); Serial.println(group.pos);
+        memcpy(&patternGroup[group.pos],&pattern[ptrnBuffer], sizeof(Pattern));
+      }
       group.pos++;
       if (group.pos > group.length) group.pos = 0;
       nextPattern = group.firstPattern + group.pos;

@@ -52,6 +52,9 @@ void setup()
   Serial.begin(115200);
 
   Serial.print("Pattern struct size: "); Serial.println(sizeof(struct Pattern));
+#if GROUP_EDIT
+  Serial.print("patternGroup size: "); Serial.println(sizeof(patternGroup));
+#endif
   memory("Boot");
 //  Serial.print("Sysex Size: ");
 //  Serial.println(MySettings);
@@ -136,7 +139,7 @@ void setup()
   lcd.print("by e-licktronic ");
   delay(1000);
   LcdUpdate();                                              // [1.028] if started in expader mode
-
+  memory("End of Init");
 }
 
 ////////////////////////Loop///////////////////////

@@ -406,11 +406,15 @@ struct Pattern
 };
 Pattern pattern[2];//current pattern and next pattern in the buffer
 Pattern bufferedPattern;//to copy paste pattern
+#if GROUP_EDIT
+Pattern patternGroup[16]; // The max amount of patterns in a group
+#endif
 boolean ptrnBuffer = 0;
 boolean patternWasEdited = FALSE;
 boolean selectedPatternChanged = FALSE;
 boolean nextPatternReady = FALSE;
 boolean patternNeedSaved = FALSE;
+
 byte prevShuf;                                                          // [zabox] [1.028] flam
 byte prevFlam;                                                          // [zabox] [1.028] flam
 
@@ -421,6 +425,7 @@ struct GroupPattern
   byte length;//length of the pattern bloc
   byte firstPattern;//first pattern of the bloc
   byte pos;
+  boolean isLoaded;
   boolean priority;//use to know if volatile group have priority on stored pattern group
 }
 group;

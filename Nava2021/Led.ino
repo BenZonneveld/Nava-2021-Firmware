@@ -140,10 +140,7 @@ void SetLeds()
         for (int a = 0; a <= group.length; a++){
           bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
         }
-        stepLeds = temp ^ (!blinkTempo << (curPattern % NBR_PATTERN));// ^ (blinkFast << curPattern);
-//        else {
-//          stepLeds = (blinkTempo << (curPattern % NBR_PATTERN)) ^ (blinkFast << curPattern);
-//        }
+        stepLeds = temp ^ (!blinkTempo << (curPattern % NBR_PATTERN));
       }
     }
     break;
