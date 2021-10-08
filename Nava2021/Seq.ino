@@ -755,7 +755,7 @@ void SeqParameter()
         //Only one pattern selected
         else if (!doublePush){
           group.priority = FALSE;         
-//          group.length = 0;//should be 0 to play the right next pattern
+          group.length = 0;//should be 0 to play the right next pattern
           nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
           group.pos = pattern[ptrnBuffer].groupPos;
         }
@@ -975,51 +975,68 @@ void SeqParameter()
   if (millis() - timeSinceSaved > HOLD_TIME){                                               
     trackJustSaved = FALSE;
   }
-  
+
   if (selectedPatternChanged)
   {
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
+
     if ( curSeqMode != PTRN_STEP && curSeqMode != PTRN_TAP && !isRunning )
       patternNeedSaved = FALSE;
+
     if ( nextPattern != END_OF_TRACK )
     {
       byte groupPos = 0;
-      if ( nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) || !group.isLoaded )
-      { 
-//        Serial.println("LoadPattern A");
-        LoadPattern(nextPattern);    // Load A
-        group.isLoaded = FALSE;
-        group.length = pattern[!ptrnBuffer].groupLength;
+      
+      if ( !group.isLoaded || nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
+      {         
+        LoadPattern(nextPattern);
+        // If not a member of a pattern group clear bitmasks
+        if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
+        {
+          group.isLoaded = FALSE; // Unload group
+          group.length = 0; 
+          groupPatternLoaded = 0;
+          groupPatternEdited = 0;
+        }
         groupPos = pattern[!ptrnBuffer].groupPos;
       }
+      
       if ( group.length > 0 )
-      {       
-//        groupPos = group.pos;
+      {
         if ( !group.isLoaded)
         {
           byte firstPattern = nextPattern - pattern[!ptrnBuffer].groupPos;
-          byte groupLength = pattern[!ptrnBuffer].groupLength;
+          
           groupPos = pattern[!ptrnBuffer].groupPos;
-//          Serial.println("Buffer pattern group");
-          for ( byte a = 0; a <= groupLength; a++ )
+
+          if ( !bitRead(groupPatternLoaded, groupPos) )
           {
-            LoadPattern(firstPattern + a);
-            memcpy(&patternGroup[a],&pattern[!ptrnBuffer], sizeof(Pattern));
+            memcpy(&patternGroup[groupPos],&pattern[!ptrnBuffer], sizeof(Pattern));
+            bitSet(groupPatternLoaded,groupPos);
+          }
+          byte bitcount = 0;
+          for ( int i=0; i <= group.length; i++ )
+          {
+            bitcount += ((groupPatternLoaded >> i) &0x1);
+          }
+          if ( (bitcount - 1) == group.length )
+          {
+            group.isLoaded = TRUE;
           }
         } else {
+          Serial.print("group.firstPattern: ");Serial.println(group.firstPattern);
           groupPos = nextPattern - group.firstPattern;
-//          Serial.print("Loading groupPos ");Serial.print(groupPos);Serial.println(" from group buffer");
         }
         group.priority = FALSE;
-//        Serial.print("groupPos: "); Serial.println(groupPos);
         memcpy(&pattern[!ptrnBuffer], &patternGroup[groupPos],sizeof(Pattern));
-        group.isLoaded = TRUE;
       } 
       else
       {
-//        Serial.println("Unset group.isLoaded");
         group.isLoaded = FALSE;
+        group.length = 0;
+        groupPatternLoaded = 0; // Reset bitmask
+        groupPatternEdited = 0; // Reset bitmask
       }
     }
     curPattern = nextPattern;
@@ -1050,11 +1067,21 @@ void SeqParameter()
     // Serial.println("patternupdated");
   }
 
-  if (patternNeedSaved && enterBtn.justPressed && !instBtn)
+  if ( (groupNeedSaved || patternNeedSaved) && enterBtn.justPressed && !instBtn)
   {
     patternNeedSaved = FALSE;
     if ( group.length )
     {
+      Serial.println("Saving edited pattern group");
+      for ( int i=0; i <= group.length; i++ )
+      {
+        if ( bitRead(groupPatternEdited, i) )
+        {
+          // Pattern needs saving
+          memcpy(&pattern[ptrnBuffer], &patternGroup[i],sizeof(Pattern));
+          SavePattern(group.firstPattern + i);
+        }
+      }
       groupNeedSaved = FALSE;
     } else {
       SavePattern(curPattern);//pattern saved
@@ -1098,6 +1125,8 @@ void SeqParameter()
         Serial.println("Edited Pattern in group");
         Serial.print("group.pos: "); Serial.println(group.pos);
         memcpy(&patternGroup[group.pos],&pattern[ptrnBuffer], sizeof(Pattern));
+        bitSet(groupPatternEdited, group.pos);
+        patternNeedSaved = FALSE;
       }
       group.pos++;
       if (group.pos > group.length) group.pos = 0;

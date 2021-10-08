@@ -43,7 +43,7 @@ void SetLeds()
   bankLed = bankBtn.pressed;
 
   if (instBtn && curInst == TOTAL_ACC) enterLed = HIGH;
-  else if (patternNeedSaved || trackNeedSaved || seq.setupNeedSaved) enterLed = blinkTempo;
+  else if (groupNeedSaved || patternNeedSaved || trackNeedSaved || seq.setupNeedSaved) enterLed = blinkTempo;
   else enterLed = LOW;
 
   if (curSeqMode == MUTE) muteLed = HIGH;

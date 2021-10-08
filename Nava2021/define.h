@@ -408,6 +408,8 @@ Pattern pattern[2];//current pattern and next pattern in the buffer
 Pattern bufferedPattern;//to copy paste pattern
 #if GROUP_EDIT
 Pattern patternGroup[16]; // The max amount of patterns in a group
+unsigned int groupPatternLoaded; // Bitmask indicating if the pattern has been buffered
+unsigned int groupPatternEdited; // Bitmask to identify edited patterns
 #endif
 boolean ptrnBuffer = 0;
 boolean patternWasEdited = FALSE;
