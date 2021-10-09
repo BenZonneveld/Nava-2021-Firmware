@@ -434,9 +434,6 @@ void SeqParameter()
               else curBank = FirstBitOn();
               nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
               if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-#if DEBUG
-  Serial.println("group.length set to 0 A");
-#endif                
               group.length = 0;
             }
             else{//pattern group edit------------------------------------------------------
@@ -468,9 +465,6 @@ void SeqParameter()
                 nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
                 if(enterBtn.justPressed){
                   ClearPatternGroup(nextPattern - pattern[ptrnBuffer].groupPos, pattern[ptrnBuffer].groupLength);
-#if DEBUG
-  Serial.println("group.length set to 0 B");
-#endif
                   group.length = 0;
                 }
                 group.pos = pattern[ptrnBuffer].groupPos;
@@ -976,20 +970,55 @@ void SeqParameter()
     trackJustSaved = FALSE;
   }
 
+  if (patternWasEdited)
+  {//update Pattern
+    patternWasEdited = FALSE;
+    SetHHPattern();
+    InstToStepWord();
+    patternNeedSaved = TRUE;
+    if ( group.length ) 
+    {
+      memcpy(&patternGroup[group.pos],&pattern[ptrnBuffer], sizeof(Pattern));
+      bitSet(groupPatternEdited, group.pos);
+      groupNeedSaved = TRUE;
+    }
+  }
+
+  if ( (groupNeedSaved || patternNeedSaved) && enterBtn.justPressed && !instBtn)
+  {
+    patternNeedSaved = FALSE;
+    if ( group.length )
+    {
+      for ( int i=0; i <= group.length; i++ )
+      {
+        if ( bitRead(groupPatternEdited, i) )
+        {
+          // Pattern needs saving
+          memcpy(&pattern[ptrnBuffer], &patternGroup[i],sizeof(Pattern));
+          SavePattern(group.firstPattern + i);
+        }
+      }
+      groupNeedSaved = FALSE;
+    } else {
+      SavePattern(curPattern);//pattern saved
+    }
+    LcdPrintSaved();
+  }
+
   if (selectedPatternChanged)
   {
     selectedPatternChanged = FALSE;
     needLcdUpdate = TRUE;//selected pattern changed so we need to update display
 
-    if ( curSeqMode != PTRN_STEP && curSeqMode != PTRN_TAP && !isRunning )
-      patternNeedSaved = FALSE;
+ //   if ( curSeqMode != PTRN_STEP && curSeqMode != PTRN_TAP && !isRunning )
+ //     patternNeedSaved = FALSE;
 
     if ( nextPattern != END_OF_TRACK )
     {
       byte groupPos = 0;
       
       if ( !group.isLoaded || nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
-      {         
+      {        
         LoadPattern(nextPattern);
         // If not a member of a pattern group clear bitmasks
         if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
@@ -1023,17 +1052,17 @@ void SeqParameter()
           if ( (bitcount - 1) == group.length )
           {
             group.isLoaded = TRUE;
+            group.priority = FALSE;
           }
         } else {
-          Serial.print("group.firstPattern: ");Serial.println(group.firstPattern);
           groupPos = nextPattern - group.firstPattern;
         }
-        group.priority = FALSE;
         memcpy(&pattern[!ptrnBuffer], &patternGroup[groupPos],sizeof(Pattern));
       } 
       else
       {
         group.isLoaded = FALSE;
+        group.priority = FALSE;
         group.length = 0;
         groupPatternLoaded = 0; // Reset bitmask
         groupPatternEdited = 0; // Reset bitmask
@@ -1055,38 +1084,6 @@ void SeqParameter()
       SetHHPattern();
       InstToStepWord();
     }
-  }
-
-  if (patternWasEdited)
-  {//update Pattern
-    patternWasEdited = FALSE;
-    SetHHPattern();
-    InstToStepWord();
-    patternNeedSaved = TRUE;
-    if ( group.length ) groupNeedSaved = TRUE;
-    // Serial.println("patternupdated");
-  }
-
-  if ( (groupNeedSaved || patternNeedSaved) && enterBtn.justPressed && !instBtn)
-  {
-    patternNeedSaved = FALSE;
-    if ( group.length )
-    {
-      Serial.println("Saving edited pattern group");
-      for ( int i=0; i <= group.length; i++ )
-      {
-        if ( bitRead(groupPatternEdited, i) )
-        {
-          // Pattern needs saving
-          memcpy(&pattern[ptrnBuffer], &patternGroup[i],sizeof(Pattern));
-          SavePattern(group.firstPattern + i);
-        }
-      }
-      groupNeedSaved = FALSE;
-    } else {
-      SavePattern(curPattern);//pattern saved
-    }
-    LcdPrintSaved();
   }
 
   if (enterBtn.justRelease) needLcdUpdate = TRUE;
@@ -1119,13 +1116,8 @@ void SeqParameter()
   //We still increment pattern group in those mode
   if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP || curSeqMode == PTRN_TAP ){    
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
-//     Serial.println("Handle Group increment");
       if ( (curSeqMode == PTRN_STEP || curSeqMode == PTRN_TAP) && patternNeedSaved )
       {
-        Serial.println("Edited Pattern in group");
-        Serial.print("group.pos: "); Serial.println(group.pos);
-        memcpy(&patternGroup[group.pos],&pattern[ptrnBuffer], sizeof(Pattern));
-        bitSet(groupPatternEdited, group.pos);
         patternNeedSaved = FALSE;
       }
       group.pos++;

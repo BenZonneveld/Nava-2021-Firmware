@@ -98,6 +98,11 @@ void InitPattern()
     pattern[ptrnBuffer].velocity[TRIG_OUT][stp] = HIGH_VEL;//TRIG_OUT
 //    pattern[ptrnBuffer].velocity[EXT_INST][stp] = HIGH_VEL;//EXT_INST
   }
+  if ( group.length )
+  {
+    prevShuf = pattern[ptrnBuffer].shuffle;
+    prevFlam = pattern[ptrnBuffer].flam;
+  }
   switch (pattern[ptrnBuffer].scale){
   case  SCALE_16:
     scaleBtn.counter = 0;
