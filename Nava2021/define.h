@@ -307,6 +307,7 @@ boolean enterLed;
 unsigned int instSlctLed;//[NBR_INST]={0x00, 0x00, 0x300, 0x400, 0x800, 
 byte ledUpdateCounter = 3;                                                                                               // [zabox] [1.028]
 byte flagLedIntensity;
+byte flagMuteIntensity;
 unsigned int muteLedsOrder[NBR_STEP_BTN]=  { 
   0x03, 0x03, 0x0C, 0x0C, 0x30, 0x30, 0xC0, 0xC0, 0x300, 0x300, 0x400, 0X800, 0x1000, 0x2000, 0x4000, 0x8000};           // [zabox] update for OH/CH mute
 unsigned int muteLeds = 0;
@@ -406,11 +407,9 @@ struct Pattern
 };
 Pattern pattern[2];//current pattern and next pattern in the buffer
 Pattern bufferedPattern;//to copy paste pattern
-#if GROUP_EDIT
 Pattern patternGroup[16]; // The max amount of patterns in a group
 unsigned int groupPatternLoaded; // Bitmask indicating if the pattern has been buffered
 unsigned int groupPatternEdited; // Bitmask to identify edited patterns
-#endif
 boolean ptrnBuffer = 0;
 boolean patternWasEdited = FALSE;
 boolean selectedPatternChanged = FALSE;

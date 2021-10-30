@@ -1,5 +1,20 @@
 Features in this release:
 
+October 2021:
+This release focuses on pattern groups.
+
+* Pattern groups can now be used in edit mode without losing edits when going to the next pattern in a group.
+
+* When saving edits in a pattern group only edited patterns are save to reduce wear and tear on the eeprom.
+
+* Pattern groups are shown in Pattern Play while not running.
+
+Other changes:
+* Also only instrument hits within the pattern length are shown.
+
+* When there are muted instruments and the Nava is not in MUTE mode the MUTE button will be lit dimly.
+
+Older releases:
 The Nava Tool Installer for windows is included in this release.
 
 

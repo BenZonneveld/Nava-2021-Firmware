@@ -6,4 +6,3 @@
 #define CONFIG_BOOTMODE          1
 #define MIDI_HAS_SYSEX           1
 #define REALTIME_ACCENT          1
-#define GROUP_EDIT               1
