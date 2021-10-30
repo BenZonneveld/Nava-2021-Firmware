@@ -731,7 +731,10 @@ void SeqParameter()
         if(FirstBitOn() >= MAX_BANK) curBank = MAX_BANK;
         else curBank = FirstBitOn();
         nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-//        group.length = 0;//should be 0 to play the right next pattern
+        if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
+        {
+          group.length = 0;//should be 0 to play the right next pattern
+        }
         if((curPattern != nextPattern) && !isRunning) selectedPatternChanged = TRUE;
       }
       else{
@@ -751,6 +754,7 @@ void SeqParameter()
           group.priority = FALSE;         
 //          group.length = 0;//should be 0 to play the right next pattern
           nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
+          if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) ) group.length = 0;
           group.pos = pattern[ptrnBuffer].groupPos;
         }
         if(curPattern != nextPattern && stepsBtn.justPressed) {                                                // [zabox] [1.027] fixes pattern change bug in slave mode
@@ -1015,60 +1019,7 @@ void SeqParameter()
 
     if ( nextPattern != END_OF_TRACK )
     {
-      byte groupPos = 0;
-      
-      if ( !group.isLoaded || nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
-      {        
-        LoadPattern(nextPattern);
-        // If not a member of a pattern group clear bitmasks
-        if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
-        {
-          patternNeedSaved = FALSE;
-          groupNeedSaved = FALSE;
-          group.isLoaded = FALSE; // Unload group
-          group.length = 0; 
-          groupPatternLoaded = 0;
-          groupPatternEdited = 0;
-        }
-        groupPos = pattern[!ptrnBuffer].groupPos;
-      }
-      
-      if ( group.length > 0 )
-      {
-        if ( !group.isLoaded)
-        {
-          byte firstPattern = nextPattern - pattern[!ptrnBuffer].groupPos;
-          
-          groupPos = pattern[!ptrnBuffer].groupPos;
-
-          if ( !bitRead(groupPatternLoaded, groupPos) )
-          {
-            memcpy(&patternGroup[groupPos],&pattern[!ptrnBuffer], sizeof(Pattern));
-            bitSet(groupPatternLoaded,groupPos);
-          }
-          byte bitcount = 0;
-          for ( int i=0; i <= group.length; i++ )
-          {
-            bitcount += ((groupPatternLoaded >> i) &0x1);
-          }
-          if ( (bitcount - 1) == group.length )
-          {
-            group.isLoaded = TRUE;
-            group.priority = FALSE;
-          }
-        } else {
-          groupPos = nextPattern - group.firstPattern;
-        }
-        memcpy(&pattern[!ptrnBuffer], &patternGroup[groupPos],sizeof(Pattern));
-      } 
-      else
-      {
-        group.isLoaded = FALSE;
-        group.priority = FALSE;
-        group.length = 0;
-        groupPatternLoaded = 0; // Reset bitmask
-        groupPatternEdited = 0; // Reset bitmask
-      }
+      PatternLoad();
     }
     curPattern = nextPattern;
     nextPatternReady = TRUE;
