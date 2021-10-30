@@ -14,6 +14,8 @@ Other changes:
 
 * When there are muted instruments and the Nava is not in MUTE mode the MUTE button will be lit dimly.
 
+* MIDI pattern change now only works in pattern play mode.
+
 Older releases:
 The Nava Tool Installer for windows is included in this release.
 

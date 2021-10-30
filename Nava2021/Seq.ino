@@ -752,9 +752,8 @@ void SeqParameter()
         //Only one pattern selected
         else if (!doublePush){
           group.priority = FALSE;         
-//          group.length = 0;//should be 0 to play the right next pattern
           nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
-          if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) ) group.length = 0;
+          if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) ) group.length = 0; //should be 0 to play the right next pattern
           group.pos = pattern[ptrnBuffer].groupPos;
         }
         if(curPattern != nextPattern && stepsBtn.justPressed) {                                                // [zabox] [1.027] fixes pattern change bug in slave mode

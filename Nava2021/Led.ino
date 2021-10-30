@@ -187,7 +187,7 @@ void SetLeds()
     else if (isRunning && !instBtn){ 
       stepLedsHigh = stepLedsLow = 0;//initialize step Leds variable 
 //      for (int stp = 0; stp < NBR_STEP; stp++){
-      for (int stp = 0; stp < pattern[ptrnBuffer].length; stp++){
+      for (int stp = 0; stp < (pattern[ptrnBuffer].length + 1); stp++){
         if (curFlam) {                                                                       // [zabox] [1.027] flam
           if (pattern[ptrnBuffer].velocity[curInst][stp] & 128) {
             if (((pattern[ptrnBuffer].velocity[curInst][stp]) & 127) > instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsHigh, stp);

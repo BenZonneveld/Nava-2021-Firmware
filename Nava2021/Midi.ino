@@ -182,9 +182,12 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 67:
       case 68:
         // Bank Select
-        curBank = pitch - 61;
-        nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        if (curSeqMode == PTRN_PLAY )
+        {
+          curBank = pitch - 61;
+          nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
+          if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        }
         break;
       case 72:
       case 73:
@@ -203,19 +206,22 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 86:
       case 87:
         // Pattern Select
-        group.priority = FALSE;
-        nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
-        group.pos = pattern[ptrnBuffer].groupPos;
-        if(curPattern != nextPattern)
+        if (curSeqMode == PTRN_PLAY )
         {
-          needLcdUpdate = TRUE;//selected pattern changed so we need to update display
-          patternNeedSaved = FALSE;
-          if ( nextPattern != END_OF_TRACK )
+          group.priority = FALSE;
+          nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
+          group.pos = pattern[ptrnBuffer].groupPos;
+          if(curPattern != nextPattern)
           {
-            PatternLoad();
+            needLcdUpdate = TRUE;//selected pattern changed so we need to update display
+            patternNeedSaved = FALSE;
+            if ( nextPattern != END_OF_TRACK )
+            {
+              PatternLoad();
+            }
+            curPattern = nextPattern;
+            nextPatternReady = TRUE;
           }
-          curPattern = nextPattern;
-          nextPatternReady = TRUE;
         }
         break;
 #endif // MIDI_BANK_PATTERN_CHANGE
