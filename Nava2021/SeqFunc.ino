@@ -85,7 +85,7 @@ void PasteBufferToPattern(byte patternNum)
 //init pattern
 void InitPattern()
 {
-  if (!group.priority){
+  if (!group.priority && ! group.isLoaded ){
     group.length = pattern[ptrnBuffer].groupLength;
     group.firstPattern = curPattern - pattern[ptrnBuffer].groupPos;
   }

@@ -307,11 +307,11 @@ void SeqParameter()
       needLcdUpdate = TRUE;
     }
 
-    //-------------------Clear Button------------------------------
+    //-------------------Clear Button for STEP Mode------------------------------
     if (clearBtn.pressed && !keyboardMode && curSeqMode != PTRN_TAP && isRunning){
+
       
       if (clearBtn.justPressed)  prev_muteInst = muteInst;                                                    // [zabox] save mute state
-      
       muteInst |= (1 << curInst);                                                                             // [zabox] mute current instrument while holding clear
       
       bitClear (pattern[ptrnBuffer].inst[curInst], curStep);
@@ -434,7 +434,7 @@ void SeqParameter()
               else curBank = FirstBitOn();
               nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
               if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-              group.length = 0;
+//              group.length = 0;
             }
             else{//pattern group edit------------------------------------------------------
               if (SecondBitOn())
@@ -731,7 +731,7 @@ void SeqParameter()
         if(FirstBitOn() >= MAX_BANK) curBank = MAX_BANK;
         else curBank = FirstBitOn();
         nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-        group.length = 0;//should be 0 to play the right next pattern
+//        group.length = 0;//should be 0 to play the right next pattern
         if((curPattern != nextPattern) && !isRunning) selectedPatternChanged = TRUE;
       }
       else{
@@ -749,7 +749,7 @@ void SeqParameter()
         //Only one pattern selected
         else if (!doublePush){
           group.priority = FALSE;         
-          group.length = 0;//should be 0 to play the right next pattern
+//          group.length = 0;//should be 0 to play the right next pattern
           nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
           group.pos = pattern[ptrnBuffer].groupPos;
         }
@@ -1023,6 +1023,8 @@ void SeqParameter()
         // If not a member of a pattern group clear bitmasks
         if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
         {
+          patternNeedSaved = FALSE;
+          groupNeedSaved = FALSE;
           group.isLoaded = FALSE; // Unload group
           group.length = 0; 
           groupPatternLoaded = 0;

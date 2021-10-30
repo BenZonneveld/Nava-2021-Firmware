@@ -481,8 +481,8 @@ byte keybOct = DEFAULT_OCT;
 byte noteIndex = 0;//external inst note index
 
 //SPI------------------------------------------------
-SPISettings SPIset(4000000, MSBFIRST, SPI_MODE0);
-SPISettings SPIset_f(4000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
+SPISettings SPIset(2000000, MSBFIRST, SPI_MODE0);
+SPISettings SPIset_f(2000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
 
 
 //Encoder--------------------------------------------
@@ -588,6 +588,5 @@ unsigned int lastStepLeds = 0;
 byte showTrigLeds = 0;
 unsigned int gateLeds = 0;
 unsigned int gateInst = 0;
-
-
+                 
 #endif//end if define_h

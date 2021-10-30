@@ -127,7 +127,7 @@ void SetLeds()
       if (isRunning){
         if (group.length){
           temp = 0;
-          for (int a = 0; a <= group.length; a++){
+          for (byte a = 0; a <= group.length; a++){
             bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
           }
           stepLeds = temp & ~(!blinkTempo << (nextPattern % NBR_PATTERN)) ^ (blinkFast<< curStep);
@@ -136,11 +136,12 @@ void SetLeds()
           stepLeds = (blinkTempo <<(nextPattern % NBR_PATTERN)) ^ (blinkFast<< curStep); 
         }
       } else {
+        // Not Running
         temp = 0;
-        for (int a = 0; a <= group.length; a++){
+        for (byte a = 0; a <= group.length; a++){
           bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
         }
-        stepLeds = temp ^ (!blinkTempo << (curPattern % NBR_PATTERN));
+        stepLeds = temp & ~(!blinkTempo << (curPattern % NBR_PATTERN));
       }
     }
     break;
@@ -215,7 +216,7 @@ void SetLeds()
         // if (group.length)
         temp = 0;
        // Serial.println(group.length);
-        for (int a = 0; a <= group.length; a++){
+        for (byte a = 0; a <= group.length; a++){
           bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
         }
         stepLeds = temp & ~(!blinkTempo << (curPattern % NBR_PATTERN));

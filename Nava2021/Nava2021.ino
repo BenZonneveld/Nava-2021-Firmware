@@ -177,7 +177,7 @@ void loop()
 
 }
 
-#ifdef DEBUG
+#if DEBUG
 void memory(char *label)
 {
   Serial.print("freeMemory() in ");
