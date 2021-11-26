@@ -20,6 +20,7 @@ void SeqParameter()
     curIndex++;
     if (curIndex >= MAX_CUR_POS ) curIndex = 0;   
 #if MIDI_HAS_SYSEX
+    // Limit encoder positions for Sysex
     if ( seq.configMode && seq.configPage == 3 ) {
       if (sysExDump < SYSEX_MAXPARAM && curIndex > 1 ) curIndex = 0;
       if (sysExDump >= SYSEX_MAXPARAM && curIndex > 0 ) curIndex = 0;
@@ -126,6 +127,8 @@ void SeqParameter()
       if (seq.configPage > MAX_CONF_PAGE){
         seq.configPage = 0;
         seq.configMode  = FALSE;
+        seq.SysExMode = false;
+        SetSeqSync();
       }
       needLcdUpdate = TRUE;
     }

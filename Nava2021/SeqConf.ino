@@ -37,8 +37,8 @@ void SeqConfiguration()
   } else {
     if ( seq.SysExMode == true )
     {
-      SetSeqSync();
       seq.SysExMode = false;
+      SetSeqSync();
     }
   }
 #endif  

@@ -98,7 +98,6 @@ void DisconnectMidiHandleRealTime()
 #if MIDI_HAS_SYSEX
 void ConnectMidiSysex()
 {
-  Serial.println("Sysex Connected");
   MIDI.setHandleSystemExclusive(HandleSystemExclusive);
 }
 

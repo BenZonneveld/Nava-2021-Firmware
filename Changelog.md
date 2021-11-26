@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- After soloing an instrument, toggling Mute off does not unmute other voices [\#40](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/40)
 - Config changes can't be saved [\#37](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/37)
 - Missed MIDI notes \(MIDI out\) [\#36](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/36)
 - Expander mode does not work outside settings [\#35](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/35)

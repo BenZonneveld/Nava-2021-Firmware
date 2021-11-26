@@ -153,6 +153,8 @@ void SeqConfigurationExpander()
           seq.configPage = 0;
           seq.configMode  = FALSE;
           seq.setupNeedSaved = FALSE;
+          seq.SysExMode = FALSE;
+          SetSeqSync();
           LcdUpdate();
         }
       }
