@@ -74,7 +74,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          tag: Nava2021Neuro-${{ steps.current-time.outputs.formattedTime  }}
+          tag: Nava2021Beta-${{ steps.current-time.outputs.formattedTime  }}
           artifacts: Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.hex,Nava2021/build/MightyCore.avr.1284/firmware.syx, Nava2021/build/MightyCore.avr.1284/Nava2021.ino.with_bootloader.bin, Nava_Tool/NavaToolInstaller.msi
           allowUpdates: true
           bodyFile: Release.md

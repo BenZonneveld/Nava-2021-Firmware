@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- Pattern group not working correctly [\#41](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/41)
 - After soloing an instrument, toggling Mute off does not unmute other voices [\#40](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/40)
 - Config changes can't be saved [\#37](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/37)
 - Missed MIDI notes \(MIDI out\) [\#36](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/36)
 - Expander mode does not work outside settings [\#35](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/35)
+- Pattern groups in Edit mode do not work correctly. [\#30](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/30)
 - Feature: No option to clear a track. [\#23](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/23)
 - Bug: Switching to pattern play always gives step edit the first press! [\#22](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/22)
 - Bug: Track play pattern name not updated [\#21](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/21)
@@ -25,7 +27,11 @@
 
 ## [Nava2021Neuro-20211030](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20211030) (2021-06-20)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/907c9958af0c20a28c0d7099e6f8a259de9cb045...Nava2021Neuro-20211030)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20211219...Nava2021Neuro-20211030)
+
+## [Nava2021Neuro-20211219](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20211219) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/907c9958af0c20a28c0d7099e6f8a259de9cb045...Nava2021Neuro-20211219)
 
 **Closed issues:**
 
