@@ -1,5 +1,6 @@
 Features in this release:
 
+Nava2021Beta
 December 2021:
 
 * Fixed a bug where Expander Mode would not work after entering the config pages
@@ -33,7 +34,6 @@ Other changes:
 
 * MIDI pattern change now only works in pattern play mode.
 
-Older releases:
 The Nava Tool Installer for windows is included in this release.
 
 

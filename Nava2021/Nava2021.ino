@@ -122,6 +122,7 @@ void setup()
   
   lcd.clear();
   lcd.setCursor(0, 0);
+
 #ifndef VERSION_DATE  
   lcd.print("    NAVA2021    ");
 #else
