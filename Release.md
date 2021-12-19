@@ -1,5 +1,14 @@
 Features in this release:
 
+December 2021:
+
+* Fixed a bug where Expander Mode would not work after entering the config pages
+
+* Implemented the faint Mute led in expander mode.
+
+* Fixed volatile/temporary pattern groups not working like expected.
+
+
 October 2021:
 This release focuses on pattern groups.
 

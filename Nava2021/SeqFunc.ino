@@ -211,17 +211,27 @@ void PatternLoad()
       groupPatternLoaded = 0;
       groupPatternEdited = 0;
     }
-    groupPos = pattern[!ptrnBuffer].groupPos;
+    if ( group.priority ) {
+      groupPos = group.pos; 
+    } else {
+      groupPos = pattern[!ptrnBuffer].groupPos;
+    }
   }
   
   if ( group.length > 0 )
   {
     if ( !group.isLoaded)
     {
-      byte firstPattern = nextPattern - pattern[!ptrnBuffer].groupPos;
-      
-      groupPos = pattern[!ptrnBuffer].groupPos;
+      byte firstPattern;
 
+      if ( group.priority )
+      {
+        firstPattern = nextPattern - group.pos;
+        groupPos = group.pos;
+      } else {
+        firstPattern = nextPattern - pattern[!ptrnBuffer].groupPos;
+        groupPos = pattern[!ptrnBuffer].groupPos;
+      }
       if ( !bitRead(groupPatternLoaded, groupPos) )
       {
         memcpy(&patternGroup[groupPos],&pattern[!ptrnBuffer], sizeof(Pattern));

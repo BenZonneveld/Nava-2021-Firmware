@@ -47,9 +47,9 @@ void SeqParameter()
 //      {
 //        ppqn = 1;
 //      }
-      MIDI.sendRealTime(midi::MidiType::Start);  //;MidiSend(START_CMD);
-        DIN_START_HIGH;
-        dinStartState = HIGH;
+      if ( seq.sync == MASTER ) MIDI.sendRealTime(midi::MidiType::Start);  //;MidiSend(START_CMD);
+      DIN_START_HIGH;
+      dinStartState = HIGH;
     }
   }
 
@@ -767,6 +767,7 @@ void SeqParameter()
           if(seq.ptrnChangeSync == FREE){
             selectedPatternChanged = TRUE;
           }
+          group.isLoaded = FALSE;
         }
       }
     }
