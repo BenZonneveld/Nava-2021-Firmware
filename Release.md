@@ -1,5 +1,39 @@
 Features in this release:
 
+Nava2021Beta
+December 2021:
+
+* Fixed a bug where Expander Mode would not work after entering the config pages
+
+* Implemented the faint Mute led in expander mode.
+
+* Fixed volatile/temporary pattern groups not working like expected.
+
+* The number of config pages and the current config page are shown using the step leds.
+
+Special NOTE:
+***************************************************************************************
+I removed the sending of MIDI Start/stop/continue command when in Slave mode.
+This should not cause any problems but let me know if you use your Nava in a way where you need a Midi Slave to transmit these.
+*********************************************************************************************
+
+
+October 2021:
+This release focuses on pattern groups.
+
+* Pattern groups can now be used in edit mode without losing edits when going to the next pattern in a group.
+
+* When saving edits in a pattern group only edited patterns are save to reduce wear and tear on the eeprom.
+
+* Pattern groups are shown in Pattern Play while not running.
+
+Other changes:
+* Also only instrument hits within the pattern length are shown.
+
+* When there are muted instruments and the Nava is not in MUTE mode the MUTE button will be lit dimly.
+
+* MIDI pattern change now only works in pattern play mode.
+
 The Nava Tool Installer for windows is included in this release.
 
 

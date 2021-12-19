@@ -55,7 +55,6 @@ void HandleClock()
   CountPPQN();
   CountPPQN();
   DIN_CLK_LOW;                                                                    
-
 }
 
 
@@ -99,7 +98,6 @@ void DisconnectMidiHandleRealTime()
 #if MIDI_HAS_SYSEX
 void ConnectMidiSysex()
 {
-  Serial.println("Sysex Connected");
   MIDI.setHandleSystemExclusive(HandleSystemExclusive);
 }
 
@@ -183,9 +181,12 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 67:
       case 68:
         // Bank Select
-        curBank = pitch - 61;
-        nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-        if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        if (curSeqMode == PTRN_PLAY )
+        {
+          curBank = pitch - 61;
+          nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
+          if(curPattern != nextPattern) selectedPatternChanged = TRUE;
+        }
         break;
       case 72:
       case 73:
@@ -204,19 +205,22 @@ void HandleNoteOn(byte channel, byte pitch, byte velocity)
       case 86:
       case 87:
         // Pattern Select
-        group.priority = FALSE;
-        nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
-        group.pos = pattern[ptrnBuffer].groupPos;
-        if(curPattern != nextPattern)
+        if (curSeqMode == PTRN_PLAY )
         {
-          needLcdUpdate = TRUE;//selected pattern changed so we need to update display
-          patternNeedSaved = FALSE;
-          if ( nextPattern != END_OF_TRACK )
+          group.priority = FALSE;
+          nextPattern = ( pitch - 72 ) + curBank * NBR_PATTERN;
+          group.pos = pattern[ptrnBuffer].groupPos;
+          if(curPattern != nextPattern)
           {
-            LoadPattern(nextPattern);
+            needLcdUpdate = TRUE;//selected pattern changed so we need to update display
+            patternNeedSaved = FALSE;
+            if ( nextPattern != END_OF_TRACK )
+            {
+              PatternLoad();
+            }
+            curPattern = nextPattern;
+            nextPatternReady = TRUE;
           }
-          curPattern = nextPattern;
-          nextPatternReady = TRUE;
         }
         break;
 #endif // MIDI_BANK_PATTERN_CHANGE
@@ -283,7 +287,7 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
 void MidiTrigOn(byte inst, byte velocity)
 {
   if ( seq.sync != EXPANDER ) return;
-    if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
+  if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
  
     SetMuxTrigMidi(inst, velocity);                                                            
     
@@ -306,6 +310,15 @@ void MidiTrigOn(byte inst, byte velocity)
     instWasMidiTrigged[inst] = TRUE;
   }
 }
+
+//bool isMidiTrigged()
+//{
+//  for(int i = 0 ; i < NBR_INST; i++)
+//  {
+//    if (instWasMidiTrigged[i] == TRUE) return TRUE;
+//  }
+//  return FALSE;
+//}
 
 //MidiTrigOff insturment
 void MidiTrigOff(byte inst)

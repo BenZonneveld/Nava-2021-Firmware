@@ -14,7 +14,12 @@ void InitIO()
   pinMode(DIN_START_PIN, OUTPUT);
   pinMode(DIN_CLK_PIN, OUTPUT);
   pinMode(TRIG1_PIN, OUTPUT);
+#if REALTIME_ACCENT  
   pinMode(TRIG2_PIN, INPUT);
+#else
+  pinMode(TRIG2_PIN, OUTPUT);
+#endif
+    
   pinMode(ENC_PINA, INPUT);
   pinMode(ENC_PINB, INPUT);
   SPI.begin();

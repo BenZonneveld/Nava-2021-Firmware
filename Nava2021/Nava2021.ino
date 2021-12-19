@@ -22,11 +22,13 @@
 #include <MIDI.h>
 
 #if MIDI_HAS_SYSEX
+#include "Sysex.h"
 struct MySettings : public midi::DefaultSettings
 {
 //    static const long BaudRate = 31250;
-    static const unsigned SysExMaxSize = 2176; // Accept SysEx messages up to 2176 bytes long.
+    static const unsigned SysExMaxSize = SYSEX_BUFFER_SIZE + 76; // Accept SysEx messages up to 2176 bytes long.
     static const bool UseRunningStatus = true;
+    static const bool HandleNullVelocityNoteOnAsNoteOff = true;
 };
 
 //MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial1, MIDI, MySettings);  // This does NOT change the Sysex Settings !!!
@@ -48,10 +50,8 @@ void setup()
 {
 #if DEBUG
   Serial.begin(115200);
-
-//  Serial.print("Sysex Size: ");
-//  Serial.println(MySettings);
 #endif
+
   InitIO();//cf Dio
   InitButtonCounter();//cf Button
   
@@ -92,7 +92,7 @@ void setup()
     while (1){
       SetDacA(MAX_VEL);
     }
-  }
+  } 
 
 
   InitSeq();// cf Seq
@@ -133,7 +133,6 @@ void setup()
   lcd.print("by e-licktronic ");
   delay(1000);
   LcdUpdate();                                              // [1.028] if started in expader mode
-
 }
 
 ////////////////////////Loop///////////////////////
@@ -179,12 +178,13 @@ void loop()
 
 }
 
-#ifdef DEBUG
+#if DEBUG
 void memory(char *label)
 {
   Serial.print("freeMemory() in ");
   Serial.print(label);
   Serial.print(" =");
   Serial.println(freeMemory());
+  Serial.print("Needed: ");Serial.println(16*457);
 }
 #endif

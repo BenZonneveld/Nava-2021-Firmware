@@ -43,12 +43,24 @@ void SetLeds()
   bankLed = bankBtn.pressed;
 
   if (instBtn && curInst == TOTAL_ACC) enterLed = HIGH;
-  else if (patternNeedSaved || trackNeedSaved || seq.setupNeedSaved) enterLed = blinkTempo;
+  else if (groupNeedSaved || patternNeedSaved || trackNeedSaved || seq.setupNeedSaved) enterLed = blinkTempo;
   else enterLed = LOW;
 
   if (curSeqMode == MUTE) muteLed = HIGH;
-  else muteLed = LOW;
-
+  else {
+    if (muteInst) {             // Show there are muted instruments when not in MUTE mode
+      muteLed = LOW;
+      if(flagMuteIntensity >= 8){
+        muteLed = HIGH;
+        flagMuteIntensity = 0;
+      } else {
+        flagMuteIntensity++;
+      }
+    } else { 
+      muteLed = LOW;
+    }
+  }
+  
   if (seq.configMode) tempoLed = blinkTempo;
   else  tempoLed = tempoBtn.pressed;
 
@@ -127,27 +139,21 @@ void SetLeds()
       if (isRunning){
         if (group.length){
           temp = 0;
-          for (int a = 0; a <= group.length; a++){
+          for (byte a = 0; a <= group.length; a++){
             bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
           }
-          stepLeds = temp & ~(!blinkTempo << (nextPattern % NBR_PATTERN))  ^ (blinkFast<< curStep);
+          stepLeds = temp & ~(!blinkTempo << (nextPattern % NBR_PATTERN)) ^ (blinkFast<< curStep);
         }
         else {
           stepLeds = (blinkTempo <<(nextPattern % NBR_PATTERN)) ^ (blinkFast<< curStep); 
         }
-      }
-      else if (!isRunning){
-        // if (group.length){
+      } else {
+        // Not Running
         temp = 0;
-//Serial.println(group.length);
-        for (int a = 0; a <= group.length; a++){
+        for (byte a = 0; a <= group.length; a++){
           bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
         }
-        stepLeds = temp & ~(!blinkTempo << (nextPattern % NBR_PATTERN));
-        /* }
-         else {
-         stepLeds = blinkTempo << (curPattern % NBR_PATTERN); 
-         }*/
+        stepLeds = temp & ~(!blinkTempo << (curPattern % NBR_PATTERN));
       }
     }
     break;
@@ -180,7 +186,8 @@ void SetLeds()
     }
     else if (isRunning && !instBtn){ 
       stepLedsHigh = stepLedsLow = 0;//initialize step Leds variable 
-      for (int stp = 0; stp < NBR_STEP; stp++){
+//      for (int stp = 0; stp < NBR_STEP; stp++){
+      for (int stp = 0; stp < (pattern[ptrnBuffer].length + 1); stp++){
         if (curFlam) {                                                                       // [zabox] [1.027] flam
           if (pattern[ptrnBuffer].velocity[curInst][stp] & 128) {
             if (((pattern[ptrnBuffer].velocity[curInst][stp]) & 127) > instVelLow[curInst] && bitRead(pattern[ptrnBuffer].inst[curInst],stp)) bitSet(stepLedsHigh, stp);
@@ -222,7 +229,7 @@ void SetLeds()
         // if (group.length)
         temp = 0;
        // Serial.println(group.length);
-        for (int a = 0; a <= group.length; a++){
+        for (byte a = 0; a <= group.length; a++){
           bitSet(temp,(group.firstPattern % NBR_PATTERN) + a);
         }
         stepLeds = temp & ~(!blinkTempo << (curPattern % NBR_PATTERN));
@@ -235,6 +242,19 @@ void SetLeds()
     if (encBtn.pressed) muteLeds = 0;
     break;
   }
+
+  if ( seq.configMode )
+  {
+    if (flagLedIntensity >= 8) {
+      stepLeds = ~(1 << MAX_CONF_PAGE) & 0xF;
+      flagLedIntensity = 0;
+    }
+    else {
+      stepLeds = (1 << (seq.configPage -1 ));
+      flagLedIntensity++;
+    }
+  }
+  
   //Send OUTPUTS now !
   SetDoutLed(stepLeds, configLed , menuLed);
 }

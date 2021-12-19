@@ -20,6 +20,7 @@ void SeqParameter()
     curIndex++;
     if (curIndex >= MAX_CUR_POS ) curIndex = 0;   
 #if MIDI_HAS_SYSEX
+    // Limit encoder positions for Sysex
     if ( seq.configMode && seq.configPage == 3 ) {
       if (sysExDump < SYSEX_MAXPARAM && curIndex > 1 ) curIndex = 0;
       if (sysExDump >= SYSEX_MAXPARAM && curIndex > 0 ) curIndex = 0;
@@ -41,10 +42,14 @@ void SeqParameter()
       shufPolarity = 0;//Init shuffle polarity
       noteIndexCpt = 0;//init ext instrument note index counter
       blinkTempo = 0;                                                               // [zabox] looks more consistent
-    
-      MIDI.sendRealTime(midi::MidiType::Start);  //;MidiSend(START_CMD);
-        DIN_START_HIGH;
-        dinStartState = HIGH;
+
+//      if ( midiStart)
+//      {
+//        ppqn = 1;
+//      }
+      if ( seq.sync == MASTER ) MIDI.sendRealTime(midi::MidiType::Start);  //;MidiSend(START_CMD);
+      DIN_START_HIGH;
+      dinStartState = HIGH;
     }
   }
 
@@ -59,7 +64,7 @@ void SeqParameter()
     case 1:
       isStop = TRUE;
       isRunning = FALSE;
-      MIDI.sendRealTime(midi::MidiType::Stop);//;MidiSend(STOP_CMD);
+      if ( seq.sync == MASTER ) MIDI.sendRealTime(midi::MidiType::Stop);//;MidiSend(STOP_CMD);
       DIN_START_LOW;
       dinStartState = LOW;
       break;
@@ -69,7 +74,7 @@ void SeqParameter()
         isRunning = TRUE;
         stopBtn.counter = 0;
         ppqn = 0;
-        MIDI.sendRealTime(midi::MidiType::Continue);//MidiSend(CONTINU_CMD);
+        if ( seq.sync == MASTER ) MIDI.sendRealTime(midi::MidiType::Continue);//MidiSend(CONTINU_CMD);
         DIN_START_HIGH;
         dinStartState = HIGH;
       }
@@ -118,9 +123,12 @@ void SeqParameter()
       keyboardMode = FALSE;
       seq.configPage++;
       curIndex = 0;
+      if ( seq.configPage == 3 ) seq.setupNeedSaved = FALSE;
       if (seq.configPage > MAX_CONF_PAGE){
         seq.configPage = 0;
         seq.configMode  = FALSE;
+        seq.SysExMode = false;
+        SetSeqSync();
       }
       needLcdUpdate = TRUE;
     }
@@ -302,11 +310,11 @@ void SeqParameter()
       needLcdUpdate = TRUE;
     }
 
-    //-------------------Clear Button------------------------------
+    //-------------------Clear Button for STEP Mode------------------------------
     if (clearBtn.pressed && !keyboardMode && curSeqMode != PTRN_TAP && isRunning){
+
       
       if (clearBtn.justPressed)  prev_muteInst = muteInst;                                                    // [zabox] save mute state
-      
       muteInst |= (1 << curInst);                                                                             // [zabox] mute current instrument while holding clear
       
       bitClear (pattern[ptrnBuffer].inst[curInst], curStep);
@@ -429,7 +437,7 @@ void SeqParameter()
               else curBank = FirstBitOn();
               nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
               if(curPattern != nextPattern) selectedPatternChanged = TRUE;
-              group.length = 0;
+//              group.length = 0;
             }
             else{//pattern group edit------------------------------------------------------
               if (SecondBitOn())
@@ -726,7 +734,10 @@ void SeqParameter()
         if(FirstBitOn() >= MAX_BANK) curBank = MAX_BANK;
         else curBank = FirstBitOn();
         nextPattern = curBank * NBR_PATTERN + (curPattern % NBR_PATTERN);
-        group.length = 0;//should be 0 to play the right next pattern
+        if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) )
+        {
+          group.length = 0;//should be 0 to play the right next pattern
+        }
         if((curPattern != nextPattern) && !isRunning) selectedPatternChanged = TRUE;
       }
       else{
@@ -743,9 +754,9 @@ void SeqParameter()
         }
         //Only one pattern selected
         else if (!doublePush){
-          group.priority = FALSE;
-          group.length = 0;//should be 0 to play the right next pattern
+          group.priority = FALSE;         
           nextPattern = FirstBitOn() + curBank * NBR_PATTERN;
+          if (nextPattern < group.firstPattern || nextPattern > (group.firstPattern + group.length) ) group.length = 0; //should be 0 to play the right next pattern
           group.pos = pattern[ptrnBuffer].groupPos;
         }
         if(curPattern != nextPattern && stepsBtn.justPressed) {                                                // [zabox] [1.027] fixes pattern change bug in slave mode
@@ -756,6 +767,7 @@ void SeqParameter()
           if(seq.ptrnChangeSync == FREE){
             selectedPatternChanged = TRUE;
           }
+          group.isLoaded = FALSE;
         }
       }
     }
@@ -965,48 +977,69 @@ void SeqParameter()
     trackJustSaved = FALSE;
   }
 
-  if (selectedPatternChanged)
-  {
-    selectedPatternChanged = FALSE;
-    needLcdUpdate = TRUE;//selected pattern changed so we need to update display
-    patternNeedSaved = FALSE;
-    if ( nextPattern != END_OF_TRACK )
-    {
-      LoadPattern(nextPattern);
-    }
-    curPattern = nextPattern;
-    nextPatternReady = TRUE;
-  }
-
-  if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function
-    nextPatternReady = FALSE;
-    keybOct = DEFAULT_OCT;
-    noteIndex = 0;
-    InitMidiNoteOff();
-    ptrnBuffer = !ptrnBuffer;
-    //Serial.println("switched!!");
-    if ( curPattern != END_OF_TRACK )
-    {
-      InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
-      SetHHPattern();
-      InstToStepWord();
-    }
-  }
-
   if (patternWasEdited)
   {//update Pattern
     patternWasEdited = FALSE;
     SetHHPattern();
     InstToStepWord();
     patternNeedSaved = TRUE;
-    // Serial.println("patternupdated");
+    if ( group.length ) 
+    {
+      memcpy(&patternGroup[group.pos],&pattern[ptrnBuffer], sizeof(Pattern));
+      bitSet(groupPatternEdited, group.pos);
+      groupNeedSaved = TRUE;
+    }
   }
 
-  if (patternNeedSaved && enterBtn.justPressed && !instBtn)
+  if ( (groupNeedSaved || patternNeedSaved) && enterBtn.justPressed && !instBtn)
   {
     patternNeedSaved = FALSE;
-    SavePattern(curPattern);//pattern saved
+    if ( group.length )
+    {
+      for ( int i=0; i <= group.length; i++ )
+      {
+        if ( bitRead(groupPatternEdited, i) )
+        {
+          // Pattern needs saving
+          memcpy(&pattern[ptrnBuffer], &patternGroup[i],sizeof(Pattern));
+          SavePattern(group.firstPattern + i);
+        }
+      }
+      groupNeedSaved = FALSE;
+    } else {
+      SavePattern(curPattern);//pattern saved
+    }
     LcdPrintSaved();
+  }
+
+  if (selectedPatternChanged)
+  {
+    selectedPatternChanged = FALSE;
+    needLcdUpdate = TRUE;//selected pattern changed so we need to update display
+
+ //   if ( curSeqMode != PTRN_STEP && curSeqMode != PTRN_TAP && !isRunning )
+ //     patternNeedSaved = FALSE;
+
+    if ( nextPattern != END_OF_TRACK )
+    {
+      PatternLoad();
+    }
+    curPattern = nextPattern;
+    nextPatternReady = TRUE;
+  }
+
+  if(nextPatternReady){///In pattern play mode this piece of code executes in the PPQ Count function [Neuro: Not true it seems]
+    nextPatternReady = FALSE;
+    keybOct = DEFAULT_OCT;
+    noteIndex = 0;
+    InitMidiNoteOff();
+    ptrnBuffer = !ptrnBuffer;
+    if ( curPattern != END_OF_TRACK )
+    {
+      InitPattern();//SHOULD BE REMOVED WHEN EEPROM WILL BE INITIALIZED
+      SetHHPattern();
+      InstToStepWord();
+    }
   }
 
   if (enterBtn.justRelease) needLcdUpdate = TRUE;
@@ -1037,8 +1070,12 @@ void SeqParameter()
   } 
 
   //We still increment pattern group in those mode
-  if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP ){
+  if (curSeqMode == MUTE || curSeqMode == PTRN_PLAY || curSeqMode == PTRN_STEP || curSeqMode == PTRN_TAP ){    
     if (trackPosNeedIncremante && group.length ){//&& stepCount > 0)
+      if ( (curSeqMode == PTRN_STEP || curSeqMode == PTRN_TAP) && patternNeedSaved )
+      {
+        patternNeedSaved = FALSE;
+      }
       group.pos++;
       if (group.pos > group.length) group.pos = 0;
       nextPattern = group.firstPattern + group.pos;

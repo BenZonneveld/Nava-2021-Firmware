@@ -1,6 +1,6 @@
 #pragma once
 
-#define START_OF_SYSEX      0xF0
+#define START_OF_SYSEX      (char)0xF0
 #define END_OF_SYSEX        0xF7
 
 #define SYSEX_MANUFACTURER  0x7d
@@ -28,19 +28,20 @@
 #define NAVA_FBANK_REQ  0x46
 #define NAVA_FTRACK_REQ 0x47
 #define NAVA_ACK        0x48
-#define BANK_PARTS      4
+#define BANK_PARTS      8  // Must be one of 4,8 or 16.
 
 #define SYSEX_PTRN_SIZE   564
-#define SYSEX_BANK_SIZE   2100
+#define SYSEX_BANK_SIZE   1076 // 1076 //2100
 #define SYSEX_TRACK_SIZE  1186
 #define SYSEX_CONFIG_SIZE 89
-struct SysexPortSettings
+#define SYSEX_BUFFER_SIZE SYSEX_TRACK_SIZE // 2100 when using 4 BANK_PARTS      
+/*struct SysexPortSettings
 {
-    static const bool UseRunningStatus = false;
+    static const bool UseRunningStatus = true;
     static const bool HandleNullVelocityNoteOnAsNoteOff = true;
     static const bool Use1ByteParsing = true;
     static const unsigned SysExMaxSize = 128;
     static const bool UseSenderActiveSensing = false;
     static const bool UseReceiverActiveSensing = false;
     static const uint16_t SenderActiveSensingPeriodicity = 0;
-};
+};*/

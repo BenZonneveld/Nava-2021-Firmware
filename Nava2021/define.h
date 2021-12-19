@@ -47,14 +47,6 @@
 #define BTN_BANK     B1
 #define BTN_MUTE     B10
 #define BTN_TEMPO    B100
-
-#ifndef VERSION_DATE 
-// needed because I swap some pins
-#define BTN_BANK     B100
-#define BTN_MUTE     B1
-#define BTN_TEMPO    B10
-#endif
-
 #define BTN_ENTER    B1000
 #define BTN_ENCODER  B100
 #define ENC_SW_GET   PINB & BTN_ENCODER
@@ -315,6 +307,7 @@ boolean enterLed;
 unsigned int instSlctLed;//[NBR_INST]={0x00, 0x00, 0x300, 0x400, 0x800, 
 byte ledUpdateCounter = 3;                                                                                               // [zabox] [1.028]
 byte flagLedIntensity;
+byte flagMuteIntensity;
 unsigned int muteLedsOrder[NBR_STEP_BTN]=  { 
   0x03, 0x03, 0x0C, 0x0C, 0x30, 0x30, 0xC0, 0xC0, 0x300, 0x300, 0x400, 0X800, 0x1000, 0x2000, 0x4000, 0x8000};           // [zabox] update for OH/CH mute
 unsigned int muteLeds = 0;
@@ -414,11 +407,15 @@ struct Pattern
 };
 Pattern pattern[2];//current pattern and next pattern in the buffer
 Pattern bufferedPattern;//to copy paste pattern
+Pattern patternGroup[16]; // The max amount of patterns in a group
+unsigned int groupPatternLoaded; // Bitmask indicating if the pattern has been buffered
+unsigned int groupPatternEdited; // Bitmask to identify edited patterns
 boolean ptrnBuffer = 0;
 boolean patternWasEdited = FALSE;
 boolean selectedPatternChanged = FALSE;
 boolean nextPatternReady = FALSE;
 boolean patternNeedSaved = FALSE;
+
 byte prevShuf;                                                          // [zabox] [1.028] flam
 byte prevFlam;                                                          // [zabox] [1.028] flam
 
@@ -429,9 +426,11 @@ struct GroupPattern
   byte length;//length of the pattern bloc
   byte firstPattern;//first pattern of the bloc
   byte pos;
+  boolean isLoaded;
   boolean priority;//use to know if volatile group have priority on stored pattern group
 }
 group;
+boolean groupNeedSaved = FALSE;
 
 unsigned int tempInst[NBR_INST]={
   0};
@@ -481,8 +480,8 @@ byte keybOct = DEFAULT_OCT;
 byte noteIndex = 0;//external inst note index
 
 //SPI------------------------------------------------
-SPISettings SPIset(4000000, MSBFIRST, SPI_MODE0);
-SPISettings SPIset_f(4000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
+SPISettings SPIset(2000000, MSBFIRST, SPI_MODE0);
+SPISettings SPIset_f(2000000, MSBFIRST, SPI_MODE0);                        // [zabox] ready for faster write spi (8mhz), signal integrity looks good and i haven't had any issues, but i'll keep it a 4mhz until the next update and further investigation. 
 
 
 //Encoder--------------------------------------------
@@ -551,10 +550,8 @@ byte InstrumentMidiOutVelocity[NBR_INST] = { 0 };
 
 #if MIDI_HAS_SYSEX
 #define SYSEX_MAXPARAM 3    // Parameters up to this number get a select option.
-//#define SYSEX_BUFFER_SIZE 2100
 byte sysExDump = 0;
 byte sysExParam = 0;
-//byte SysEx[SYSEX_BUFFER_SIZE];
 #endif
 
 //Din synchro----------------------------------------
@@ -590,6 +587,5 @@ unsigned int lastStepLeds = 0;
 byte showTrigLeds = 0;
 unsigned int gateLeds = 0;
 unsigned int gateInst = 0;
-
-
+                 
 #endif//end if define_h
