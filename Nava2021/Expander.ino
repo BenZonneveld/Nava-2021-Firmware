@@ -121,7 +121,7 @@ void ButtonGetExpander ()
 void SetLedsExpander()
 {  
   configLed = (((tempoBtn.pressed | seq.configMode ) << 15) | (seq.setupNeedSaved << 8) | (showTrigLeds << 12) | (bankLed << 13) | (muteLed << 14)); 
-  
+
   if (muteLed) {  
     SetDoutLed(stepLeds | muteLeds, configLed , menuLed | (muteInst & 1)); 
   }
@@ -129,7 +129,17 @@ void SetLedsExpander()
     SetDoutLed(stepLeds | gateLeds, configLed , menuLed | (gateInst & 1));
   }
   else {
-    SetDoutLed(stepLeds, configLed , menuLed);
+    if (muteInst ) {             // Show there are muted instruments when not in MUTE mode
+      if(flagMuteIntensity >= 8){
+        SetDoutLed(stepLeds, configLed  | (!muteLed << 14), menuLed );
+        flagMuteIntensity = 0;
+      } else {
+        flagMuteIntensity++;
+        SetDoutLed(stepLeds, configLed , menuLed);
+      }
+    } else {
+      SetDoutLed(stepLeds, configLed , menuLed);
+    }
   }
   
   menuLed = ((shiftBtn << 1) | ((~(PORTA >> 2)) & 1U & showTrigLeds));

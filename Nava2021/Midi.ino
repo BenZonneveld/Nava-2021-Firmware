@@ -287,7 +287,7 @@ void HandleNoteOff(byte channel, byte pitch, byte velocity)
 void MidiTrigOn(byte inst, byte velocity)
 {
   if ( seq.sync != EXPANDER ) return;
-    if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
+  if (instWasMidiTrigged[inst] == FALSE && (~(muteInst >> inst) & 1)) {                                                             // [zabox] [1.028] expander
  
     SetMuxTrigMidi(inst, velocity);                                                            
     
@@ -310,6 +310,15 @@ void MidiTrigOn(byte inst, byte velocity)
     instWasMidiTrigged[inst] = TRUE;
   }
 }
+
+//bool isMidiTrigged()
+//{
+//  for(int i = 0 ; i < NBR_INST; i++)
+//  {
+//    if (instWasMidiTrigged[i] == TRUE) return TRUE;
+//  }
+//  return FALSE;
+//}
 
 //MidiTrigOff insturment
 void MidiTrigOff(byte inst)
