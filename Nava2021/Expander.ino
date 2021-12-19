@@ -122,6 +122,18 @@ void SetLedsExpander()
 {  
   configLed = (((tempoBtn.pressed | seq.configMode ) << 15) | (seq.setupNeedSaved << 8) | (showTrigLeds << 12) | (bankLed << 13) | (muteLed << 14)); 
 
+  if ( seq.configMode )
+  {
+    if (flagLedIntensity >= 8) {
+      stepLeds = ~(1 << MAX_CONF_PAGE) & 0xF;
+      flagLedIntensity = 0;
+    }
+    else {
+      stepLeds = (1 << (seq.configPage -1 ));
+      flagLedIntensity++;
+    }
+  }
+
   if (muteLed) {  
     SetDoutLed(stepLeds | muteLeds, configLed , menuLed | (muteInst & 1)); 
   }

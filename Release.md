@@ -8,6 +8,8 @@ December 2021:
 
 * Fixed volatile/temporary pattern groups not working like expected.
 
+* The number of config pages and the current config page are shown using the step leds.
+
 
 October 2021:
 This release focuses on pattern groups.

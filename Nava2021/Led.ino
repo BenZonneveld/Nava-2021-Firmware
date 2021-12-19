@@ -242,6 +242,19 @@ void SetLeds()
     if (encBtn.pressed) muteLeds = 0;
     break;
   }
+
+  if ( seq.configMode )
+  {
+    if (flagLedIntensity >= 8) {
+      stepLeds = ~(1 << MAX_CONF_PAGE) & 0xF;
+      flagLedIntensity = 0;
+    }
+    else {
+      stepLeds = (1 << (seq.configPage -1 ));
+      flagLedIntensity++;
+    }
+  }
+  
   //Send OUTPUTS now !
   SetDoutLed(stepLeds, configLed , menuLed);
 }
