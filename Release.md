@@ -10,6 +10,12 @@ December 2021:
 
 * The number of config pages and the current config page are shown using the step leds.
 
+Special NOTE:
+***************************************************************************************
+I removed the sending of MIDI Start/stop/continue command when in Slave mode.
+This should not cause any problems but let me know if you use your Nava in a way where you need a Midi Slave to transmit these.
+*********************************************************************************************
+
 
 October 2021:
 This release focuses on pattern groups.
