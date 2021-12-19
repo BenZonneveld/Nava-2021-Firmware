@@ -1,6 +1,6 @@
 Features in this release:
 
-Nava2021Beta
+Nava2021Neuro
 December 2021:
 
 * Fixed a bug where Expander Mode would not work after entering the config pages
