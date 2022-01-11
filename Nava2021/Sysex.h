@@ -34,7 +34,9 @@
 #define SYSEX_BANK_SIZE   1076 // 1076 //2100
 #define SYSEX_TRACK_SIZE  1186
 #define SYSEX_CONFIG_SIZE 89
-#define SYSEX_BUFFER_SIZE SYSEX_TRACK_SIZE // 2100 when using 4 BANK_PARTS      
+#define SYSEX_BUFFER_SIZE SYSEX_TRACK_SIZE // 2100 when using 4 BANK_PARTS
+uint8_t *SysEx;
+      
 /*struct SysexPortSettings
 {
     static const bool UseRunningStatus = true;

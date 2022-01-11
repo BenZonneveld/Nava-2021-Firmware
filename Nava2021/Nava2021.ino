@@ -132,6 +132,15 @@ void setup()
   lcd.setCursor(0,1);
   lcd.print("by e-licktronic ");
   delay(1000);
+
+  // Allocate Memory for pattern groups
+  patternGroup = (Pattern *)malloc(NBR_PATTERN * sizeof(Pattern));
+  if ( patternGroup == NULL )
+  {
+    lcd.setCursor(0,1);
+    lcd.print("Mem Alloc Error");
+    while(1);
+  }
   LcdUpdate();                                              // [1.028] if started in expader mode
 }
 
@@ -185,6 +194,6 @@ void memory(char *label)
   Serial.print(label);
   Serial.print(" =");
   Serial.println(freeMemory());
-  Serial.print("Needed: ");Serial.println(16*457);
+//  Serial.print("Needed: ");Serial.println(1186);
 }
 #endif

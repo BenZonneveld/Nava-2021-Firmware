@@ -2,7 +2,7 @@
 
 ## [Unreleased](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/HEAD)
 
-[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210918...HEAD)
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Beta-20211219...HEAD)
 
 **Closed issues:**
 
@@ -20,6 +20,10 @@
 - Feature request: Mode at startup should be selectable. [\#16](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/16)
 - EXT Instrument should have 2 velocity levels. [\#15](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/15)
 - Tempo display isn't always updated. [\#14](https://github.com/BenZonneveld/Nava-2021-Firmware/issues/14)
+
+## [Nava2021Beta-20211219](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Beta-20211219) (2021-06-20)
+
+[Full Changelog](https://github.com/BenZonneveld/Nava-2021-Firmware/compare/Nava2021Neuro-20210918...Nava2021Beta-20211219)
 
 ## [Nava2021Neuro-20210918](https://github.com/BenZonneveld/Nava-2021-Firmware/tree/Nava2021Neuro-20210918) (2021-06-20)
 

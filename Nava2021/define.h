@@ -8,7 +8,9 @@
 
 //DEBUG
 #ifndef VERSION_DATE
-#define DEBUG 1
+#define DEBUG 0
+#else 
+#define DEBUG 0
 #endif
   #if DEBUG
    unsigned int stepValue_old = 0;
@@ -407,7 +409,7 @@ struct Pattern
 };
 Pattern pattern[2];//current pattern and next pattern in the buffer
 Pattern bufferedPattern;//to copy paste pattern
-Pattern patternGroup[16]; // The max amount of patterns in a group
+Pattern *patternGroup; //[16]; // The max amount of patterns in a group
 unsigned int groupPatternLoaded; // Bitmask indicating if the pattern has been buffered
 unsigned int groupPatternEdited; // Bitmask to identify edited patterns
 boolean ptrnBuffer = 0;
@@ -577,7 +579,7 @@ volatile boolean trigCounterStart = FALSE;
 #define FLAM_TIMER_ZERO  TCNT3  = 0                                         // reset timer (must be atomic)
 
 
-//Expader-------------------------------------------                        // [zabox] [1.028]
+//Expander-------------------------------------------                        // [zabox] [1.028]
 byte triggerTime [NBR_INST];                                                
 byte cur_triggerTime;
 #define PULSE 31;                                                           // # timer ticks for 2ms pulse @1024 prescaler

@@ -32,12 +32,21 @@ void SeqConfiguration()
   { 
     if ( seq.SysExMode == false )
     {
+      free (patternGroup);
       EnableSysexMode();
     }
   } else {
     if ( seq.SysExMode == true )
     {
       seq.SysExMode = false;
+      patternGroup = (Pattern *)malloc(NBR_PATTERN * sizeof(Pattern));
+      if ( patternGroup == NULL )
+      {
+        lcd.setCursor(0,1);
+        lcd.print("Mem Alloc Error");
+        while(1);
+      }
+
       SetSeqSync();
     }
   }

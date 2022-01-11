@@ -76,7 +76,12 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
 {     
   char header[]={ START_OF_SYSEX, SYSEX_MANUFACTURER, SYSEX_DEVID_1, SYSEX_DEVID_2, sysex_type, param};
   //uint8_t *SysEx = (uint8_t *)MIDI.getSysExArray();
-  uint8_t SysEx[SYSEX_BUFFER_SIZE];
+  SysEx = (uint8_t *)malloc(SYSEX_BUFFER_SIZE);
+  if ( SysEx == NULL )
+  {
+    free(SysEx);
+    return 0; 
+  }
   // Copy the header to the buffer
   memcpy(SysEx, header, sizeof(header));
 
@@ -117,17 +122,16 @@ uint16_t build_sysex(uint8_t *data, uint16_t datasize, uint8_t sysex_type, uint8
       break;
     }
   }
-  memory("Just before sending sysex");
-  Serial.print("Sysex TX size: "); Serial.println(sysexSize);
 #endif
   MIDI.sendSysEx(sysexSize,SysEx,true);
+  free(SysEx);
   // return system exclusive size
   return(sysexSize);
 }
 
 void DumpPattern(byte patternNbr)
 {
-  byte RawData[PTRN_SIZE + 32];
+  byte RawData[PTRN_SIZE + 34];
   int datacount = 0;
 
   unsigned long adress = (unsigned long)(PTRN_OFFSET + patternNbr * PTRN_SIZE);
@@ -178,7 +182,7 @@ void DumpPattern(byte patternNbr)
   datacount += 16;
   memcpy(&RawData[datacount], instVelLow, 16);
   datacount += 16;
-  uint16_t transmit_size=build_sysex(RawData, datacount, NAVA_PTRN_DMP, patternNbr);
+  uint16_t transmit_size=build_sysex(RawData, 448/*datacount*/, NAVA_PTRN_DMP, patternNbr);
 }
 
 void GetPattern(byte * sysex, uint16_t RawSize)
@@ -207,7 +211,7 @@ void GetPattern(byte * sysex, uint16_t RawSize)
 
 void DumpBank(byte selectedBank)
 {
-  byte RawData[BANK_PARTS*PTRN_SIZE + 32]; // Need to do the bank dump in multiple parts as there isn't enough memory to have the rawdata and the sysex array in memory.
+  byte RawData[(NBR_PATTERN/BANK_PARTS)*PTRN_SIZE + 32]; // Need to do the bank dump in multiple parts as there isn't enough memory to have the rawdata and the sysex array in memory.
   int datacount = 0;
   
   for ( int BankPart=0; BankPart < BANK_PARTS; BankPart++)
@@ -276,7 +280,7 @@ void DumpBank(byte selectedBank)
 
 void GetBank(byte * sysex, uint16_t RawSize)
 {
-  byte NavaData[BANK_PARTS * PTRN_SIZE + 32];
+  byte NavaData[(NBR_PATTERN/BANK_PARTS) * PTRN_SIZE + 32];
 
   uint8_t BankId = sysex[5] & 0xF;
   uint8_t ptrnGrp = (sysex[5] - BankId) / 16;
