@@ -182,8 +182,7 @@ void SeqConfigurationExpander()
       }
     }
     
-    if (seq.configMode) {
-            
+    if (seq.configMode) {       
       ButtonGet();
       EncGet();
       
@@ -199,11 +198,9 @@ void SeqConfigurationExpander()
           seq.setupNeedSaved = FALSE;
           needLcdUpdate = TRUE;
       }
-      
-
+     
       SeqConfiguration();
       if (enterBtn.justRelease) needLcdUpdate = TRUE;
       LcdUpdate();
     }
-  
 }
