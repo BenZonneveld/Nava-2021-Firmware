@@ -12,12 +12,6 @@
 #else 
 #define DEBUG 0
 #endif
-  #if DEBUG
-   unsigned int stepValue_old = 0;
-   byte ppqn_old = 14;
-  #endif
-  
-
 
 //MIDI
 #define NOTE_ON_CMD 0x90

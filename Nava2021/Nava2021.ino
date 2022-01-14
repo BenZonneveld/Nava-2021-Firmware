@@ -165,26 +165,6 @@ void loop()
   SeqParameter();
   KeyboardUpdate();
   LcdUpdate();
-  
-
-//  Serial.print("ADC: ");
-//  Serial.println(analogRead(TRIG2_PIN));
-  
-#if DEBUG_
-    if (stepValue) {
-      if (stepValue != stepValue_old) {
-       // Serial.println(stepValue, BIN);
-       
-       
-        stepValue_old = stepValue;
-      }
-    }
-    if (ppqn != ppqn_old) {
-      //Serial.println(ppqn);
-      ppqn_old = ppqn;
-    }    
-#endif
-
 }
 
 #if DEBUG
